@@ -3,7 +3,7 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 .env
-models/
+/models/
 *.pdf
 logs/*
 data/raw/*
