@@ -1,0 +1,6 @@
+# 数据和输出路径配置；后续按本机数据源修改
+raw_data: data/raw
+interim_data: data/interim
+processed_data: data/processed
+reports: reports
+logs: logs

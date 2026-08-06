@@ -1,0 +1,51 @@
+text_models:
+  - tfidf_ridge
+  - bag_of_words_ridge
+  - hashing_bow_ridge
+  - char_tfidf_ridge
+  - word_count_ridge
+  - chinese_sentiment_lexicon
+  - word2vec_ridge
+  - chinese_roberta_embedding
+  - qwen3_embedding
+  # - bge_m3_embedding  # 完成基线并确认 GPU/磁盘后启用
+prediction_model: ridge
+classification_model: logistic
+low_level_models:
+  - word_count
+  - word_tfidf
+  - char_tfidf
+  - hashing_bow
+  - lexicon
+  - word2vec
+embedding_batch_size: 32
+random_seed: 2026
+max_text_length: 256
+pooling: mean
+cache_embeddings: true
+fit_text_transformers_on_training_window_only: true
+ollama:
+  enabled: true
+  base_url: http://127.0.0.1:11435
+  model: qwen3-embedding:8b
+  role: embedding
+  use_as_embedding_model: true
+api_embeddings:
+  enabled: false
+  provider: openai_compatible
+  base_url: https://api.openai.com/v1
+  model: text-embedding-3-small
+  api_key_env: OPENAI_API_KEY
+chat_models:
+  openai:
+    base_url: https://api.openai.com/v1
+    model: gpt-4o-mini
+    api_key_env: OPENAI_API_KEY
+  ollama:
+    base_url: http://127.0.0.1:11435
+    model: null
+    api_key_env: null
+model_versions:
+  chinese_roberta_embedding: hfl/chinese-roberta-wwm-ext
+  chinese_bert_embedding: hfl/chinese-bert-wwm-ext
+  bge_m3_embedding: BAAI/bge-m3

@@ -1,0 +1,7 @@
+market: China_A_share
+start_date: null
+end_date: null
+return_horizons: [1, 5, 20]
+news_cutoff: close
+include_st: false
+include_delisted: true
