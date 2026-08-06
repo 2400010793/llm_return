@@ -205,7 +205,8 @@ def fetch_one(item: tuple[str, int], args, raw_dir: Path, catalog, robot_cache, 
         if published and len(parser.body) >= args.min_body_chars:
             stock_matches = merge_stock_matches(link_matches, matches(title, parser.body, catalog))
             if not args.exactly_one_stock or len(stock_matches) == 1:
-                record = {"source": "sina_finance", "content_type": "financial_news", "article_id": sha(url), "url": url, "depth": depth, "title": title, "published_at": published, "stock_matches": stock_matches, "body": parser.body[:args.max_body_chars], "raw_html": str(raw_path), "collected_at": base["fetched_at"]}
+                stored_body = parser.body[:args.max_body_chars]
+                record = {"source": "sina_finance", "content_type": "financial_news", "article_id": sha(url), "url": url, "depth": depth, "title": title, "published_at": published, "stock_matches": stock_matches, "body": stored_body, "body_chars_full": len(parser.body), "body_chars_stored": len(stored_body), "body_truncated": len(stored_body) < len(parser.body), "raw_html": str(raw_path), "collected_at": base["fetched_at"]}
         return {**base, "status": "ok", "links": links, "record": record, "bytes": len(payload)}
     except Exception as exc:
         return {**base, "status": "error", "links": [], "record": None, "error": f"{type(exc).__name__}: {exc}"}
@@ -267,7 +268,7 @@ def main() -> None:
     parser.add_argument("--pause-seconds", type=float, default=2.0)
     parser.add_argument("--timeout", type=float, default=20.0)
     parser.add_argument("--min-body-chars", type=int, default=120)
-    parser.add_argument("--max-body-chars", type=int, default=50000)
+    parser.add_argument("--max-body-chars", type=int, default=12000, help="正文最多保存字符数；用于控制后续模型输入长度")
     parser.add_argument("--raw-dir", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--stock-catalog")

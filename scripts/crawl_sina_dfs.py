@@ -90,7 +90,8 @@ def crawl(args: argparse.Namespace) -> dict:
                 link_matches = [{"stock_id": code, "stock_name": "", "stock_match_method": "sina_stock_link"} for code in page_ids if args.paper_stock_matching or code in article_ids]
                 stock_matches = merge_stock_matches(link_matches, matches(title, body, catalog))
                 if published and len(body) >= args.min_body_chars and (not args.exactly_one_stock or len(stock_matches) == 1):
-                    records.append({"source": "sina_finance", "content_type": "financial_news", "article_id": sha(url), "url": url, "depth": depth, "title": title, "published_at": published, "stock_matches": stock_matches, "body": body[:args.max_body_chars], "raw_html": str(raw_path), "collected_at": base["fetched_at"]})
+                    stored_body = body[:args.max_body_chars]
+                    records.append({"source": "sina_finance", "content_type": "financial_news", "article_id": sha(url), "url": url, "depth": depth, "title": title, "published_at": published, "stock_matches": stock_matches, "body": stored_body, "body_chars_full": len(body), "body_chars_stored": len(stored_body), "body_truncated": len(stored_body) < len(body), "raw_html": str(raw_path), "collected_at": base["fetched_at"]})
                 result.update({"status": "ok", "links": len(links), "published_at": published, "body_chars": len(body)})
                 manifest.write(json.dumps(result, ensure_ascii=False) + "\n")
                 if depth < args.max_depth:
@@ -134,7 +135,7 @@ def main() -> None:
     parser.add_argument("--pause-seconds", type=float, default=2.0)
     parser.add_argument("--timeout", type=float, default=20.0)
     parser.add_argument("--min-body-chars", type=int, default=120)
-    parser.add_argument("--max-body-chars", type=int, default=50000)
+    parser.add_argument("--max-body-chars", type=int, default=12000, help="正文最多保存字符数；用于控制后续模型输入长度")
     parser.add_argument("--raw-dir", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--stock-catalog")

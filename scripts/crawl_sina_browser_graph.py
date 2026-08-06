@@ -78,6 +78,9 @@ def body_and_record(url: str, depth: int, html_text: str, args, raw_path: Path, 
             "stock_matches": stock_matches,
             "body_chars": len(body),
             "body": body[: args.max_body_chars],
+            "body_chars_full": len(body),
+            "body_chars_stored": min(len(body), args.max_body_chars),
+            "body_truncated": len(body) > args.max_body_chars,
             "raw_html": str(raw_path),
             "collected_at": datetime.now(timezone.utc).isoformat(),
         }
@@ -192,7 +195,7 @@ def main() -> None:
     parser.add_argument("--render-wait-ms", type=int, default=500)
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--min-body-chars", type=int, default=120)
-    parser.add_argument("--max-body-chars", type=int, default=50000)
+    parser.add_argument("--max-body-chars", type=int, default=12000, help="正文最多保存字符数；用于控制后续模型输入长度")
     parser.add_argument("--raw-dir", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--stock-catalog")
