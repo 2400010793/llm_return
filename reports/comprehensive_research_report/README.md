@@ -2,6 +2,10 @@
 
 本目录保存《中国市场 Prompt Token 与新闻收益预测研究报告》的可复现源文件。
 
+报告覆盖新浪与巨潮数据来源、采集和清洗，RoBERTa/BGE-M3/Qwen 模型合同及实测表现，
+论文 benchmark，以及 mask/prompt、PCA、硬/软 KMeans、UMAP+HDBSCAN、GMM 和融合
+实验。未完成的三模型公平比较作为设计列出，不会混入已完成结果。
+
 文件职责：
 
 - `report.md`：报告正文；

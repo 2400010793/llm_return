@@ -1,283 +1,247 @@
-# 中国市场中的大语言模型新闻收益预测
+# 中国市场 Prompt Token 新闻收益预测
 
-> 当前研究快照：2026-08-26。项目已经从通用复现原型推进到新浪/巨潮
-> 双数据源、RoBERTa/BGE-M3/Qwen 三模型、prompt 目标 token 与正文表示的
-> 严格样本外比较。最新事实状态、已完成结果、未完成任务和接手命令见
-> [完整交接文档](docs/HANDOFF_2026-08-26.md)；论文依据见
-> [论文到实验的映射](references/paper_to_experiment_map.md)；日常操作见
-> [运行手册](docs/RUNBOOK.md)。面向研究汇报的完整事实、负面结果、证据等级和
-> 下一阶段见[综合研究报告](reports/comprehensive_research_report/report.md)。
+本仓库研究中文财经文本能否预测 A 股收益，以及 prompt 目标 token 是否相对新闻正文
+提供增量信息。项目已形成新浪新闻和巨潮公告双数据源、RoBERTa/BGE-M3/Qwen
+三模型、严格滚动 PCA 回归、聚类、组合和交易成本评估的完整研究链。
 
-## 当前主线
+当前事实快照为 **2026-08-26**。最详细的状态、路径、失败结果和接手命令见
+[完整交接文档](docs/HANDOFF_2026-08-26.md)，研究结论见
+[综合研究报告](reports/comprehensive_research_report/report.md)，论文依据见
+[论文到实验的映射](references/paper_to_experiment_map.md)。
 
-当前预注册比较只使用四个 `masked_short` prompt：`盈利`、`收益`、
-`超额收益`、`亏损`，并在完全共同新闻上比较三个模型的目标 span token
-表示与正文表示。所有监督模型只使用训练期拟合的 PCA32，不做原始维回归；
-基础参数固定为 Ridge alpha 100、KMeans k 6、soft shrinkage 500、temperature
-0.5。新浪采用 6 年训练、2 年验证、1 年测试；巨潮基础模型采用 3 年历史、
-1 年测试，并保留历史窗口内部的 1 年 OOS 预测供二级融合训练。
+## 1. 当前结论
 
-截至快照时的可核查数据：
+- 新浪完整清洗面板有 **796,553** 条新闻；巨潮完整面板有 **903,665** 条公告，
+  二者都覆盖 2010--2026，但股票池、文本类型和年份分布不同，不能混成一个面板。
+- 现有新浪四 prompt 结果说明目标 token 确实包含收益排序信息，但 token 并未普遍超过
+  正文。Qwen 的“收益”token RankIC 为 0.05360，低于正文 0.05680。
+- RoBERTa 的四 prompt token 因子相关较低（平均 0.653），BGE-M3 较高（0.892）。
+  这只是模型内几何事实，不能单独证明哪个模型“理解得更好”。
+- 新浪当前最佳 event-3 结果是 RoBERTa+BGE-M3 的 masked“收益”span，
+  PCA64 后拼接并用 Ridge，RankIC **0.08945，9/9 年为正**。
+- 巨潮既有 pooled 结果的最佳 RankIC 为 **0.01764，9/9 年为正**；公告上的信号
+  明显弱于新浪新闻，但跨年更稳定。
+- 硬 KMeans 平均没有提升线性基线；软聚类和 UMAP+HDBSCAN 只在部分 prompt、
+  部分组合尾部有效，必须和同一 PCA+Ridge 基线配对报告。
 
-| 项目 | 状态 |
-|---|---:|
-| 新浪全量清洗面板 | 796,553 条 |
-| 巨潮全量面板 | 903,665 条 |
-| 中性六 prompt 新浪 RoBERTa | 256/256 shards |
-| 中性六 prompt 巨潮 RoBERTa | 255/256 shards，缺 shard-225 |
-| 中性六 prompt 新浪 BGE-M3 | 189/256 shards，任务已主动取消 |
-| 中性六 prompt 巨潮 BGE-M3 | 78/256 shards，任务已主动取消 |
-| 三模型四 prompt PCA32 公平比较 | 已提交，等待 Fairshare 调度；尚无结果 |
+## 2. 数据来源与采集
 
-使用下面的只读命令可以重新生成当前数据与 embedding 状态：
+| 数据 | 来源与用途 | 当前规模 | 采集边界 |
+|---|---|---:|---|
+| 新浪财经 | 公开历史财经新闻，正文语义与收益预测 | 796,553 条清洗新闻 | **网络采集只能在本地机器运行**；集群只处理复制并校验后的文件 |
+| 巨潮资讯 CNINFO | 官方上市公司公告、详情页和公告 PDF | 903,665 条面板记录，816 只股票 | 只读取公开可见页面和链接，不调用隐藏接口，不绕过验证码或访问控制 |
+| 东方财富 | 要闻、个股新闻/公告/研报、股吧可见内容 | 有界批次采集 | 低频浏览器流程；遇访问控制立即停止 |
+| 雪球 | 公开可见讨论、资讯和公告 feed | 有界批次采集 | 匿名访问或用户显式提供的授权 browser state；不导出或绕过登录 |
+| 行情与高频指标 | 日频 OHLC、收益标签；1 分钟波动率、价差、流动性和估值数据 | 按研究交集对齐 | 原始授权数据不进入 Git，以 manifest、路径和哈希追踪 |
+
+### 2.1 新浪的两种流程
+
+新浪不是一条爬虫完成所有任务，而是两种互补流程。
+
+**流程 A：普通 HTTP 图扩展，适合批量正文。**
+
+入口为 `scripts/run_sina_auto_pipeline.py`，底层为
+`scripts/crawl_sina_bfs_fast.py`。当前默认先从种子做 depth-3 抓取，按 URL 和正文
+哈希全局去重并排除该 runner 中的 2000 年记录，再把去重后的文章作为 depth-5 根节点
+继续扩展，最后再次去重。每页保存原始 HTML、JSONL record、manifest 和可恢复 state。
+
+当前自动流程配置为 `workers=20`、`pause=1s`、`timeout=30s`、正文
+`120--12000` 字符；worker 范围限制为 1--50。20 是并发上限，不等于 20 页/秒，
+请求、解析、robots 和批次间等待都会限制吞吐。
+
+```powershell
+$env:PYTHONPATH = "scripts"
+python scripts/run_sina_auto_pipeline.py `
+  --root-file data/interim/sina_roots.txt `
+  --stock-catalog data/stock_universe_csi500_current.csv `
+  --output-dir data/interim/sina_auto_v1 `
+  --workers 20 --pause-seconds 1 --timeout 30
+```
+
+**流程 B：浏览器渲染发现种子，适合动态页和缺失年份。**
+
+`scripts/select_sina_historical_seeds_browser.py` 从公开渲染页面发现和检查候选，默认
+`workers=8`、`pause=3s`、`timeout=30s`、`render_wait=500ms`、depth 2、最多
+300 页。它按股票、年份、季度、频道路径和标题差异做 farthest-first 选择，默认每只
+股票每年最多一个 seed。`scripts/run_sina_annual_expansion.py` 可按年份独立扩展，默认
+4 个年份任务 x 每年 2 个浏览器页面，理论浏览器并发上限 8，depth 5、每年最多
+1000 页、目标 100 个 seed。
+
+**推荐选择：混合流程。** 浏览器只负责发现/验证少量历史种子，普通 HTTP 负责正文
+扩展和断点恢复；只有动态页面或缺失年份才用全浏览器补洞。普通 HTTP 更快、更容易
+审计，浏览器覆盖更灵活但成本高。仓库只有微型探针：普通 DFS 2 页/0.38 秒，浏览器
+BFS 4 页/4.90 秒，浏览器 DFS 4 页/4.77 秒。这些样本太小，只用于证明流程可运行，
+**不能外推全量速度**。目前没有一次完整新流水线的吞吐报告。
+
+> 硬约束：新浪所有联网发现和抓取命令只在本地 Windows/工作站执行，不提交到
+> Slurm，也不在 CPU/GPU 节点抓取。抓完后再将原始 HTML、JSONL、manifest 和 state
+> 一起复制到 Lustre，并校验 SHA256。
+
+### 2.2 巨潮公告流程
+
+巨潮是官方公告来源，和新浪新闻不同。`scripts/collect_cninfo_announcements.py` 的流程为：
+
+1. 从公开公司披露页按股票和日期筛选公告索引；
+2. 遍历可见分页并保存标题、公告日期和详情 URL；
+3. 顺序读取详情页，按公开 PDF 链接下载原文件；
+4. 用 `pypdf` 提取文本，保留 PDF、详情文本、采集错误和状态；
+5. 按 `document_id` 去重、清洗、分类，并与收益/O2O 面板对齐。
+
+2010--2017 历史采集审计覆盖 816 股票 x 8 年共 6,528 个股票年，全部完成，原始记录
+554,451 条；合并 2018--2026 后的最终分类面板为 903,665 条，日期为
+2010-01-03 至 2026-07-31，`row_index` 和 `document_id` 均唯一。正文至少 100 字的
+记录为 882,610 条，next-day 标签 895,251 条，event-3 标签 894,851 条。
+
+### 2.3 东方财富和雪球
+
+`scripts/collect_browser_visible.py` 只读取浏览器可见内容：东方财富要闻、个股页、公告、
+研报和股吧，以及雪球公开讨论/资讯/公告。默认页面间隔 3 秒。批处理入口默认每批 3 只
+股票、批间 60 秒；`run_100_stock_collection.py` 当前历史默认期望 90 只 active 股票，
+每次只跑一个 batch，股吧详情 10 篇、个股详情 6 篇、个股链接 20 条、研报详情 0 篇。
+
+这套流程适合投资者情绪、关注度和事件对照，不适合作为高速历史新闻主库。若需要登录
+态，storage state 必须由用户显式提供且已获授权；检测到验证码、访问异常或请求过频时
+程序会停止，不能增加重试、代理或隐藏 API 绕过。
+
+## 3. 模型、来源与实测性能
+
+| 模型 | 代码中的模型来源 | 结构/维度 | 本项目输入合同 | 已有代表结果 |
+|---|---|---|---|---|
+| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder，768 维 | 最大 512 token；保存 prompt/title/body/full mean/max、CLS 和 prompt token | 新浪 next-day 最佳单模型 0.06044；巨潮 pooled 0.01764 |
+| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder，1024 维 | 最大 1000 token；输出与 RoBERTa 分目录、同类型 pooled/token 产物 | 新浪四方向最佳 0.04439；巨潮 pooled 0.01415 |
+| Qwen3-Embedding-8B | 本地/Ollama `qwen3-embedding:8b` | 因果模型，4096 维 | prompt 放在正文后；正文用 `article_mean`，目标 span 排除句号 | 新浪正文 0.05680、收益 token 0.05360；巨潮 residual O2O 0.02732 |
+
+“性能”统一指严格样本外 RankIC 或明确标注的成本后组合，不使用模型参数量或发布时间
+代替实测性能。三模型维度和结构不同，不能直接比较原始坐标；跨模型只比较同新闻、
+同标签、同 PCA 算法下的标准化统计和样本外因子。
+
+## 4. Benchmark 与扩展实验
+
+### 4.1 论文 benchmark
+
+原始论文的可复现骨架是“冻结文本表示 + 简单监督头 + 严格滚动 + 组合检验”。仓库保留
+TF-IDF/词典/Word2Vec/pooled Transformer 等传统或整文基线；当前 prompt-token 主线的
+统一 benchmark 是：
+
+```text
+同一新闻交集 -> 训练期 StandardScaler -> 训练期 randomized PCA32
+-> Ridge(alpha=100) -> 股票日聚合 -> 测试期 RankIC/组合
+```
+
+新浪使用 6 年训练 + 2 年验证 + 1 年测试，测试年 2018--2026；巨潮公平比较按用户
+确定的 3 年历史 + 1 年测试。所有 PCA、scaler、聚类器和监督模型只在历史训练数据拟合。
+不做原始 768/1024/4096 维回归，也不根据测试年切换参数。
+
+### 4.2 Mask 与 prompt 扩展
+
+`masked_short` 只 mask 公司身份、股票代码、日期和时间，不 mask 盈利、收益、亏损、
+估值、风险等目标词。mask 的作用是控制身份/时间泄漏，不假设它一定提高收益预测；已有
+16 对配置中只做多 Sharpe 平均增加 0.069，但 `simple_states` IC 平均下降 0.00480。
+
+方向 prompt 为 `分析股票盈利/收益/超额收益/亏损`。中性任务 prompt 为
+`分析股票估值/确定性/波动率/冲击/流动性/风险`。目标 span 只取目标词对应 token 的
+均值，不含“分析股票”、句号、separator 或 special token。正文必须用 `body_mean`；
+Qwen 对应用 `article_mean`，禁止用 `full_mean` 冒充正文。
+
+扩展实验还把语义 prompt 对齐到对应标签：估值使用 PE/PB/PS/EV-EBITDA 的滞后
+log 相对偏离；波动率使用下一日实现波动率水平、log 增量和 5 日相对 20 日跳升；
+流动性使用下一日价差水平和 log 变化。它们回答的是不同预测任务，不能都解释为收益率。
+
+## 5. PCA 与聚类方法
+
+聚类不是重复做一份无监督可视化，而是在同一训练窗 PCA 表示上检验非线性分层是否
+给收益预测带来增量。
+
+| 方法 | 原理 | 本项目实现 | 如何判断有效 |
+|---|---|---|---|
+| PCA32 + Ridge | PCA 提取训练期最大方差方向，Ridge 对连续收益做线性收缩 | randomized PCA32，seed 42，Ridge alpha 100 | 所有聚类方法必须与此配对 |
+| 硬 KMeans | 将样本分到最近质心，得到离散语义状态 | MiniBatchKMeans k=6；簇 one-hot/距离与 PCA 特征进入 Ridge | OOS RankIC/组合增量；当前 16 对平均 -0.00026 |
+| 软 KMeans | 把到各质心的距离变成连续 membership，避免边界跳变 | 距离 softmax，temperature 0.5；训练期簇收益向全局均值 shrinkage 500 | 只用历史收益估计簇均值，测试期冻结 |
+| UMAP + HDBSCAN | UMAP 保留局部邻域；HDBSCAN 发现不规则密度簇并允许噪声点 | PCA -> UMAP8（cosine, neighbors 30, min_dist 0.1）-> HDBSCAN（50/10）-> Ridge | 仅作非线性复核；不能用 silhouette 选择收益模型 |
+| GMM | 假设 PCA 空间由多个高斯成分混合，以后验概率表示软状态 | Qwen 聚类分析中使用 k=3/5/8，输出 posterior/簇年度收益 | 描述和稳健性复核，不是当前主模型选择器 |
+
+ARI、silhouette、簇规模和簇收益排序只描述结构。模型参数只能由验证期 RankIC 或冻结
+配置确定，不能用全样本聚类图选择最终收益模型。
+
+## 6. 当前产物完整性
+
+| 数据集/模型 | 中性六 prompt 分片 | 状态 |
+|---|---:|---|
+| 新浪 RoBERTa | 256/256 | 完整 |
+| 巨潮 RoBERTa | 255/256 | 缺 shard-225 |
+| 新浪 BGE-M3 | 189/256 | 剩余任务已取消，保留现有完成分片 |
+| 巨潮 BGE-M3 | 78/256 | 剩余任务已取消，保留现有完成分片 |
+
+三模型四方向 prompt 公平比较使用预计最小交集：新浪 35,576 条、巨潮 254,544 条。
+截至快照 build 任务仍因 Priority 等待，后续 geometry/rolling/fusion 为依赖等待，
+因此这些公平比较结果尚未生成，不能把计划写成结论。
+
+重新审计数据、embedding 和 Slurm 状态：
 
 ```bash
 python scripts/audit_research_handoff.py --include-slurm
 ```
 
-本仓库只保存源码、配置、测试和小型研究说明。授权数据、模型权重、PDF、
-embedding、任务快照和运行报告保留在工作区/Lustre，不进入 Git；它们通过
-清单、SHA256 和绝对路径在交接文档中追溯。
+## 7. 评价与验收
 
-## 1. 项目目标
+主指标是日均 RankIC、RankIC IR、逐年 RankIC 和正 RankIC 年份数。辅助报告月度正 IC
+比例、日期区块 bootstrap 95% 区间、OOS R2、Top20 同新闻池超额、多空/只做多收益、
+5bp 单边成本后的 CAGR、Sharpe、最大回撤、因子相关和 Top20 选股重合率。
 
-复现 Chen、Kelly 和 Xiu 的 *Expected Returns and Large Language Models* 的核心结论，并将研究对象从美国/国际市场扩展到中国股票市场。
+至少满足以下约束才可写成稳定增量：测试期完全样本外；同新闻池配对；至少 6/9 年方向
+一致（巨潮短协议按可用测试年另报）；bootstrap 区间不跨 0；成本或风险指标至少一项
+改善；所有结论能回指 CSV/manifest，而不是只存在于文字报告。
 
-核心问题：
-
-1. 中国金融新闻文本是否能够预测未来股票收益？
-2. LLM 文本嵌入是否优于传统词袋、词典情绪和 Word2Vec 方法？
-3. 新闻信息是否存在价格反应迟滞？
-4. 预测结果能否形成具有经济意义的多空投资组合？
-5. 中国市场的语言、投资者结构、涨跌停和卖空限制是否会改变原文结论？
-
-> 本项目先做“可复现的最小版本”，再逐步增加模型、数据源和稳健性检验。所有预测必须严格使用当时可获得的信息，避免前视偏差。
-
-## 2. 与第二篇论文的关系
-
-参考论文为 Yang 的 *Investor Sentiment in the Chinese Stock Market*。它不直接复现新闻 LLM 方法，但提供中国市场研究的关键参考：
-
-- 中国股票数据与样本期的组织方式；
-- 使用中文投资者评论构造文本情绪指标的方法；
-- 使用百度指数而不是 Google Trends 衡量中国投资者关注/情绪；
-- 中国市场的行业、地区和投资者结构异质性分析；
-- 涨跌停、卖空限制、交易成本和投资者注意力等稳健性问题；
-- 时间序列预测、横截面预测、Fama–MacBeth 回归和多空组合评价框架。
-
-本项目将新闻文本作为主信号，将股吧评论情绪、百度搜索指数作为补充信号或控制变量，区分“新闻语气”“投资者情绪”和“投资者关注度”。
-
-## 3. 推荐研究路线
-
-### 阶段 0：研究设计与数据可得性
-
-- 明确研究市场：A 股沪深主板、创业板、科创板是否全部纳入；
-- 明确频率：先从日频开始，后续扩展到周频；
-- 明确预测期限：次日、未来 5 个交易日、未来 20 个交易日；
-- 记录新闻发布时间、来源、语言、关联股票和发布时间时区；
-- 确认新闻、行情、股票代码、行业分类和退市股票数据的授权与可得性。
-
-### 阶段 1：构造中国新闻—股票面板
-
-每一行至少包含：
-
-- `article_id`：新闻唯一 ID；
-- `stock_id`：关联股票；
-- `published_at`：发布时间；
-- `headline`、`body`、`language`、`source`；
-- `date`：新闻所属交易日；
-- `ret_1d`、`ret_5d`、`ret_20d`：未来收益标签；
-- 股票价格、成交量、流通市值、行业、停牌和涨跌停状态。
-
-新闻与收益标签的时间对齐是第一优先级：收盘后发布的新闻不能使用当天收盘前收益；非交易日新闻应映射到下一个可交易时点。
-
-### 阶段 2：文本表示与基准模型
-
-先实现可解释、成本较低的基线：
-
-1. 词袋/TF-IDF；
-2. 中文金融情绪词典；
-3. Word2Vec 或中文句向量；
-4. 中文 BERT/RoBERTa；
-5. 多语言或中文金融领域预训练模型；
-6. API/本地 LLM embedding（在数据合规和成本允许时）。
-
-第一版不叠加复杂神经网络，采用原文类似的“文本表示 + 简单监督预测模型”，以便识别性能究竟来自文本表示还是来自模型复杂度。
-
-### 阶段 3：收益预测模型
-
-对每种文本表示分别估计：
-
-\[
-E(r_{i,t+1}\mid x_{i,t}) = x_{i,t}'\theta
-\]
-
-建议先使用：
-
-- pooled panel regression；
-- Ridge/Lasso/Elastic Net；
-- 分期滚动训练或 expanding-window 训练；
-- 只使用训练期数据拟合标准化、降维和模型参数。
-
-可加入股票特征作为控制变量，但需要分别报告“仅文本”和“文本 + 股票特征”的结果。
-
-### 阶段 4：投资组合与经济意义
-
-每个交易日或每周：
-
-1. 用历史训练窗口预测股票未来收益；
-2. 按预测值分成 5 组或 10 组；
-3. 构造高预测组减低预测组的多空组合；
-4. 计算平均收益、波动率、Sharpe 比率、最大回撤和换手率；
-5. 逐步加入交易成本、涨跌停无法成交、停牌和卖空限制；
-6. 与基准信号比较：过去收益、规模、反转、动量、词典情绪和股吧情绪。
-
-中国市场建议至少报告三种组合口径：
-
-- 理论多空组合；
-- 仅做多高预测组；
-- 考虑卖空限制后的可实施组合。
-
-### 阶段 5：稳健性和机制分析
-
-- 不同预测期限：1、5、20 个交易日；
-- 不同新闻新鲜度：新闻提醒、快讯、普通新闻；
-- 新闻篇幅、否定词、数字、复杂叙事和重复新闻；
-- 大盘、行业和个股固定效应；
-- 牛市/熊市、危机期和疫情期；
-- 大盘股/小盘股、高/低流动性股票；
-- 沪深市场、行业和地区异质性；
-- 控制投资者关注度、百度指数、股吧情绪和传统风险因子；
-- 安慰剂测试、伪发布时间测试和严格样本外测试；
-- 交易成本、涨跌停、停牌、T+1 和卖空约束。
-
-## 4. 当前目录
+## 8. 仓库与运行入口
 
 ```text
-llm_return/
-├── README.md                          # 项目目标、研究计划和复现规范
-├── pyproject.toml                     # Python 包与测试配置
-├── configs/
-│   ├── paths.yaml                     # 数据路径和输出路径
-│   ├── sample.yaml                    # 样本期、市场和过滤规则
-│   └── models.yaml                    # 文本模型和预测模型参数
-├── data/
-│   ├── raw/                           # 原始数据，只读保存
-│   ├── interim/                       # 清洗和采集中间结果
-│   └── processed/                     # 可直接建模的数据与冻结嵌入
-├── references/                        # 论文笔记、变量定义和实施计划
-├── src/
-│   ├── data/                           # 清洗、去重、标签、面板和嵌入读取
-│   ├── text/                           # 文本预处理、表示和嵌入接口
-│   ├── models/                         # 可复用的模型与无泄漏预处理
-│   │   ├── return_prediction.py        # 股票—日聚合、评价、Ridge 选参
-│   │   ├── dimension_reduction.py      # 训练窗拟合的 PCA/SVD
-│   │   └── paper_pipeline.py           # 小型 TF-IDF 论文基线
-│   ├── portfolio/
-│   │   ├── formation.py                # 每日等权分位数组合
-│   │   ├── strategy.py                 # EWCT、手续费、持仓和交易约束
-│   │   └── performance.py              # 毛/净收益、Sharpe、换手和回撤
-│   └── evaluation/
-│       ├── prediction_metrics.py       # MSE、OOS R²、方向准确率、Rank IC
-│       ├── classification.py           # 分类指标与稳定性统计
-│       └── artifacts.py                # 内容寻址、锁、原子写和恢复
-├── scripts/                            # 薄 CLI、manifest、审计和 Slurm 入口
-├── tests/                              # 单元测试和无前视偏差测试
-├── task_records/                       # 长任务提交与审计记录
-├── reports/                            # 表格、预测、组合和最终报告
-└── logs/                               # 运行日志
+configs/      路径、样本、模型和新浪年度配额
+data/         小型样本、目录占位和股票池；大型授权数据不入 Git
+docs/         交接、运行手册和状态快照
+references/   论文清单、论文映射、数据/模型合同
+src/          可导入、可测试的数据、模型、评价和组合逻辑
+scripts/      采集、清洗、embedding、滚动实验、审计和 Slurm 入口
+reports/      可追溯结果、表格和综合报告源码
+tests/        单元测试、时间泄漏和采集器测试
 ```
 
-### 代码职责
-
-- `src/` 只放可导入、可测试、与命令行无关的研究逻辑；多个实验需要的代码应优先放在这里。
-- `scripts/` 只负责参数解析、数据路径、滚动窗口编排和任务提交，不重复实现指标、组合或预处理。
-- `src/models/return_prediction.py` 是连续收益任务的统一入口；公告级模型输出先聚合为股票—日，再进行验证选参和测试评价。
-- `src/portfolio/` 独立于模型，既可用于 TF-IDF，也可用于冻结 embedding 或其他预测器。
-- `src/evaluation/artifacts.py` 统一管理实验身份、文件指纹、单写者锁、原子保存和断点恢复。
-
-### 完整策略回测
-
-`scripts/run_portfolio_strategy.py` 接收股票—日预测文件，输出逐日收益、逐股持仓、逐笔交易和汇总指标。论文模式实现次日开盘建仓、顶部/底部五分位、多空组合、10/20 bps 大/小盘股成本，以及 EWCT 权重递推。A 股模式支持买卖双边佣金、卖出印花税、滑点、停牌/涨跌停可交易标记、融券标记和仅做多组合。
+常用入口：
 
 ```bash
-python scripts/run_portfolio_strategy.py \
-  reports/example.stock_day_predictions.parquet \
-  --output-dir reports/strategy/example \
-  --cost-model paper --gammas 1.0
+# 环境与测试
+python -m pip install -e '.[dev]'
+pytest -q
+
+# 只读状态审计
+python scripts/audit_research_handoff.py --include-slurm
+
+# 用股票日预测执行成本回测
+python scripts/run_portfolio_strategy.py PREDICTIONS.parquet \
+  --output-dir reports/strategy/example --cost-model paper --gammas 1.0
+
+# 重建综合 PDF
+python reports/comprehensive_research_report/build_report.py
 ```
 
-`gamma < 1` 会延长持仓，因此必须通过 `--market-data` 提供稠密的股票—交易日收益；程序默认在持仓收益缺失时终止，不会静默填零。论文 10/20 bps 拆分还需要 `--market-cap-column` 或 `--small-stock-column`，否则仅采用论文的大盘股 10 bps 简化回退口径，并在汇总文件中记录该限制。
+## 9. 数据与合规规范
 
-`scripts/collect_strategy_ohlc.py` 可按预测文件中的股票池下载并缓存前复权 OHLC，构造 O2O、C2C、VWAP 代理收益，以及停牌、IPO 初期和开盘涨跌停交易标记。当前 RoBERTa 最终测试样本的 815 只股票已全部接入；修正交易时点和成本后的结果见 [2026 可执行交易回测审计](reports/strategy/real_trading_audit_2026.md) 与 [完整指标表](reports/strategy/roberta_corrected_v2_2026_execution_comparison.csv)。这些结果是历史可执行性回测，不是实盘成交记录。
+- 原始新闻/PDF、模型权重、embedding、任务快照和授权行情不进入 Git。
+- 每次数据传输保留来源、采集时间、参数、行数、稳定 ID、SHA256 和 manifest。
+- 不绕过 robots、登录、验证码、访问控制或网站频率限制。
+- 新闻发布时间必须映射到当时可交易的下一时点；收盘后和非交易日新闻不能前视。
+- 标准化、PCA、聚类、标签选择和监督模型都只能用训练/验证期允许的信息。
+- Qwen 为因果模型且 prompt 后置；RoBERTa/BGE-M3 为双向模型，正文表示的含义不同。
+- 旧新浪 75,894 行面板、全量新浪 796,553 行面板和巨潮 903,665 行面板禁止共用 row_index。
 
-## 5. 建议的第一版最小可行实验
+## 10. 文档索引
 
-为了避免一开始范围过大，先完成以下实验：
+- [完整交接和当前任务](docs/HANDOFF_2026-08-26.md)
+- [采集、运行与恢复手册](docs/RUNBOOK.md)
+- [综合研究报告](reports/comprehensive_research_report/report.md)
+- [数据源和模型说明](references/data_sources_and_models.md)
+- [论文到实验映射](references/paper_to_experiment_map.md)
+- [完整复现计划](references/full_replication_plan.md)
+- [报告索引](reports/README.md)
 
-- 市场：沪深 A 股普通股票；
-- 频率：日频；
-- 文本：中文财经新闻标题 + 正文；
-- 基线：TF-IDF + Ridge、中文情绪词典；
-- LLM：一种中文 BERT/RoBERTa 句向量模型；
-- 预测目标：下一交易日收益；
-- 训练方式：至少 3 年训练窗口，滚动样本外预测；
-- 组合：五分位多空组合；
-- 对照：过去收益、规模、成交量、波动率；
-- 输出：预测性能、分组收益、Sharpe、换手率和交易成本敏感性。
-
-只有当最小版本通过时间对齐、前视偏差和安慰剂测试后，才扩展到更多 LLM、长预测期限、百度指数和股吧情绪。
-
-## 6. 关键风险与规范
-
-1. **数据授权：** 新闻正文、百度指数和股吧数据应确认合法授权及使用范围。
-2. **前视偏差：** 任何词表、标准化参数、降维结果和模型参数都只能由训练期数据得到。
-3. **新闻时间：** 必须区分发布时间和交易日，特别是收盘后、周末和节假日新闻。
-4. **股票生存偏差：** 纳入退市股票，避免只保留当前仍上市公司。
-5. **交易可行性：** 单独处理涨跌停、停牌、T+1、交易费用和卖空约束。
-6. **嵌入可重复性：** 固定模型版本、tokenizer 版本、批处理方式、随机种子和缓存结果。
-7. **结果解释：** 将统计显著性与实际可交易性分开报告，不直接把预测收益等同于真实收益。
-
-## 7. 协作方式
-
-后续每次修改建议遵循：
-
-1. 先在 `references/` 中记录变量和假设；
-2. 再修改 `configs/`；
-3. 先做小样本测试；
-4. 通过测试后运行全样本；
-5. 将表格和图保存到 `reports/`；
-6. 在本 README 中更新已完成事项和待办事项。
-
-## 8. 待办事项
-
-- [ ] 确认新闻数据源、价格数据源和授权范围
-- [ ] 确认中国股票市场样本范围和样本期
-- [ ] 完成字段字典和数据质量审计
-- [ ] 完成新闻与股票的时间对齐规则
-- [ ] 实现 TF-IDF 和词典情绪基线
-- [ ] 实现第一种中文 LLM 嵌入
-- [ ] 完成滚动样本外预测
-- [x] 完成五分位组合与持仓级净收益回测
-- [x] 实现 EWCT、交易成本及可配置交易约束，并接入测试股票池的稠密 OHLC/交易状态
-- [ ] 加入第二篇论文中的百度指数/股吧情绪参考变量
-- [ ] 完成稳健性检验和研究报告
-
-## 9. 下一步执行说明
-
-详细的数据源、模型和安装建议见 [references/data_sources_and_models.md](references/data_sources_and_models.md)。当前不建议立即下载大型模型；应先确认新闻数据授权、字段和发布时间，再用小样本跑通 TF-IDF 基线。
-
-文本表示和 embedding 的分阶段实施方案见 [references/embedding_implementation_plan.md](references/embedding_implementation_plan.md)。原则是先完成 TF-IDF/词典基线，再下载中文 RoBERTa，最后评估 BERT、BGE-M3 和 API embedding。
-
-全面复现路线见 [references/full_replication_plan.md](references/full_replication_plan.md)。当前公开原型使用 GDELT 元数据；正式结果仍应替换为具有授权、历史覆盖和股票实体关联的新闻全文数据。
-
-东方财富、股吧和雪球可作为中国投资者评论情绪的补充数据源，但当前只接收合法 API/网页导出，不绕过登录、验证码、robots.txt 或访问频率限制。相关规范化代码见 `src/data/public_sources.py` 和 `src/data/normalize_public.py`。
-
-## 10. 基础配置使用
-
-项目基础配置已实现：
-
-- 配置文件：[configs/paths.yaml](configs/paths.yaml)、[configs/sample.yaml](configs/sample.yaml)、[configs/models.yaml](configs/models.yaml)；
-- 配置加载：[src/config.py](src/config.py)；
-- 配置检查命令：[src/cli.py](src/cli.py)。
-
-运行配置检查时使用 `python -m src.cli --prepare-dirs`。该命令只读取 YAML 并创建配置中声明的运行目录，不下载新闻、不下载模型，也不执行回测。
+仓库当前只保存可公开、可复现的代码和小型事实文件。任何人接手前，应先运行只读审计，
+确认本机/Lustre 的大文件状态与本快照一致，再继续计算。

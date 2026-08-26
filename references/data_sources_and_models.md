@@ -1,161 +1,130 @@
-# 数据源与模型实施方案
+# 数据来源、模型与表示合同
 
-## 一、下一步实现顺序
+本文档记录已经使用的数据和模型，不再是前期选型建议。完整采集参数、实测结果和路径见
+`docs/HANDOFF_2026-08-26.md`。
 
-不要先下载大模型。建议按以下顺序推进：
+## 1. 数据源
 
-1. **确定数据源和授权**：确认新闻全文/标题、发布时间、股票代码、来源和历史覆盖期。
-2. **先获取小样本**：选取 1 年、约 100—500 只股票，验证字段和时间对齐。
-3. **完成价格标签**：生成未来 1、5、20 个交易日收益，并处理停牌、涨跌停、除权和退市。
-4. **建立新闻—股票面板**：每条新闻对应股票、发布时间、文本和未来收益。
-5. **实现无模型基线**：过去收益、TF-IDF + Ridge、中文金融情绪词典。
-6. **再生成 Transformer 嵌入**：先使用中文 BERT/RoBERTa，再评估 BGE-M3。
-7. **完成滚动样本外预测和五分位组合回测**。
-8. **最后加入股吧情绪、百度指数、交易约束和稳健性分析**。
+| 来源 | 内容 | 当前研究面板 | 主要限制 |
+|---|---|---:|---|
+| 新浪财经 | 历史财经新闻标题/正文 | 796,553 条，2010--2026 | 联网采集只能本地运行；历史年份覆盖不均 |
+| 巨潮资讯 | 官方公司公告详情和 PDF | 903,665 条、816 股票，2010--2026 | 公告长文本和股票池与新浪不同 |
+| 东方财富 | 要闻、个股资讯、公告、研报、股吧 | 有界原型 | 公开可见浏览器页、低频批次 |
+| 雪球 | 公开讨论、资讯和公告 | 有界原型 | 匿名或显式授权 browser state |
+| 日频行情 | OHLC、复权、停牌/涨跌停、行业和市值 | 与新闻/公告按点时规则对齐 | 收盘后新闻只能用于下一可交易时点 |
+| 高频/估值 | 1 分钟波动率/价差；PE/PB/PS/EV-EBITDA | 仅使用实际日期交集 | `/data/alpha_team2/shares/260825/` 不入 Git |
 
-## 二、推荐模型
+### 新浪
 
-### 第一阶段：必须实现的基线
+浏览器脚本负责发现和验证少量动态历史 seed；普通 HTTP 脚本负责有界并发、原始 HTML、
+JSONL、manifest、state 和断点恢复。推荐组合为“浏览器发现 + HTTP 扩展”，而不是全浏览器
+抓正文。新浪所有联网命令只能在本地机器执行，完成后连同 SHA256 复制到 Lustre。
 
-- `TF-IDF + Ridge`：验证新闻是否有预测信息，速度快、可解释；
-- 中文金融情绪词典：与第二篇论文的文本情绪研究对照；
-- 过去收益、规模、成交量、波动率：作为非文本基线。
+### 巨潮
 
-### 第二阶段：建议安装的本地模型
+`collect_cninfo_announcements.py` 使用公开公司披露页的可见日期筛选、分页、详情和 PDF
+链接。2010--2017 的 6,528 个股票年审计全部完成，合并后最终面板 903,665 条。
+采集、PDF 文本抽取、去重清洗、分类面板和收益对齐是四个独立阶段，不能把最终面板条数
+写成原始 PDF 下载数。
 
-1. `hfl/chinese-roberta-wwm-ext`
-   - 中文 RoBERTa 编码器；
-   - 用于生成文章向量；
-   - 与第一篇论文的 BERT/RoBERTa 设计最接近。
+### 东方财富和雪球
 
-2. `hfl/chinese-bert-wwm-ext`
-   - 中文 BERT 对照模型；
-   - 用于检验 RoBERTa 的改进是否稳定。
+共用 `collect_browser_visible.py`，只采集公开可见内容，遇验证码/访问异常立即停止。
+当前 batch 默认每批 3 股票，页面间隔至少 3 秒，批间 60 秒。这两类数据主要用于投资者
+情绪和注意力控制，不是新浪/巨潮主文本库的替代品。
 
-3. `BAAI/bge-m3`
-   - 中文和多语言文本嵌入模型；
-   - 可作为主力 embedding 模型；
-   - 对长文本需要分块后聚合，不能简单截断整篇新闻。
+## 2. 最低字段与稳定键
 
-### 第三阶段：可选模型
-
-- 中文金融领域预训练模型：只有在完成通用模型基线后再加入；
-- OpenAI/其他 API embedding：用于与原论文的 API embedding 对照，但需要考虑费用、数据合规和版本固定；
-- 大型生成式模型：不作为第一版模型，避免把收益差异混入提示词、版本和推理随机性。
-
-## 三、模型安装建议
-
-### API 大语言模型和 embedding
-
-可以使用 API key 访问 OpenAI 或其他 OpenAI-compatible 服务，但只允许通过
-环境变量注入密钥，不将密钥写入代码、YAML、命令行历史或 Git。项目提供
-`src/text/api_embeddings.py`，默认读取 `OPENAI_API_KEY`，并调用兼容服务的
-`/v1/embeddings` 接口。API 模型应固定模型名、服务地址、批大小、文本哈希和
-返回维度；每次实验记录这些元数据，并注意费用、数据跨境和新闻正文授权。
-
-API 生成式模型可以作为辅助情绪/事件抽取，但不应与 embedding 结果混为一类。
-若服务商未明确允许将金融新闻发送到其服务，不应上传正文，只能使用获授权的
-脱敏字段或本地模型。
-
-第一版只需要安装 Python 包，不要预先下载全部模型：
-
-- `pandas`、`numpy`、`scikit-learn`：数据处理和基线模型；
-- `pyarrow`：Parquet 数据存储；
-- `transformers`、`torch`、`sentence-transformers`：本地 Transformer 嵌入；
-- `jieba` 或 `pkuseg`：中文分词，仅词袋/词典方法需要；
-- `statsmodels`：回归和 Fama–MacBeth 等统计分析；
-- `pyyaml`、`tqdm`、`joblib`：配置、进度和缓存。
-
-推荐安装顺序：先安装数据处理包并跑通 TF-IDF；确认数据结构后再安装 PyTorch 和下载模型。模型文件通常数百 MB 到数 GB，应使用固定版本并记录到 `configs/models.yaml`。
-
-## 四、新闻数据源优先级
-
-### 首选：学术数据库或商业数据库
-
-优先确认是否能获得以下带股票代码和精确发布时间的数据：
-
-1. CSMAR/国泰安新闻；
-2. Wind/万得资讯新闻；
-3. 聚源或同花顺 iFinD 新闻；
-4. Refinitiv/Eikon 或 Bloomberg（若有机构权限）。
-
-这些数据最适合复现，因为通常提供股票关联、来源、发布时间和历史存档，能够减少新闻匹配误差。
-
-### 可用于原型验证的公开来源
-
-- 财联社、证券时报、新华财经、东方财富、新浪财经等公开页面或公开接口；
-- 仅在网站条款允许、访问频率合规且保留来源记录时使用；
-- 公开来源常见问题是历史覆盖不完整、正文变化、反爬限制、发布时间缺失和股票关联不可靠。
-
-公开来源适合做小样本流程测试，不建议未经核验就用于最终论文结论。
-
-### 价格数据源
-
-- 优先使用与新闻数据库配套的 Wind、CSMAR、聚源或 CRSP 类学术数据；
-- 原型阶段可以使用 AKShare、Baostock 或其他公开行情接口；
-- 最终结果应使用包含除权、停牌、退市和历史股票代码的数据，并保留数据版本。
-
-## 五、新闻字段最低要求
+文本记录至少包含：
 
 ```text
-article_id
-stock_id
-stock_name
-published_at
-source
-headline
-body
-language
-market
+row_index, document_id, stock_id, published_at, source,
+headline/title, body/text, body_sha256, collected_at
 ```
 
-价格表最低要求：
+最终建模面板还应包含：
 
 ```text
-stock_id
-date
-open
-close
-adj_close
-volume
-market_cap
-industry
-is_suspended
-is_limit_up
-is_limit_down
+trading_date, next_day_return, event_return_3d, o2o_return,
+industry, market_cap, is_suspended, is_limit_up, is_limit_down
 ```
 
-## 六、时间对齐规则
+每个数据集独立生成 `row_index`。跨数据集或重建版本只按稳定 `document_id`、股票、日期和
+正文哈希对齐，不能假设行号可复用。
 
-- 新闻发布时间早于当日收盘：可以用于下一交易日预测；
-- 收盘后发布：只能从下一个交易日开始计算收益；
-- 周末和节假日发布：映射到下一个交易日；
-- 同一新闻的转载和更新：去重并保留最早有效发布时间；
-- 任何标准化、词表筛选、降维和模型训练都只能使用训练窗口信息；
-- 新闻文本中若包含事后更新内容，必须按版本或抓取时间处理，不能使用未来修订文本。
+## 3. 时间对齐
 
-## 七、第一版数据选择建议
+- 收盘前新闻用于下一交易日预测；收盘后新闻从下一个可交易时点开始；
+- 周末/节假日新闻映射到下一交易日；
+- 转载和更新按正文哈希、URL、标题和发布时间去重，保留最早可用版本；
+- 任何 scaler、PCA、词表、聚类器、簇收益和监督模型都只使用训练期；
+- 估值、波动率和价差标签使用下一日或明确的未来窗口，输入特征必须先滞后。
 
-如果有商业数据库权限：
+## 4. 模型
 
-- 直接使用 CSMAR/Wind/聚源中的新闻和 A 股日行情；
-- 样本先设为 2015—2024 年；
-- 先抽取 2020 年单年数据做流程验证；
-- 新闻先使用标题和正文，后续拆分比较。
+| 模型 | 标识/来源 | 结构 | hidden | 最大输入 | 正文表示 |
+|---|---|---|---:|---:|---|
+| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder | 768 | 512 | `body_mean` |
+| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder | 1024 | 1000 | `body_mean` |
+| Qwen3-Embedding-8B | Ollama `qwen3-embedding:8b` | 因果模型 | 4096 | 既有 runner 合同 | `article_mean` |
 
-如果暂时没有商业数据库权限：
+RoBERTa/BGE-M3 输出：
 
-- 先用公开新闻做小规模流程验证；
-- 同时使用公开行情接口构造价格标签；
-- 暂不把公开数据结果宣称为严格复现；
-- 后续替换成具有稳定历史覆盖的授权数据源。
+```text
+prompt_mean, title_mean, body_mean, title_body_mean, full_mean, cls,
+title_max, body_max, title_body_max, full_max, prompt_token_embeddings
+```
 
-## 八、开始条件
+每个模型还保存 tokenizer/model 标识、输入 IDs、prompt tokens、行 metadata、prompt spec、
+manifest 和 `COMPLETED`。不同模型维度、tokenizer 和目录不可混用。
 
-在下载模型前，需要先确认三个问题：
+Qwen 的 prompt 位于正文后，因果注意力下 `article_mean` 不受后置 prompt 反向影响；
+RoBERTa/BGE-M3 为双向模型，prompt 会参与正文编码。这一差异必须出现在报告中。
 
-1. 是否拥有 CSMAR、Wind、聚源、iFinD 或 Refinitiv 的访问权限；
-2. 新闻数据是只有标题，还是包含正文和精确发布时间；
-3. 计划使用 GPU 还是 CPU，以及可用显存。
+## 5. Prompt 与 mask
 
-确认后再决定具体安装命令、模型版本和批处理大小。
+方向 prompt：
+
+```text
+分析股票盈利
+分析股票收益
+分析股票超额收益
+分析股票亏损
+```
+
+中性 prompt：
+
+```text
+分析股票估值
+分析股票确定性
+分析股票波动率
+分析股票冲击
+分析股票流动性
+分析股票风险
+```
+
+只使用 `masked_short`：mask 公司身份、代码、日期和时间，不 mask 目标语义。目标 token
+只取目标 span，不含前缀、句号和 special token。不同 prompt 不添加无意义 padding；
+实际 span 以 tokenizer input IDs/offset 为准。
+
+## 6. 实测性能边界
+
+| 结果 | RankIC | 说明 |
+|---|---:|---|
+| 新浪 RoBERTa+BGE masked 收益 span event-3 | 0.08945 | PCA64 分别降维后拼接，9/9 年为正 |
+| 新浪 RoBERTa masked 收益 prompt mean next-day | 0.06044 | 9/9 年为正 |
+| 巨潮 RoBERTa pooled | 0.01764 | 9/9 年为正 |
+| 巨潮 BGE-M3 pooled | 0.01415 | 9/9 年为正 |
+| Qwen 新浪正文 / 收益 token | 0.05680 / 0.05360 | token 尚未超过正文 |
+| Qwen 巨潮 residual O2O | 0.02732 | 3+1+1，5/5 年为正 |
+
+这些结果来自不同任务和历史配置，只证明实现可用，不能直接做模型排行榜。三模型公平
+比较必须使用同新闻、同 prompt、同标签和各自训练期 PCA32。
+
+## 7. 数据与模型合规
+
+- 新闻正文、公告 PDF、模型权重、embedding 和授权行情不进入 Git；
+- API key 只通过环境变量，禁止进入代码、YAML、命令行历史或日志；
+- 未获明确授权时不向外部 embedding API 上传新闻正文；
+- 固定模型 ID、revision/tokenizer hash、最大长度、batch、文本哈希和输出维度；
+- 模型“性能”只报告本项目严格样本外指标，不用发布时间、参数规模或公开榜单替代。

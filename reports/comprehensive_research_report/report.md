@@ -117,7 +117,31 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 
 ## 3. 数据资产与清洗方法
 
-### 3.1 三套不可混用的样本
+### 3.1 数据来源与采集链
+
+本项目的两套主文本来自不同信息生成机制。新浪财经是媒体新闻，适合研究新闻叙事、市场
+注意力和价格反应；巨潮资讯是上市公司官方公告，适合研究法定披露和事件冲击。东方财富
+与雪球只作为公开可见投资者内容的补充，不与主面板混合。
+
+| 来源 | 采集方式 | 当前用途 | 运行边界 |
+|---|---|---|---|
+| 新浪财经 | 浏览器发现历史 seed；普通 HTTP depth-3、去重、depth-5 扩展 | 新闻主面板 | 联网采集只能本地运行；集群只处理校验后文件 |
+| 巨潮资讯 | 官方可见公司页、日期筛选、分页、详情、公开 PDF 下载和文本抽取 | 公告主面板 | 不调用隐藏接口，访问控制出现即停止 |
+| 东方财富 | 可见要闻、个股页、公告、研报、股吧 | 情绪/注意力控制 | 页面间隔至少 3 秒，有界批次 |
+| 雪球 | 可见讨论、资讯和公告 feed | 情绪/注意力控制 | 匿名或显式授权 browser state |
+
+新浪采用混合方式：浏览器渲染更适合找到动态历史入口和缺失年份，普通 HTTP 更适合批量
+正文、原始 HTML 留存和断点恢复。自动 HTTP runner 当前为 20 workers、1 秒批次 pause、
+30 秒 timeout，先 depth 3、正文哈希去重，再 depth 5。浏览器 selector 默认 8 pages、
+3 秒 pause、500ms render wait；年度补洞默认 4 年任务 x 每年 2 pages。20 workers 是并发
+上限而非 20 页/秒。现有普通 DFS 2 页/0.38 秒、浏览器 BFS 4 页/4.90 秒和 DFS
+4 页/4.77 秒都只是可运行性微探针，不能外推全量吞吐。
+
+巨潮 2010--2017 采集审计覆盖 816 股票 x 8 年，共 6,528 个股票年且全部完成，原始
+完成文件有 554,451 条记录。采集器保存公告索引、详情状态和 PDF；后续才进行 PDF 文本
+抽取、document ID 去重、清洗、分类与收益对齐。最终 903,665 行面板不是原始下载量。
+
+### 3.2 三套不可混用的样本
 
 | 样本 | 期间 | 行数 | 股票数 | 主要用途 |
 |---|---|---:|---:|---|
@@ -129,7 +153,7 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 75,894 条面板的行号。三模型四 Prompt 构建器预期的冻结最小交集为新浪 35,576 条、
 巨潮 254,544 条；这是构建时必须核对的预期值，不是已经完成的最终分析样本。
 
-### 3.2 年度分布
+### 3.3 年度分布
 
 | 年份 | 新浪全量 | 巨潮全量 | 旧新浪对齐 |
 |---:|---:|---:|---:|
@@ -154,7 +178,7 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 新浪 2026 年占比明显上升，巨潮 2010--2017 的公告量明显高于 2018 年以后；这类来源
 和采集结构漂移必须通过年度滚动、逐年指标和固定新闻池诊断，不能把全期随机切分作为主结果。
 
-### 3.3 文本与标签覆盖
+### 3.4 文本与标签覆盖
 
 新浪正文清洗字符数中位数为 2,579，90 分位为 9,384，固定最大清洗长度为 12,000 字；
 796,553 条中有 646,222 条 next-day 标签和 643,517 条 event-3 标签。巨潮正文字符数
@@ -165,7 +189,7 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 新浪覆盖 5,466 只股票，但不同年份和来源的有效覆盖不均。报告中的模型比较必须同时冻结
 新闻行、股票日、标签可用性和测试年份。
 
-### 3.4 Mask 与点时约束
+### 3.5 Mask 与点时约束
 
 新增中性 Prompt 只 mask 公司名、股票代码、日期和时间，不删除盈利、亏损、风险、
 估值或其他目标词。每行保存稳定 `row_index`、`document_id`、股票代码、发布时间、正文
@@ -175,16 +199,21 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 
 ### 4.1 模型与表示
 
-| 模型 | 原始维度 | 输入上限 | 正文表示 | 目标 token |
-|---|---:|---:|---|---|
-| 中文 RoBERTa | 768 | 512 | `body_mean` | Prompt 中精确目标 span 均值 |
-| BGE-M3 | 1,024 | 1,000 | `body_mean` | Prompt 中精确目标 span 均值 |
-| Qwen3-Embedding-8B | 4,096 | 既有任务合同 | `article_mean` | 排除末尾句号的目标 span 均值 |
+| 模型 | 模型来源/runner ID | 结构 | 原始维度 | 输入上限 | 正文表示 | 已有代表 RankIC |
+|---|---|---|---:|---:|---|---:|
+| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder | 768 | 512 | `body_mean` | 新浪 0.06044；巨潮 0.01764 |
+| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder | 1,024 | 1,000 | `body_mean` | 新浪 0.04439；巨潮 0.01415 |
+| Qwen3-Embedding-8B | Ollama `qwen3-embedding:8b` | 因果模型 | 4,096 | 既有任务合同 | `article_mean` | 新浪正文 0.05680；巨潮 0.02732 |
 
 六个中性 Prompt 固定为：`分析股票估值`、`分析股票确定性`、`分析股票波动率`、
 `分析股票冲击`、`分析股票流动性`、`分析股票风险`。不添加“请”“综合分析”、高中低
 或无意义 padding。RoBERTa/BGE-M3 输出同时保存 prompt/title/body/full 的 mean/max、
 CLS 和 `prompt_token_embeddings`，因此不是只保存 Prompt token。
+
+表中性能来自不同标签和历史实验，只说明各 runner 已产生有预测力的表示，不能当作严格
+模型排名。公平比较使用同新闻、同 prompt、同 next-day 标签和各模型训练期 PCA32。
+双向模型的前置 prompt 可以影响正文 token；Qwen 的 prompt 后置，因果注意力下此前的
+`article_mean` 不受 prompt 反向影响。这一结构差异不能通过统一 PCA 消除。
 
 ### 4.2 四方向 Prompt 的 span 定义
 
@@ -198,7 +227,23 @@ CLS 和 `prompt_token_embeddings`，因此不是只保存 Prompt token。
 历史结果保留原有 span 定义，不能事后更改。新的三模型公平比较使用完整目标短语，并在
 manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 Prompt hash。
 
-### 4.3 时间切分与固定参数
+### 4.3 Benchmark 层级
+
+原始论文的主骨架是冻结文本表示、简单监督头、严格滚动和组合检验。本项目按以下顺序
+区分 benchmark 与扩展，防止把模型复杂度误当作 prompt 信息：
+
+1. 非文本控制：过去收益、规模、成交量和历史波动率；
+2. 传统文本：情绪词典、TF-IDF + Ridge、Word2Vec；
+3. 整文 Transformer：真正的 `body_mean/article_mean`；
+4. prompt pooled：`prompt_mean/full_mean`；
+5. 目标 token：精确 span；
+6. 扩展：mask、硬/软聚类、密度聚类和预测级融合。
+
+当前公平比较的直接 benchmark 固定为同一新闻交集上的训练期 PCA32 + Ridge alpha 100。
+每个 token/body/聚类配置都与它配对；不做原始 768/1024/4096 维回归，不因最终测试
+结果切换 PCA 维数。历史 PCA64/raw 结果保留为历史证据，但不混入新主表。
+
+### 4.4 时间切分与固定参数
 
 新浪主结果使用严格 6+2+1，测试年 2018--2026。巨潮三模型公平比较因历史 embedding
 交集限制，基础预测采用 3 年历史加 1 年测试，并在历史窗口内保留 1 年 OOS 供二级融合。
@@ -209,7 +254,7 @@ manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 
 seeds 17/29/42/71/113、soft shrinkage 500、temperature 0.5、UMAP8 和 HDBSCAN
 `min_cluster_size=50, min_samples=10`。不做原始维回归，也不根据九年最终结果改参数。
 
-### 4.4 评价指标
+### 4.5 评价指标
 
 主指标为日均 RankIC、RankIC IR、逐年 RankIC、正 RankIC 年份数、月度正 RankIC 比例
 和日期区块 bootstrap 区间。辅助指标为同新闻池 Top20% 超额、多空收益、Accuracy、
@@ -218,7 +263,7 @@ seeds 17/29/42/71/113、soft shrinkage 500、temperature 0.5、UMAP8 和 HDBSCAN
 Embedding cosine、centered cosine、CKA、ARI 和 silhouette 只描述表示结构，不能选择
 收益模型。三模型原始坐标不可直接比较；跨模型只比较标准化几何统计和完全样本外因子。
 
-### 4.5 组合与成本
+### 4.6 组合与成本
 
 四方向历史成本回测固定 `gamma=0.1`，买入和卖出各 5bp。只做多、独立做空和多空必须
 分别报告。A 股缺少逐股券源、借券费和召回数据时，任何空头腿都是理论诊断，不能称为
@@ -440,7 +485,28 @@ token 可能主要改变尾部选股，而不是整体 RankIC；但该机制需�
 StandardScaler 和 Ridge alpha 100，不再运行原始维回归。这使跨模型统一成为“同算法、
 同维数、同历史窗口和同参数”，而不是错误地共享同一个 PCA 基底。
 
-### 10.2 聚类的正面和负面证据
+### 10.2 聚类原理与本项目实现
+
+聚类不是独立重复一份无监督图，而是在训练期 PCA 表示上检验离散或非线性语义状态能否
+对未来收益产生监督增量。四类方法使用相同 fold，所有变换只在训练期拟合。
+
+| 方法 | 原理 | 当前实现 |
+|---|---|---|
+| 硬 MiniBatchKMeans | 最小化样本到最近质心的平方距离，得到离散状态 | PCA32 后 k=6，one-hot/质心距离与 PCA 特征进入 Ridge；历史 sweep k=2/4/6/8/12 |
+| 软 KMeans | 用距离 softmax 替代硬边界，以 membership 加权簇收益 | temperature=0.5；训练期簇收益向全局均值 shrinkage=500；测试冻结 |
+| UMAP+HDBSCAN | UMAP 保留局部近邻，HDBSCAN 按密度发现非球形簇并允许噪声 | PCA -> UMAP8（cosine, neighbors 30, min_dist 0.1）-> HDBSCAN（50/10）-> Ridge |
+| GMM | PCA 空间的多高斯混合，以后验概率表示重叠簇 | Qwen 结构复核使用 k=3/5/8；不作为当前主收益选择器 |
+
+软 KMeans 的训练期簇收益为
+`mu_k=(sum(y_i in k)+500*global_mean)/(n_k+500)`，样本分数为各簇 `mu_k` 按距离
+membership 的加权和。验证和测试收益不参与 `mu_k`。UMAP/HDBSCAN 的验证测试标签通过
+训练期 transform/approximate prediction 获得，不能在全样本 UMAP 图上回填收益。
+
+ARI 检查不同 seed/年份的分簇一致性，silhouette 检查簇内/簇间几何，noise share 检查
+HDBSCAN 是否退化；它们只用于描述结构，不能用于选择收益模型。有效性只看与同一
+PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
+
+### 10.3 聚类的正面和负面证据
 
 硬 KMeans 在四方向 16 个严格配对中平均降低 RankIC 0.00026，仅 6/16 胜。BGE-M3
 收益 token 的簇收益排序比 RoBERTa 清晰，说明其表示更容易形成连续分层；但软聚类最高
@@ -448,16 +514,18 @@ StandardScaler 和 Ridge alpha 100，不再运行原始维回归。这使跨模�
 
 UMAP+HDBSCAN 在 BGE-M3 masked loss 的同一输入上把多头从 1.50bp 提高到 6.17bp，
 多空从 15.26bp 提高到 20.35bp，8/9 年方向为正。它是值得保留的局部稳健性结果，
-但没有跨 Prompt 稳定胜出，也没有超过已有最佳软聚类配置。
+但没有跨 Prompt 稳定胜出，也没有超过已有最佳软聚类配置。2026 单折的六语义轴中，
+PCA+Ridge 和硬 KMeans 的平均 token-body delta 为 +0.03670/+0.03344，软 KMeans 和
+UMAP+HDBSCAN 为 -0.01451/-0.00881，进一步说明聚类增量依赖任务，不能预设为正。
 
-### 10.3 多因子融合的严格方案
+### 10.4 多因子融合的严格方案
 
 公平比较先生成 24 个完全样本外基础因子：3 模型 × 4 Prompt × token/body。融合分为
 单模型四 token、单 Prompt 三模型、12 token、12 body 和全部 24 因子。输入先逐日
 横截面标准化，再比较等权、Ridge、ElasticNet 和 HistGradientBoosting。二级权重只能
 使用历史 OOS/验证数据，测试年冻结。
 
-### 10.4 当前不能写出的结论
+### 10.5 当前不能写出的结论
 
 - 不能因 RoBERTa Prompt 间距离大就写“RoBERTa 不理解语义”；
 - 不能因 BGE-M3 token 相关高就写“BGE-M3 理解更准确”；
@@ -542,6 +610,10 @@ UMAP+HDBSCAN 在 BGE-M3 masked loss 的同一输入上把多头从 1.50bp 提高
 
 | 事实 | 可追溯产物 |
 |---|---|
+| 新浪两种采集流程、默认并发和微探针 | `scripts/run_sina_auto_pipeline.py`、`scripts/select_sina_historical_seeds_browser.py`、`data/interim/sina_*probe.json` |
+| 巨潮 2010--2017 股票年和原始记录 | `reports/cninfo_historical_collection_audit.json`、`reports/cninfo_historical_cleaning_audit.json` |
+| 东方财富/雪球可见页面边界和批次 | `scripts/collect_browser_visible.py`、`scripts/run_100_stock_collection.py` |
+| 模型 ID、维度、最大长度和表示合同 | `references/data_sources_and_models.md`、embedding manifest/preflight |
 | 全量面板行数、日期、股票数、标签覆盖 | `facts.json`；`scripts/audit_research_handoff.py`；相应 Parquet schema |
 | 四方向 Prompt、mask、成本和聚类结果 | 工作区 `REPORT_ALL_RESULTS.md`，SHA256 `23ade165...e4ff` |
 | 估值、波动率、价差配对结果 | `reports/aligned_extended_regression/token_body_selected.csv` |
@@ -575,6 +647,7 @@ UMAP+HDBSCAN 在 BGE-M3 masked loss 的同一输入上把多头从 1.50bp 提高
 | hard KMeans | PCA 后簇 one-hot 与连续特征进入 Ridge | 聚类增强，必须配对同 PCA Ridge |
 | soft KMeans | 距离软分配加训练期簇收益收缩 | 连续分层，不使用测试收益定义簇分数 |
 | UMAP+HDBSCAN | 训练期 PCA/UMAP/密度簇后进入 Ridge | 稳健性复核，不以 silhouette 选收益模型 |
+| GMM | PCA 空间高斯混合的后验软 membership | Qwen 结构复核，当前不作为主收益选择器 |
 | 净年化/Sharpe | 扣固定交易成本后的组合收益统计 | 仍未包含容量、涨跌停和借券约束 |
 
 ## 参考文献
