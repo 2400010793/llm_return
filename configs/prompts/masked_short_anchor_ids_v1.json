@@ -1,0 +1,7 @@
+{
+  "valuation": "valuation_anchor",
+  "certainty": "certainty_anchor",
+  "volatility": "volatility_anchor",
+  "impact": "impact_anchor",
+  "liquidity": "liquidity_anchor"
+}

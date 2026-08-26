@@ -1,11 +1,11 @@
-"""Paper-style rolling out-of-sample classification comparison.
+"""Paper-style rolling out-of-sample one-day direction classification.
 
 Replicates the paper's timing design as closely as the Chinese panel permits:
 8 calendar years in-sample, the first 6 for fitting and the last 2 for
 chronological validation/tuning, followed by a 1-year out-of-sample test.
-Following the paper, the sentiment model is trained on the in-sample
-three-day event-return label, while validation and out-of-sample accuracy are
-measured on the next-period return sign.  ``--target-column`` remains as a
+The primary project protocol uses the same one-day return target for fitting,
+validation, and out-of-sample evaluation. ``event_return_3d`` is retained only
+as an explicit legacy/ablation override. ``--target-column`` remains as a
 backward-compatible option that sets both columns to the same target.
 """
 from __future__ import annotations
@@ -24,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.run_classification import _features, _grid, _truncate_text
 from src.evaluation.classification import evaluate_binary_classification
 from src.models.representation_models import _classifier
+from src.models.dimension_reduction import fit_reduce
 
 
 def seed_everything(seed: int) -> None:
@@ -33,6 +34,64 @@ def seed_everything(seed: int) -> None:
 
 def finite_rows(y: pd.Series) -> np.ndarray:
     return np.isfinite(pd.to_numeric(y, errors="coerce").to_numpy(dtype=float))
+
+
+def align_precomputed_matrix(
+    panel: pd.DataFrame,
+    matrix: np.ndarray,
+    metadata: pd.DataFrame | None,
+    *,
+    alignment_key: str = "document_id",
+    metadata_row_index_offset: int = 0,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Fail closed when aligning a frozen matrix to a sorted/subset panel.
+
+    Metadata-key alignment permits the matrix to contain rows outside the
+    requested panel. Positional alignment is accepted only for equal complete
+    row counts and uses ``__panel_position`` captured before panel sorting.
+    """
+    if metadata is None:
+        if len(panel) != len(matrix):
+            raise ValueError(
+                f"panel and matrix have different row counts: {len(panel)} != {len(matrix)}"
+            )
+        if "__panel_position" not in panel:
+            raise ValueError("positional alignment requires __panel_position")
+        positions = pd.to_numeric(panel["__panel_position"], errors="raise").to_numpy(dtype=np.int64)
+        if len(np.unique(positions)) != len(positions) or positions.min(initial=0) < 0 or positions.max(initial=-1) >= len(matrix):
+            raise ValueError("invalid or duplicate __panel_position values")
+        return np.asarray(matrix[positions]), {
+            "mode": "exact_positional", "rows": len(panel), "key": "__panel_position",
+        }
+
+    if len(metadata) != len(matrix):
+        raise ValueError(
+            f"metadata and matrix row counts differ: {len(metadata)} != {len(matrix)}"
+        )
+    if alignment_key not in panel or alignment_key not in metadata:
+        raise ValueError(f"alignment key {alignment_key!r} missing from panel or metadata")
+    panel_keys = panel[alignment_key].copy()
+    metadata_keys = metadata[alignment_key].copy()
+    if metadata_row_index_offset:
+        if alignment_key != "row_index":
+            raise ValueError("metadata_row_index_offset is only valid for row_index")
+        metadata_keys = pd.to_numeric(metadata_keys, errors="raise") + metadata_row_index_offset
+    if panel_keys.duplicated().any():
+        raise ValueError(f"panel alignment key {alignment_key!r} contains duplicates")
+    if metadata_keys.duplicated().any():
+        raise ValueError(f"metadata alignment key {alignment_key!r} contains duplicates")
+    lookup = pd.Series(np.arange(len(metadata_keys), dtype=np.int64), index=metadata_keys)
+    positions = lookup.reindex(panel_keys)
+    if positions.isna().any():
+        missing = panel_keys.iloc[np.flatnonzero(positions.isna().to_numpy())[:5]].tolist()
+        raise ValueError(f"metadata does not cover all panel keys; examples={missing}")
+    return np.asarray(matrix[positions.to_numpy(dtype=np.int64)]), {
+        "mode": "metadata_key",
+        "key": alignment_key,
+        "rows": len(panel),
+        "metadata_rows": len(metadata),
+        "metadata_row_index_offset": metadata_row_index_offset,
+    }
 
 
 def evaluate(y: pd.Series, probabilities: np.ndarray) -> dict[str, float]:
@@ -80,18 +139,40 @@ def fit_one(
     return final.predict_proba(x_test)[:, 1], params
 
 
+def reduce_windows(x_fit, x_val, x_all, x_test, args):
+    """Fit reducers separately for the fit and all-training windows."""
+    if args.reducer == "none":
+        return x_fit, x_val, x_all, x_test, None, None
+    fit_reduced = fit_reduce(
+        x_fit, x_val, method=args.reducer,
+        n_components=args.reducer_components, random_state=args.seed,
+    )
+    all_reduced = fit_reduce(
+        x_all, x_test, method=args.reducer,
+        n_components=args.reducer_components, random_state=args.seed,
+    )
+    return (
+        fit_reduced.train,
+        fit_reduced.predict,
+        all_reduced.train,
+        all_reduced.predict,
+        fit_reduced.reducer,
+        all_reduced.reducer,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("panel")
     parser.add_argument(
         "--train-target-column",
-        default="event_return_3d",
-        help="In-sample weak label used to fit sentiment (paper: 3-day event return).",
+        default="next_day_return",
+        help="One-day return target used to fit direction; event_return_3d is legacy-only.",
     )
     parser.add_argument(
         "--evaluation-target-column",
         default="next_day_return",
-        help="Return sign used for validation and out-of-sample accuracy (paper: next period).",
+        help="One-day return target used for validation and out-of-sample accuracy.",
     )
     parser.add_argument(
         "--target-column",
@@ -113,6 +194,11 @@ def main() -> None:
     parser.add_argument("--max-features", type=int, default=50000)
     parser.add_argument("--word2vec-size", type=int, default=100)
     parser.add_argument("--word2vec-epochs", type=int, default=10)
+    parser.add_argument(
+        "--reducer", choices=["none", "svd", "pca"], default="none",
+        help="Optional training-window-only dimensionality reduction; SVD for sparse text, PCA for dense embeddings.",
+    )
+    parser.add_argument("--reducer-components", type=int, default=128)
     parser.add_argument("--output", default="reports/classification/paper_rolling/results.json")
     args = parser.parse_args()
     if args.target_column:
@@ -171,6 +257,9 @@ def main() -> None:
                     test[args.text_column].tolist(),
                     args,
                 )
+            x_fit, x_val, x_all, x_test, fit_reducer, all_reducer = reduce_windows(
+                x_fit, x_val, x_all, x_test, args
+            )
             for classifier in classifiers:
                 probabilities, params = fit_one(
                     x_fit,
@@ -193,6 +282,18 @@ def main() -> None:
                         "classifier": classifier,
                         "train_target": args.train_target_column,
                         "evaluation_target": args.evaluation_target_column,
+                        "reducer": args.reducer,
+                        "reducer_components": args.reducer_components if args.reducer != "none" else None,
+                        "fit_explained_variance": (
+                            float(np.sum(fit_reducer.explained_variance_ratio_))
+                            if fit_reducer is not None and hasattr(fit_reducer, "explained_variance_ratio_")
+                            else None
+                        ),
+                        "all_train_explained_variance": (
+                            float(np.sum(all_reducer.explained_variance_ratio_))
+                            if all_reducer is not None and hasattr(all_reducer, "explained_variance_ratio_")
+                            else None
+                        ),
                         "best_params": params,
                         **metrics,
                         "n_test": int(

@@ -1,0 +1,20 @@
+{
+  "horizon": [],
+  "valuation": [
+    "next_pe_log_dev",
+    "next_pb_log_dev",
+    "next_ps_log_dev",
+    "next_evtoebitda_log_dev"
+  ],
+  "certainty": [],
+  "volatility": [
+    "volatility_jump_log_v2",
+    "next_intraday_rvol_log_change",
+    "next_intraday_rvol_close"
+  ],
+  "impact": [],
+  "liquidity": [
+    "next_intraday_spread_log_change",
+    "next_intraday_spread_bps_mean"
+  ]
+}

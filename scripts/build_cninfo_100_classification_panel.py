@@ -18,15 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-
-def clean_text(value: object) -> str:
-    text = "" if value is None else str(value)
-    text = text.replace("\ufeff", " ").replace("\u3000", " ")
-    text = re.sub(r"[ \t\r\f\v]+", " ", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    text = re.sub(r"第\s*\d+\s*页\s*(?:共\s*\d+\s*页)?", " ", text, flags=re.I)
-    text = re.sub(r"(?:www\.|https?://)\S+", " ", text)
-    return text.strip()
+from src.text.preprocess_zh import clean_text
 
 
 def parse_time(frame: pd.DataFrame) -> pd.Series:

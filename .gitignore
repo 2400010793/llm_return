@@ -5,8 +5,17 @@ __pycache__/
 .env
 /models/
 *.pdf
+/catboost_info/
+/notebooks/*.ipynb
+/task_records/*
+!/task_records/README.md
+/## GitHub Copilot Chat.md
+/plan.md
 logs/*
 data/raw/*
 data/interim/*
 data/processed/*
 reports/*
+/data/source_stock_lists/
+/data/stock_universe_cninfo_current_with_returns.csv
+/data/stock_universe_index_coverage.csv

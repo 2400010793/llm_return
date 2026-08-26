@@ -73,9 +73,8 @@ def _features(name: str, train_texts: list[str], test_texts: list[str], args: An
         vectorizer = make_hashing_bow(n_features=args.hashing_features)
         return vectorizer.transform(train_texts).tocsr(), vectorizer.transform(test_texts).tocsr()
     if name == "lexicon":
-        columns = ["positive_count", "negative_count", "lexicon_score"]
-        train = pd.DataFrame([lexicon_score(text) for text in train_texts], columns=columns).to_numpy(dtype=np.float32)
-        test = pd.DataFrame([lexicon_score(text) for text in test_texts], columns=columns).to_numpy(dtype=np.float32)
+        train = pd.DataFrame([lexicon_score(text) for text in train_texts]).select_dtypes(include="number").to_numpy(dtype=np.float32)
+        test = pd.DataFrame([lexicon_score(text) for text in test_texts]).select_dtypes(include="number").to_numpy(dtype=np.float32)
         return train, test
     if name == "word2vec":
         from src.text.semantic_embeddings import encode_word2vec
@@ -94,12 +93,26 @@ def _grid(model: str, enabled: bool, stage: str) -> dict[str, list[Any]] | None:
     if model in {"logistic", "logistic_regression"}:
         values = [0.1, 1.0, 10.0] if stage == "coarse" else [0.01, 0.1, 1.0, 10.0, 100.0]
         return {"C": values, "solver": ["liblinear"], "class_weight": ["balanced"]}
+    if model in {"linear_svm", "linear_svc", "svm"}:
+        values = [0.1, 1.0, 10.0] if stage == "coarse" else [0.01, 0.1, 1.0, 10.0, 100.0]
+        return {"C": values, "class_weight": ["balanced"]}
+    if model in {"nb_svm", "nbsvm"}:
+        c_values = [0.1, 1.0, 10.0] if stage == "coarse" else [0.01, 0.1, 1.0, 10.0, 100.0]
+        alpha_values = [1.0] if stage == "coarse" else [0.1, 1.0, 10.0]
+        return {"C": c_values, "alpha": alpha_values, "class_weight": ["balanced"]}
     if model in {"random_forest", "rf"}:
         return {"n_estimators": [200] if stage == "coarse" else [200, 500], "max_depth": [6, 12] if stage == "coarse" else [6, 12, 24, None], "min_samples_leaf": [1, 2] if stage == "coarse" else [1, 2, 5, 10], "max_features": ["sqrt"]}
     if model in {"mlp", "nn"}:
         if stage == "coarse":
             return {"hidden_layer_sizes": [(64,), (128, 32)], "alpha": [1e-3], "learning_rate_init": [3e-4, 1e-3], "batch_size": [128], "max_iter": [200, 400], "solver": ["adam"], "early_stopping": [False]}
         return {"hidden_layer_sizes": [(32,), (64,), (128,), (128, 32)], "alpha": [1e-4, 1e-3, 1e-2], "learning_rate_init": [1e-4, 3e-4, 1e-3, 3e-3], "batch_size": [64, 128, 256], "max_iter": [200, 400, 800], "solver": ["adam"], "early_stopping": [False]}
+    if model in {"knn", "k_nearest_neighbors", "k_neighbors"}:
+        neighbors = [5, 15, 31] if stage == "coarse" else [3, 5, 11, 15, 31, 51]
+        return {"n_neighbors": neighbors, "weights": ["distance", "uniform"], "metric": ["cosine"]}
+    if model in {"multinomial_nb", "multinomial_naive_bayes", "mnb", "complement_nb", "complement_naive_bayes", "cnb"}:
+        return {"alpha": [0.1, 1.0, 10.0]}
+    if model in {"sgd", "sgd_logistic", "sgd_hinge"}:
+        return {"loss": ["log_loss"], "alpha": [1e-6, 1e-5, 1e-4], "class_weight": ["balanced"]}
     raise ValueError(f"unsupported classifier: {model}")
 
 
@@ -129,7 +142,7 @@ def main() -> None:
     parser.add_argument("--word2vec-size", type=int, default=100)
     parser.add_argument("--word2vec-epochs", type=int, default=20)
     parser.add_argument("--transformer-batch-size", type=int, default=8)
-    parser.add_argument("--transformer-max-length", type=int, default=256)
+    parser.add_argument("--transformer-max-length", type=int, default=512)
     parser.add_argument("--output", default="reports/classification/results.json")
     parser.add_argument("--qwen-npy", default="", help="Precomputed Qwen/Ollama matrix, ordered like the sorted panel")
     parser.add_argument("--roberta-npy", default="", help="Precomputed Chinese RoBERTa matrix")

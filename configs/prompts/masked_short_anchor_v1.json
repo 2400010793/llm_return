@@ -1,0 +1,19 @@
+{
+  "format_version": "masked_short_anchor_v1",
+  "model": "roberta",
+  "variant": "masked_short",
+  "task_groups": {
+    "0": ["valuation"],
+    "1": ["certainty"],
+    "2": ["volatility"],
+    "3": ["impact"],
+    "4": ["liquidity"]
+  },
+  "prompts": {
+    "valuation": {"label": "估值主题 anchor", "prompt_id": "valuation_anchor", "target": "估值", "text": "分析股票估值"},
+    "certainty": {"label": "确定性主题 anchor", "prompt_id": "certainty_anchor", "target": "确定性", "text": "分析股票确定性"},
+    "volatility": {"label": "波动率主题 anchor", "prompt_id": "volatility_anchor", "target": "波动率", "text": "分析股票波动率"},
+    "impact": {"label": "冲击主题 anchor", "prompt_id": "impact_anchor", "target": "冲击", "text": "分析股票冲击"},
+    "liquidity": {"label": "流动性主题 anchor", "prompt_id": "liquidity_anchor", "target": "流动性", "text": "分析股票流动性"}
+  }
+}

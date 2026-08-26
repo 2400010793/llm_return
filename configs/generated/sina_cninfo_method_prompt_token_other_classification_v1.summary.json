@@ -1,0 +1,28 @@
+{
+  "tasks": 32,
+  "models": [
+    "roberta",
+    "bge_m3",
+    "ckip_bert",
+    "xlm_roberta_large"
+  ],
+  "variants": [
+    "short",
+    "masked_short",
+    "long",
+    "masked_long"
+  ],
+  "classifiers": [
+    "linear_svm",
+    "sgd"
+  ],
+  "feature": "prompt_tokens_flat",
+  "reducer": "pca",
+  "components": 128,
+  "train_target": "event_return_3d",
+  "evaluation_target": "next_day_return",
+  "protocol": "6y fit / 2y validation / 1y OOS; 2023-2026 test folds",
+  "embedding_root": "/mnt/lustre3/home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings",
+  "output_root": "/mnt/lustre3/home/gaozh/news_content_quality_20260812/cninfo_method_v1",
+  "manifest": "configs/generated/sina_cninfo_method_prompt_token_other_classification_v1.tsv"
+}

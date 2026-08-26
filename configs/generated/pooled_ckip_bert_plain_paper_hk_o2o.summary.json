@@ -1,0 +1,32 @@
+{
+  "phase": "paper_hk_o2o",
+  "tasks": 4,
+  "output": "configs/generated/pooled_ckip_bert_plain_paper_hk_o2o.tsv",
+  "embedding_root": "data/processed/pooled_paper_hk_embeddings_v1",
+  "output_root": "reports/classification/pooled_embeddings/paper_hk_o2o",
+  "target": "next_day_open_to_open_return",
+  "models": [
+    "ckip_bert"
+  ],
+  "variants": [
+    "plain"
+  ],
+  "features": [
+    "full_mean"
+  ],
+  "classifiers": [
+    "logistic",
+    "mlp"
+  ],
+  "reducers": [
+    {
+      "name": "none",
+      "components": 0
+    },
+    {
+      "name": "pca",
+      "components": 128
+    }
+  ],
+  "seed": 42
+}

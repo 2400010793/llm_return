@@ -1,0 +1,8 @@
+{
+  "classification_tasks": 104,
+  "regression_tasks": 40,
+  "classification_manifest": "configs/generated/sina_cninfo_method_classification_v1.tsv",
+  "regression_manifest": "configs/generated/sina_cninfo_method_regression_v1.tsv",
+  "classification_protocol": "6y fit / 2y validation / 1y OOS; 3d label train, next-day evaluation",
+  "regression_protocol": "6y fit / 2y validation / 1y OOS; next-day Ridge"
+}

@@ -1,0 +1,2 @@
+task_id	embedding_root	model	variant	feature	target	reducer	components	output
+0	data/processed/pooled_embeddings_v3	roberta	masked_short	title_body_full_concat	next_day_return	none	0	reports/regression/pooled_embeddings/stock_day/roberta_masked_short_title_body_full_concat_next_day_return_ridge_none_corrected_v2.json

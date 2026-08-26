@@ -1,0 +1,12 @@
+{
+  "phase": "aggregation",
+  "tasks": 8,
+  "output": "configs/generated/pooled_bge_m3_short_masked_short_aggregation.tsv",
+  "models": [
+    "bge_m3"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

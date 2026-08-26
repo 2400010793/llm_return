@@ -1,0 +1,36 @@
+{
+  "phase": "o2o_core",
+  "tasks": 96,
+  "output": "configs/generated/pooled_o2o_classification_seed42.tsv",
+  "target": "next_day_open_to_open_return",
+  "models": [
+    "roberta",
+    "bge_m3"
+  ],
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "features": [
+    "body_mean",
+    "full_mean",
+    "title_body_full_concat"
+  ],
+  "classifiers": [
+    "logistic",
+    "mlp",
+    "hist_gradient_boosting",
+    "extra_trees"
+  ],
+  "reducers": [
+    {
+      "name": "none",
+      "components": 0
+    },
+    {
+      "name": "pca",
+      "components": 128
+    }
+  ],
+  "seed": 42
+}

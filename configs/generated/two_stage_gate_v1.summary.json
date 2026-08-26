@@ -1,0 +1,26 @@
+{
+  "representation_tasks": 48,
+  "gpu_group_tasks": [
+    24,
+    24
+  ],
+  "predictor_tasks": 48,
+  "embedding_text_combinations": 4,
+  "gate_configurations": 6,
+  "windows": [
+    "tune2024",
+    "confirm2025"
+  ],
+  "downstream_reducers": [
+    "none",
+    "pca16",
+    "pca32_if_dimension_allows"
+  ],
+  "downstream_models": [
+    "ridge",
+    "huber_sgd",
+    "small_mlp"
+  ],
+  "selection_protocol": "select full config on 2024, exact-key confirmation on 2025",
+  "test_year_accessed": false
+}

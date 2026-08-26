@@ -1,0 +1,30 @@
+{
+  "model": "roberta",
+  "variants": [
+    "masked_short",
+    "masked_long"
+  ],
+  "feature": "title_body_full_concat",
+  "targets": [
+    "next_day_return"
+  ],
+  "regressors": [
+    "ridge",
+    "elasticnet_sgd",
+    "huber_sgd",
+    "small_mlp"
+  ],
+  "run_mode": "screen",
+  "reducers": [
+    [
+      "none",
+      0
+    ],
+    [
+      "pca",
+      128
+    ]
+  ],
+  "tasks": 16,
+  "output": "configs/generated/pooled_regression_screen_roberta_masked.tsv"
+}

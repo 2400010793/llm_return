@@ -1,0 +1,27 @@
+{
+  "model": "bge_m3",
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "feature": "full_mean",
+  "targets": [
+    "next_day_return"
+  ],
+  "regressors": [
+    "ridge"
+  ],
+  "run_mode": "final-test",
+  "reducers": [
+    [
+      "none",
+      0
+    ],
+    [
+      "pca",
+      128
+    ]
+  ],
+  "tasks": 4,
+  "output": "configs/generated/sina_author_return_bge.tsv"
+}

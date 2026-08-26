@@ -1,0 +1,13 @@
+{
+  "phase": "next1_core",
+  "tasks": 24,
+  "output": "configs/generated/pooled_next1_core_seed42.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

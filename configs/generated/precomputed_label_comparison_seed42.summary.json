@@ -1,0 +1,22 @@
+{
+  "phase": "label_comparison",
+  "tasks": 40,
+  "models": [
+    "bge_m3",
+    "chinese_roberta"
+  ],
+  "inputs": [
+    "text_plain",
+    "text_input_2_short",
+    "text_input_3_long",
+    "text_input_5_masked_short",
+    "text_input_6_masked_long"
+  ],
+  "seed": 42,
+  "target_modes": [
+    "event3_to_next1",
+    "next1_to_next1"
+  ],
+  "output": "configs/generated/precomputed_label_comparison_seed42.tsv",
+  "generates_embeddings": false
+}

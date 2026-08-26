@@ -1,0 +1,13 @@
+{
+  "phase": "linear",
+  "tasks": 36,
+  "output": "configs/generated/pooled_linear_short_variants.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

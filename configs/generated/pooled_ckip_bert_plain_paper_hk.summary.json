@@ -1,0 +1,11 @@
+{
+  "phase": "paper_hk",
+  "tasks": 4,
+  "output": "configs/generated/pooled_ckip_bert_plain_paper_hk.tsv",
+  "models": [
+    "ckip_bert"
+  ],
+  "variants": [
+    "plain"
+  ]
+}

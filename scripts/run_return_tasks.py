@@ -11,7 +11,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.models.return_tasks import fit_return_model, fit_sentiment_model, sentiment_metrics
-from src.models.paper_pipeline import portfolio_metrics, quantile_portfolio
+from src.portfolio import portfolio_metrics, quantile_portfolio
 
 
 def main() -> None:

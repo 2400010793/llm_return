@@ -1,0 +1,4 @@
+task_id	phase	embedding_root	model	variant	feature	classifier	reducer	components	output	train_target	evaluation_target
+0	lstm	data/processed/pooled_embeddings_v3	roberta	short	body_mean	lstm	none	0	reports/classification/pooled_embeddings/lstm/roberta_short_body_mean_lstm_none_0.json	next_day_return	next_day_return
+1	lstm	data/processed/pooled_embeddings_v3	roberta	short	full_mean	lstm	none	0	reports/classification/pooled_embeddings/lstm/roberta_short_full_mean_lstm_none_0.json	next_day_return	next_day_return
+2	lstm	data/processed/pooled_embeddings_v3	roberta	short	title_body_full_concat	lstm	none	0	reports/classification/pooled_embeddings/lstm/roberta_short_title_body_full_concat_lstm_none_0.json	next_day_return	next_day_return

@@ -1,0 +1,6 @@
+file	sha256	pages	title	authors	year	role
+ExpectedReturns_LLMs.pdf	843df34c84b92addbdc02e62535329d098b89de54a5480412b7fa9a1b65eef42	62	Expected Returns and Large Language Models	Yifei Chen; Bryan Kelly; Dacheng Xiu	2024	Primary rolling-LLM return-prediction design
+Phd_thesis_Zhijiao_Yang_20219273_.pdf	9fc94b22176729d1148741413ec50f38c6eb4997faa6285faea4ebcab6dc9b51	141	Investor Sentiment in the Chinese Stock Market	Zhijiao Yang	2023	China-market sentiment, cross-sectional tests, constraints, and Baidu Index
+Deep_learning_textual_sentiment_and_financial_mark (1).pdf	049a99ce67f268ba664aa6fcc73907b251dd444884a67bfdec3b05e30fdcb328	26	Deep learning, textual sentiment, and financial market	Fuwei Jiang; Yumin Liu; Lingchao Meng; Huajing Zhang	2024	BERT sentiment trained with return labels and Chinese market validation
+2205.04743v1.pdf	c5fb9c51e59a9412f9ddc0172d03316055168ded3a86f3ebe1803cf9e6f27aeb	17	Deep learning based Chinese text sentiment mining and stock market correlation research	Zhang Chenrui	2022	Chinese BERT sentiment and MIC exploratory reference
+134c5fadcdf98503b93ac0ef93b4f0a41b8d.pdf	6bbb3c948a8bb0862d8b6bff910d00eab0bdecda4ee16cb9a21eaba147914730	43	Topic Modeling in Finance: A Review of Methods, Applications, and Challenges	Xinyu Wang	2026	Topic-model and clustering literature map

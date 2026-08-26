@@ -1,0 +1,30 @@
+{
+  "models": [
+    "roberta"
+  ],
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "features": [
+    "body_mean",
+    "full_mean"
+  ],
+  "regressors": [
+    "ridge",
+    "huber_sgd",
+    "small_mlp"
+  ],
+  "reducers": [
+    [
+      "none",
+      0
+    ]
+  ],
+  "target": "simple_states_ret_vv_return",
+  "expected_rows": 903665,
+  "run_mode": "final-test",
+  "tasks": 12,
+  "output": "configs/generated/simple_states_aligned_regression_v1.tsv",
+  "output_root": "reports/regression/pooled_embeddings/simple_states_aligned_v1"
+}

@@ -1,0 +1,38 @@
+{
+  "tasks": 192,
+  "models": [
+    "roberta",
+    "bge_m3",
+    "ckip_bert",
+    "xlm_roberta_large"
+  ],
+  "variants": [
+    "short",
+    "masked_short",
+    "long",
+    "masked_long"
+  ],
+  "feature": "prompt_tokens_flat",
+  "reducer": "dynamic_token_gate",
+  "classifiers": [
+    "logistic",
+    "linear_svm",
+    "sgd",
+    "mlp",
+    "simple_mlp",
+    "random_forest",
+    "extra_trees",
+    "hist_gradient_boosting",
+    "xgboost",
+    "lightgbm",
+    "catboost",
+    "knn"
+  ],
+  "train_target": "event_return_3d",
+  "evaluation_target": "next_day_return",
+  "protocol": "6y fit / 2y validation / 1y OOS; 2023-2026 test folds",
+  "generates_embeddings": false,
+  "embedding_root": "/mnt/lustre3/home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings",
+  "output_root": "/mnt/lustre3/home/gaozh/news_content_quality_20260812/cninfo_method_v1",
+  "manifest": "/mnt/lustre3/home/gaozh/llm_return/configs/generated/sina_cninfo_method_dynamic_classifier_v1.tsv"
+}

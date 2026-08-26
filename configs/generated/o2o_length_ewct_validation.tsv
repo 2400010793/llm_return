@@ -1,0 +1,2 @@
+task_id	model_id	validation_predictions	confirmation_predictions	quantiles	validation_output_dir
+0	length_winsor_huber_pca256	reports/regression/pooled_embeddings/o2o_paper_filters/length_winsor_huber_pca256_screen.artifacts/screen/validation_stock_day_predictions.parquet	unused	5	reports/strategy/o2o_paper_filters_validation/length_q5

@@ -46,9 +46,18 @@ def ollama_embed(
     model: str = "nomic-embed-text",
     base_url: str = "http://127.0.0.1:11434",
     timeout: float = 120.0,
+    max_tokens: int | None = None,
 ) -> list[list[float]]:
     """Create local Ollama embeddings without calling a hidden remote API."""
-    payload = json.dumps({"model": model, "input": texts}).encode("utf-8")
+    body: dict[str, Any] = {"model": model, "input": texts}
+    if max_tokens is not None:
+        if max_tokens < 1:
+            raise ValueError("max_tokens must be positive")
+        # Ollama applies num_ctx to each embedding input and, with truncate
+        # enabled, retains at most this many model tokens per document.
+        body["truncate"] = True
+        body["options"] = {"num_ctx": max_tokens}
+    payload = json.dumps(body).encode("utf-8")
     request = urllib.request.Request(
         f"{base_url.rstrip('/')}/api/embed",
         data=payload,

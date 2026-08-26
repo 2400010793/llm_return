@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.models.paper_pipeline import portfolio_metrics, quantile_portfolio
+from src.portfolio import portfolio_metrics, quantile_portfolio
 
 
 def test_quantile_portfolio() -> None:

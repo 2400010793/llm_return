@@ -1,0 +1,28 @@
+{
+  "source": "configs/generated/finbert2_pooling_regression.tsv",
+  "sources": [
+    "configs/generated/finbert2_pooling_regression.tsv",
+    "configs/generated/finbert2_paper_regression.tsv"
+  ],
+  "output": "configs/generated/simple_states_finbert2_all_v1.tsv",
+  "output_root": "reports/simple_states/finbert2_all_v1",
+  "only_existing": true,
+  "tasks": 15,
+  "source_task_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    0
+  ]
+}

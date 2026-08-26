@@ -1,6 +1,7 @@
 import numpy as np
 
-from src.models.representation_models import classification_metrics, fit_return_regressor, fit_sentiment_classifier
+from src.models.representation_models import _classifier, classification_metrics, fit_return_regressor, fit_sentiment_classifier
+from src.models.dimension_reduction import fit_reduce
 from src.evaluation.classification import evaluate_binary_classification, summarize_classification_stability
 from src.evaluation.mcs import classification_loss_matrix, model_confidence_set
 
@@ -20,6 +21,53 @@ def test_logistic_sentiment_classifier_uses_three_day_labels() -> None:
     assert result.probabilities.shape == (2,)
     assert result.metrics["n"] == 2.0
     assert classification_metrics([0.1, -0.1], result.probabilities)["accuracy"] >= 0.5
+
+
+def test_linear_svm_and_nb_svm_classifiers_return_probabilities() -> None:
+    x = np.array([
+        [2.0, 0.0], [0.0, 2.0], [1.5, 0.0], [0.0, 1.5],
+        [1.2, 0.0], [0.0, 1.2],
+    ])
+    returns = [0.1, -0.1, 0.2, -0.2, 0.1, -0.1]
+    for name in ["linear_svm", "nb_svm"]:
+        params = {"C": [1.0]}
+        if name == "nb_svm":
+            params["alpha"] = [1.0]
+        result = fit_sentiment_classifier(
+            x, returns, x[:2], returns[:2], model_name=name, param_grid=params,
+        )
+        assert result.probabilities.shape == (2,)
+        assert np.all((result.probabilities >= 0.0) & (result.probabilities <= 1.0))
+
+
+def test_extra_trees_classifier_returns_probabilities() -> None:
+    x = np.array([
+        [2.0, 0.0], [0.0, 2.0], [1.5, 0.0], [0.0, 1.5],
+        [1.2, 0.0], [0.0, 1.2], [1.0, 0.0], [0.0, 1.0],
+    ])
+    labels = np.array([1, 0, 1, 0, 1, 0, 1, 0])
+    model = _classifier(
+        "extra_trees", 7, n_estimators=20, max_depth=3,
+        min_samples_leaf=1,
+    )
+    model.fit(x, labels)
+    probabilities = model.predict_proba(x)[:, 1]
+    assert probabilities.shape == (8,)
+    assert np.all((probabilities >= 0.0) & (probabilities <= 1.0))
+
+
+def test_sparse_text_uses_svd_before_knn() -> None:
+    from scipy import sparse
+
+    x_train = sparse.csr_matrix([[2.0, 0.0, 1.0], [0.0, 2.0, 0.0], [1.0, 0.0, 2.0], [0.0, 1.0, 0.0]])
+    reduced = fit_reduce(x_train, x_train[:2], n_components=2, method="svd")
+    result = fit_sentiment_classifier(
+        reduced.train, [0.1, -0.1, 0.2, -0.2], reduced.predict, [0.1, -0.1],
+        model_name="knn", model_params={"n_neighbors": 3, "metric": "euclidean"},
+    )
+    assert reduced.train.shape == (4, 2)
+    assert result.probabilities.shape == (2,)
+    assert np.all((result.probabilities >= 0.0) & (result.probabilities <= 1.0))
 
 
 def test_classification_seed_and_chronological_tuning_are_recorded() -> None:

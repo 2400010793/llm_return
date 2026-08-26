@@ -1,0 +1,8 @@
+-r requirements-baseline.txt
+-r requirements-transformers.txt
+-r requirements-boosting.txt
+
+# PCA and clustering diagnostics used by the active three-model workflow.
+umap-learn>=0.5.12
+hdbscan>=0.8.42
+pypdf>=5.0

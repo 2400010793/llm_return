@@ -1,0 +1,15 @@
+{
+  "phase": "complex_pooling_pca",
+  "tasks": 21,
+  "output": "configs/generated/pooled_complex_pooling_pca_seed42.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "long",
+    "masked_long",
+    "masked_short",
+    "short"
+  ]
+}

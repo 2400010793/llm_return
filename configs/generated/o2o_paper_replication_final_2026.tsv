@@ -1,0 +1,5 @@
+task_id	embedding_root	model	variant	feature	target	regressor	run_mode	reducer	components	output
+0	data/processed/pooled_embeddings_v3	roberta	short	full_mean	next_day_open_to_open_return	ridge	final-test	none	0	reports/regression/pooled_embeddings/o2o_paper_replication_2026/roberta_short_full_mean_ridge.json
+1	data/processed/pooled_embeddings_v3	roberta	masked_short	full_mean	next_day_open_to_open_return	ridge	final-test	none	0	reports/regression/pooled_embeddings/o2o_paper_replication_2026/roberta_masked_short_full_mean_ridge.json
+2	data/processed/pooled_embeddings_v3	bge_m3	short	full_mean	next_day_open_to_open_return	ridge	final-test	none	0	reports/regression/pooled_embeddings/o2o_paper_replication_2026/bge_m3_short_full_mean_ridge.json
+3	data/processed/pooled_embeddings_v3	bge_m3	masked_short	full_mean	next_day_open_to_open_return	ridge	final-test	none	0	reports/regression/pooled_embeddings/o2o_paper_replication_2026/bge_m3_masked_short_full_mean_ridge.json

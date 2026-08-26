@@ -1,0 +1,12 @@
+{
+  "phase": "triple_models",
+  "tasks": 12,
+  "output": "configs/generated/pooled_roberta_short_masked_short_triple_models.tsv",
+  "models": [
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

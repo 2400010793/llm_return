@@ -1,0 +1,24 @@
+{
+  "tasks": 8,
+  "models": [
+    "roberta",
+    "bge_m3"
+  ],
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "feature": "title_body_full_concat",
+  "gate_methods": [
+    "variance",
+    "logistic_l1"
+  ],
+  "keep_groups": [
+    2
+  ],
+  "classifiers": [
+    "simple_mlp"
+  ],
+  "generates_embeddings": false,
+  "output": "configs/generated/pooled_next1_gating_seed42.tsv"
+}

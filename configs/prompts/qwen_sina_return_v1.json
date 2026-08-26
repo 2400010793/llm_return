@@ -1,0 +1,13 @@
+{
+  "format_version": "qwen_sina_causal_readout_v1",
+  "prompts": {
+    "short": {
+      "text": "分析股票收益。",
+      "semantic_phrases": [
+        ["analysis", "分析"],
+        ["target_stock", "股票"],
+        ["return", "收益"]
+      ]
+    }
+  }
+}

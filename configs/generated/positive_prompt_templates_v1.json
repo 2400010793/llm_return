@@ -1,0 +1,12 @@
+{
+  "version": "positive_prompt_templates_v1",
+  "prompts": {
+    "profit": "分析股票盈利",
+    "excess_return": "分析股票超额收益",
+    "return": "分析股票收益",
+    "loss": "分析股票亏损"
+  },
+  "baseline": "分析股票未来收益",
+  "variants": ["short", "masked_short"],
+  "models": ["roberta", "bge_m3"]
+}

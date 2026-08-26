@@ -7,6 +7,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from scipy.stats import binomtest
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
@@ -21,8 +22,9 @@ from sklearn.metrics import (
 )
 
 
-PRIMARY_METRIC = "auc"
+PRIMARY_METRIC = "accuracy"
 SECONDARY_METRICS = (
+    "auc",
     "balanced_accuracy",
     "f1",
     "accuracy",
@@ -106,3 +108,106 @@ def summarize_classification_stability(
             record[f"{metric}_max"] = float(values.max())
         output.append(record)
     return output
+
+
+def holm_adjust(p_values: Iterable[float]) -> list[float]:
+    """Return Holm step-down adjusted p-values in the original order."""
+    values = np.asarray(list(p_values), dtype=float)
+    if values.ndim != 1 or not np.isfinite(values).all():
+        raise ValueError("Holm adjustment requires finite one-dimensional p-values")
+    if ((values < 0) | (values > 1)).any():
+        raise ValueError("p-values must lie in [0, 1]")
+    order = np.argsort(values, kind="stable")
+    adjusted = np.empty(len(values), dtype=float)
+    running = 0.0
+    for rank, position in enumerate(order):
+        candidate = min(1.0, (len(values) - rank) * values[position])
+        running = max(running, candidate)
+        adjusted[position] = running
+    return adjusted.tolist()
+
+
+def paired_classification_comparison(
+    actual_returns: Iterable[float],
+    probabilities_a: Iterable[float],
+    probabilities_b: Iterable[float],
+    clusters: Iterable[Any],
+    *,
+    threshold: float = 0.5,
+    n_bootstrap: int = 2_000,
+    seed: int = 42,
+    metrics: tuple[str, ...] = ("accuracy", "auc", "balanced_accuracy", "mcc"),
+) -> dict[str, Any]:
+    """Compare B minus A using a paired cluster bootstrap and exact McNemar.
+
+    Clusters are sampled with replacement, preserving every announcement in a
+    sampled trading date. All arrays are filtered by one common finite mask so
+    the comparison can never silently use different test universes.
+    """
+    returns = np.asarray(list(actual_returns), dtype=float)
+    probs_a = np.asarray(list(probabilities_a), dtype=float)
+    probs_b = np.asarray(list(probabilities_b), dtype=float)
+    cluster_values = np.asarray(list(clusters), dtype=object)
+    if not (returns.shape == probs_a.shape == probs_b.shape == cluster_values.shape):
+        raise ValueError("paired comparison inputs must have equal shapes")
+    if n_bootstrap < 1:
+        raise ValueError("n_bootstrap must be positive")
+    mask = np.isfinite(returns) & np.isfinite(probs_a) & np.isfinite(probs_b)
+    mask &= pd.notna(cluster_values)
+    if not mask.any():
+        raise ValueError("no common finite paired observations")
+    returns, probs_a, probs_b = returns[mask], probs_a[mask], probs_b[mask]
+    cluster_values = cluster_values[mask]
+    unique_clusters, cluster_codes = np.unique(cluster_values.astype(str), return_inverse=True)
+    cluster_indices = [np.flatnonzero(cluster_codes == code) for code in range(len(unique_clusters))]
+
+    metrics_a = evaluate_binary_classification(returns, probs_a, threshold=threshold)
+    metrics_b = evaluate_binary_classification(returns, probs_b, threshold=threshold)
+    unknown = set(metrics).difference(metrics_a)
+    if unknown:
+        raise ValueError(f"unknown comparison metrics: {sorted(unknown)}")
+    point = {metric: metrics_b[metric] - metrics_a[metric] for metric in metrics}
+
+    rng = np.random.default_rng(seed)
+    draws = {metric: np.empty(n_bootstrap, dtype=float) for metric in metrics}
+    for bootstrap_index in range(n_bootstrap):
+        sampled_codes = rng.integers(0, len(unique_clusters), size=len(unique_clusters))
+        indices = np.concatenate([cluster_indices[code] for code in sampled_codes])
+        sample_a = evaluate_binary_classification(
+            returns[indices], probs_a[indices], threshold=threshold
+        )
+        sample_b = evaluate_binary_classification(
+            returns[indices], probs_b[indices], threshold=threshold
+        )
+        for metric in metrics:
+            draws[metric][bootstrap_index] = sample_b[metric] - sample_a[metric]
+
+    actual = returns > 0
+    correct_a = (probs_a > threshold) == actual
+    correct_b = (probs_b > threshold) == actual
+    a_only = int(np.sum(correct_a & ~correct_b))
+    b_only = int(np.sum(~correct_a & correct_b))
+    discordant = a_only + b_only
+    mcnemar_p = float(binomtest(min(a_only, b_only), discordant, 0.5).pvalue) if discordant else 1.0
+    return {
+        "direction": "b_minus_a",
+        "n": int(len(returns)),
+        "n_clusters": int(len(unique_clusters)),
+        "threshold": threshold,
+        "n_bootstrap": n_bootstrap,
+        "seed": seed,
+        "delta": point,
+        "clustered_95_ci": {
+            metric: [
+                float(np.quantile(values, 0.025)),
+                float(np.quantile(values, 0.975)),
+            ]
+            for metric, values in draws.items()
+        },
+        "mcnemar_accuracy": {
+            "a_correct_b_wrong": a_only,
+            "a_wrong_b_correct": b_only,
+            "discordant": discordant,
+            "exact_p_value": mcnemar_p,
+        },
+    }

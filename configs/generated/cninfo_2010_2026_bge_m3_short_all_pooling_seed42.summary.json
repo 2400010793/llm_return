@@ -1,0 +1,12 @@
+{
+  "phase": "all_pooling",
+  "tasks": 182,
+  "output": "configs/generated/cninfo_2010_2026_bge_m3_short_all_pooling_seed42.tsv",
+  "models": [
+    "bge_m3"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

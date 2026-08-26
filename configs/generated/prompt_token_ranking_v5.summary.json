@@ -1,0 +1,22 @@
+{
+  "tasks": 16,
+  "models": [
+    "roberta",
+    "bge_m3"
+  ],
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "targets": [
+    "next_day_return",
+    "event_return_3d"
+  ],
+  "methods": [
+    "fisher",
+    "variance"
+  ],
+  "keep_tokens": 8,
+  "generates_embeddings": false,
+  "output": "configs/generated/prompt_token_ranking_v5.tsv"
+}

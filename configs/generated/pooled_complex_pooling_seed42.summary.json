@@ -1,0 +1,15 @@
+{
+  "phase": "complex_pooling",
+  "tasks": 21,
+  "output": "configs/generated/pooled_complex_pooling_seed42.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "long",
+    "masked_long",
+    "masked_short",
+    "short"
+  ]
+}

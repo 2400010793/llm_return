@@ -1,0 +1,13 @@
+task_id	model	prompt_length	semantic_name	variant	target
+0	roberta	short	future_span	short	next_day_return
+1	roberta	short	future_span	masked_short	next_day_return
+2	roberta	short	stock_span	short	next_day_return
+3	roberta	short	stock_span	masked_short	next_day_return
+4	roberta	short	return_span	short	next_day_return
+5	roberta	short	return_span	masked_short	next_day_return
+6	bge_m3	short	future_span	short	next_day_return
+7	bge_m3	short	future_span	masked_short	next_day_return
+8	bge_m3	short	stock_span	short	next_day_return
+9	bge_m3	short	stock_span	masked_short	next_day_return
+10	bge_m3	short	return_span	short	next_day_return
+11	bge_m3	short	return_span	masked_short	next_day_return

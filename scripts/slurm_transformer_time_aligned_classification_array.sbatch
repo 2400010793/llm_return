@@ -28,7 +28,7 @@ output="reports/classification/transformers_time_aligned/${model}_${classifier}_
 
 extra_flag="--${model}-npy"
 if [[ "${model}" == "bge_m3" ]]; then
-  extra_flag="--bge_m3-npy"
+  extra_flag="--bge-m3-npy"
 fi
 /usr/bin/python3 scripts/run_paper_rolling_classification.py \
   data/processed/cninfo_100_classification_panel_time_aligned.parquet \

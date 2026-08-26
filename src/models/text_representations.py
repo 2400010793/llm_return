@@ -30,7 +30,7 @@ def _numeric_features(texts: list[str], kind: str) -> np.ndarray:
     rows = []
     for text in texts:
         values = lexicon_score(text) if kind == "lexicon" else lmmd_features(text)
-        rows.append([float(v) for v in values.values()])
+        rows.append([float(v) for v in values.values() if isinstance(v, (int, float))])
     return np.asarray(rows, dtype=np.float32)
 
 

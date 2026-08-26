@@ -1,0 +1,13 @@
+{
+  "phase": "aggregation",
+  "tasks": 16,
+  "output": "configs/generated/cninfo_2010_2026_classification/aggregation.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "horizon": ["horizon_short", "horizon_medium", "horizon_long"],
+  "valuation": ["valuation_low", "valuation_medium", "valuation_high"],
+  "certainty": ["certainty_low", "certainty_medium", "certainty_high"],
+  "volatility": ["volatility_low", "volatility_medium", "volatility_high"],
+  "impact": ["impact_low", "impact_medium", "impact_high"],
+  "liquidity": ["liquidity_low", "liquidity_medium", "liquidity_high"]
+}

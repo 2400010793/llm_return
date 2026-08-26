@@ -1,0 +1,25 @@
+{
+  "pooled_tasks": 120,
+  "dynamic_tasks": 64,
+  "dynamic_group_tasks": [
+    32,
+    32
+  ],
+  "models": [
+    "ridge",
+    "huber_sgd",
+    "small_mlp",
+    "uniform",
+    "static",
+    "dynamic"
+  ],
+  "embedding_models": [
+    "roberta",
+    "bge_m3"
+  ],
+  "text_processing": [
+    "short",
+    "masked_short"
+  ],
+  "test_year_accessed": false
+}

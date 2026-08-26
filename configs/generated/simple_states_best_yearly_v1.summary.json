@@ -1,0 +1,18 @@
+{
+  "predictions": "reports/regression/pooled_embeddings/o2o_rolling_2010_2026_hfq/roberta_short_full_mean_small_mlp_none_0.stock_day_predictions.parquet",
+  "factor_id": "roberta_short_full_mean_small_mlp_none_0",
+  "years": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "tasks": 9,
+  "output": "configs/generated/simple_states_best_yearly_v1.tsv",
+  "output_root": "reports/simple_states/roberta_short_full_mean_small_mlp_none_0_yearly_v1"
+}

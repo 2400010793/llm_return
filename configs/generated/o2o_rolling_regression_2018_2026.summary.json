@@ -1,0 +1,36 @@
+{
+  "models": [
+    "roberta",
+    "bge_m3"
+  ],
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "features": [
+    "body_mean",
+    "full_mean",
+    "title_body_full_concat"
+  ],
+  "regressors": [
+    "ridge",
+    "huber_sgd",
+    "small_mlp"
+  ],
+  "reducers": [
+    [
+      "none",
+      0
+    ],
+    [
+      "pca",
+      128
+    ]
+  ],
+  "target": "next_day_open_to_open_return",
+  "expected_rows": 350577,
+  "run_mode": "final-test",
+  "tasks": 72,
+  "output": "configs/generated/o2o_rolling_regression_2018_2026.tsv",
+  "output_root": "reports/regression/pooled_embeddings/o2o_rolling_2018_2026"
+}

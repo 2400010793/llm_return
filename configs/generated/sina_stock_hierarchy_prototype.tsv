@@ -1,0 +1,5 @@
+task_id	model	prompt_length	semantic_name	variant	target	cluster_method	predictor
+0	roberta	short	stock_span	short	next_day_return	agglomerative	ridge
+1	roberta	short	stock_span	masked_short	next_day_return	agglomerative	ridge
+2	bge_m3	short	stock_span	short	next_day_return	agglomerative	ridge
+3	bge_m3	short	stock_span	masked_short	next_day_return	agglomerative	ridge

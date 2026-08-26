@@ -13,6 +13,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import os
 import re
 from io import BytesIO
 from datetime import datetime, timezone
@@ -33,6 +34,39 @@ FOCUS_TITLE_PATTERN = re.compile(
 
 class AccessControlError(RuntimeError):
     pass
+
+
+def build_output_payload(
+    args: argparse.Namespace, records: list[dict], collected_at: str,
+) -> dict:
+    has_collection_error = any(
+        isinstance(record, dict)
+        and record.get("content_type") == "collection_error"
+        for record in records
+    )
+    return {
+        "status": "partial" if has_collection_error else "complete",
+        "query": {
+            "start_date": args.start_date,
+            "end_date": args.end_date,
+            "index_only": bool(args.index_only),
+            "focus_only": bool(args.focus_only),
+        },
+        "collected_at": collected_at,
+        "records": records,
+    }
+
+
+def write_json_atomic(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_text(
+            json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8"
+        )
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def stable_key(value: str) -> str:
@@ -64,6 +98,7 @@ async def ensure_allowed(page: Page) -> None:
 
 async def set_date_input(page: Page, placeholder: str, value: str) -> None:
     field = page.locator(f'input[placeholder="{placeholder}"]').first
+    await field.wait_for(state="visible", timeout=15000)
     await field.click(force=True)
     await field.press("Control+A")
     await field.type(value, delay=80)
@@ -75,9 +110,34 @@ async def apply_filter(page: Page, start_date: str, end_date: str) -> None:
     await set_date_input(page, "开始日期", start_date)
     await set_date_input(page, "结束日期", end_date)
     await page.keyboard.press("Escape")
-    await page.get_by_role("button", name="查询", exact=True).click(force=True)
+    query_button = page.get_by_role("button", name="查询", exact=True)
+    await query_button.wait_for(state="visible", timeout=15000)
+    await query_button.click(force=True)
     await page.wait_for_timeout(3000)
     await ensure_allowed(page)
+
+
+async def open_stock_page(page: Page, url: str) -> None:
+    """Open a visible stock page with recovery for slow CNINFO navigation.
+
+    The site can leave the initial document load pending while the Vue page is
+    already usable.  The date-range control is the readiness signal, not the
+    ``domcontentloaded`` event.
+    """
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            await page.goto(url, wait_until="commit", timeout=15000)
+        except PlaywrightTimeoutError as error:
+            last_error = error
+        try:
+            await page.wait_for_selector('input[placeholder="开始日期"]', state="visible", timeout=20000)
+            return
+        except PlaywrightTimeoutError as error:
+            last_error = error
+            await page.goto("about:blank", wait_until="commit", timeout=10000)
+            await asyncio.sleep(2.0 * (attempt + 1))
+    raise PlaywrightTimeoutError(f"CNINFO stock page did not expose date controls after 3 attempts: {url}; {last_error}")
 
 
 async def resolve_stock_by_visible_field(page: Page, stock: dict[str, str]) -> str:
@@ -167,7 +227,8 @@ async def read_detail(
 ) -> dict:
     await asyncio.sleep(pause)
     url = item["url"] if item["url"].startswith("http") else f"https://www.cninfo.com.cn{item['url']}"
-    await page.goto(url, wait_until="domcontentloaded")
+    await page.goto(url, wait_until="commit", timeout=15000)
+    await page.wait_for_selector("body", state="attached", timeout=15000)
     await page.wait_for_timeout(300)
     await ensure_allowed(page)
     body = (await page.locator("body").inner_text()).strip()
@@ -218,8 +279,8 @@ async def collect_stock(page: Page, request: APIRequestContext, stock: dict[str,
         url = await resolve_stock_by_visible_field(page, stock)
     else:
         url = f"https://www.cninfo.com.cn/new/disclosure/stock?stockCode={stock['stock_id']}&orgId={stock['org_id']}#latestAnnouncement"
-        await page.goto(url, wait_until="domcontentloaded")
-    await page.wait_for_timeout(3000)
+        await open_stock_page(page, url)
+    await page.wait_for_timeout(1500)
     await ensure_allowed(page)
     await apply_filter(page, args.start_date, args.end_date)
     items = await all_visible_rows(page, args.max_pages, args.page_pause_seconds)
@@ -227,8 +288,24 @@ async def collect_stock(page: Page, request: APIRequestContext, stock: dict[str,
         items = [item for item in items if FOCUS_TITLE_PATTERN.search(item["title"])]
     existing_urls = getattr(args, "existing_urls", set())
     items = [item for item in items if canonical_detail_url(item["url"]) not in existing_urls]
-    remaining = max(0, args.limit - len(getattr(args, "existing_records", [])))
-    items = items[:remaining]
+    if args.limit:
+        remaining = max(0, args.limit - len(getattr(args, "existing_records", [])))
+        items = items[:remaining]
+    if args.index_only:
+        collected_at = datetime.now(timezone.utc).isoformat()
+        return [
+            {
+                "source": "cninfo",
+                "content_type": "announcement_index",
+                "stock_relation": "direct",
+                **stock,
+                **item,
+                "url": item["url"] if item["url"].startswith("http") else f"https://www.cninfo.com.cn{item['url']}",
+                "published_at": f"{item['announcement_date']}T00:00:00+08:00",
+                "collected_at": collected_at,
+            }
+            for item in items
+        ]
     records: list[dict] = []
     for item in items:
         try:
@@ -285,11 +362,17 @@ async def main(args: argparse.Namespace) -> None:
         if key not in keys:
             keys.add(key)
             unique.append(record)
-    output.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps({"collected_at": collected_at, "records": unique}, ensure_ascii=False, indent=2), encoding="utf-8")
-    manifest_path.write_text(json.dumps({"keys": sorted(keys)}, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"output": str(output), "records": len(unique), "manifest": str(manifest_path)}, ensure_ascii=False))
+    # Escape non-ASCII characters in JSON on disk/stdout.  Some CNINFO pages
+    # contain lone UTF-16 surrogates; ensure_ascii=False would make UTF-8
+    # serialization fail and abort an otherwise valid stock collection.
+    payload = build_output_payload(args, unique, collected_at)
+    write_json_atomic(output, payload)
+    manifest_path.write_text(json.dumps({"keys": sorted(keys)}, ensure_ascii=True, indent=2), encoding="utf-8")
+    print(json.dumps({
+        "status": payload["status"], "output": str(output),
+        "records": len(unique), "manifest": str(manifest_path),
+    }, ensure_ascii=True))
 
 
 if __name__ == "__main__":
@@ -297,7 +380,8 @@ if __name__ == "__main__":
     parser.add_argument("--stock", action="append", required=True, help="CODE:ORG_ID:NAME; repeat for multiple stocks")
     parser.add_argument("--start-date", required=True, help="YYYY-MM-DD")
     parser.add_argument("--end-date", required=True, help="YYYY-MM-DD, exclusive")
-    parser.add_argument("--limit", type=int, default=2000, help="maximum detail pages per stock; list pagination is still fully enumerated")
+    parser.add_argument("--limit", type=int, default=0, help="maximum detail pages per stock; 0 means unlimited")
+    parser.add_argument("--index-only", action="store_true", help="collect visible announcement indexes without opening detail pages or downloading PDFs")
     parser.add_argument("--focus-only", action="store_true", help="download only research-priority announcement titles")
     parser.add_argument("--resolve-stock", action="store_true", help="resolve stock code through CNINFO's visible company field before filtering announcements")
     parser.add_argument("--pause-seconds", type=float, default=DEFAULT_PAUSE)
@@ -309,8 +393,8 @@ if __name__ == "__main__":
     parser.add_argument("--raw-dir", default="data/raw/cninfo", help="保存页面可见 PDF 的原始文件")
     parser.add_argument("--headed", action="store_true")
     parsed = parser.parse_args()
-    if not 1 <= parsed.limit <= 2000:
-        parser.error("--limit must be between 1 and 2000")
+    if parsed.limit < 0:
+        parser.error("--limit must be non-negative; 0 means unlimited")
     if parsed.page_pause_seconds < 0.1 or parsed.max_pages < 0:
         parser.error("--page-pause-seconds must be at least 0.1 and --max-pages cannot be negative")
     asyncio.run(main(parsed))

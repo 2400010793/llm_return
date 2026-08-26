@@ -1,0 +1,64 @@
+{
+  "format_version": "aligned_masked_short_v1",
+  "model": "roberta",
+  "variant": "masked_short",
+  "prompt_template": "分析股票{target}",
+  "token_alignment": "within_axis",
+  "task_groups": {
+    "0": ["horizon"],
+    "1": ["valuation", "impact"],
+    "2": ["certainty"],
+    "3": ["volatility"],
+    "4": ["liquidity"]
+  },
+  "axes": {
+    "horizon": {
+      "label": "收益期限",
+      "levels": {
+        "low": {"prompt_id": "horizon_short", "target": "短期收益", "text": "分析股票短期收益"},
+        "neutral": {"prompt_id": "horizon_medium", "target": "中期收益", "text": "分析股票中期收益"},
+        "high": {"prompt_id": "horizon_long", "target": "长期收益", "text": "分析股票长期收益"}
+      }
+    },
+    "valuation": {
+      "label": "估值水平",
+      "levels": {
+        "low": {"prompt_id": "valuation_low", "target": "低估值", "text": "分析股票低估值"},
+        "neutral": {"prompt_id": "valuation_medium", "target": "中估值", "text": "分析股票中估值"},
+        "high": {"prompt_id": "valuation_high", "target": "高估值", "text": "分析股票高估值"}
+      }
+    },
+    "certainty": {
+      "label": "确定性",
+      "levels": {
+        "low": {"prompt_id": "certainty_low", "target": "低确定性", "text": "分析股票低确定性"},
+        "neutral": {"prompt_id": "certainty_medium", "target": "中确定性", "text": "分析股票中确定性"},
+        "high": {"prompt_id": "certainty_high", "target": "高确定性", "text": "分析股票高确定性"}
+      }
+    },
+    "volatility": {
+      "label": "波动率",
+      "levels": {
+        "low": {"prompt_id": "volatility_low", "target": "低波动率", "text": "分析股票低波动率"},
+        "neutral": {"prompt_id": "volatility_medium", "target": "中波动率", "text": "分析股票中波动率"},
+        "high": {"prompt_id": "volatility_high", "target": "高波动率", "text": "分析股票高波动率"}
+      }
+    },
+    "impact": {
+      "label": "冲击强度",
+      "levels": {
+        "low": {"prompt_id": "impact_low", "target": "低冲击", "text": "分析股票低冲击"},
+        "neutral": {"prompt_id": "impact_medium", "target": "中冲击", "text": "分析股票中冲击"},
+        "high": {"prompt_id": "impact_high", "target": "高冲击", "text": "分析股票高冲击"}
+      }
+    },
+    "liquidity": {
+      "label": "流动性",
+      "levels": {
+        "low": {"prompt_id": "liquidity_low", "target": "低流动性", "text": "分析股票低流动性"},
+        "neutral": {"prompt_id": "liquidity_medium", "target": "中流动性", "text": "分析股票中流动性"},
+        "high": {"prompt_id": "liquidity_high", "target": "高流动性", "text": "分析股票高流动性"}
+      }
+    }
+  }
+}

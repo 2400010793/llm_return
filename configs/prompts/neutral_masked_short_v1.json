@@ -1,0 +1,37 @@
+{
+  "format_version": "neutral_masked_short_v1",
+  "variant": "masked_short",
+  "mask_policy": "identity_and_time_only",
+  "prompts": {
+    "valuation": {
+      "label": "估值",
+      "target": "估值",
+      "text": "分析股票估值"
+    },
+    "certainty": {
+      "label": "确定性",
+      "target": "确定性",
+      "text": "分析股票确定性"
+    },
+    "volatility": {
+      "label": "波动率",
+      "target": "波动率",
+      "text": "分析股票波动率"
+    },
+    "impact": {
+      "label": "冲击",
+      "target": "冲击",
+      "text": "分析股票冲击"
+    },
+    "liquidity": {
+      "label": "流动性",
+      "target": "流动性",
+      "text": "分析股票流动性"
+    },
+    "risk": {
+      "label": "风险",
+      "target": "风险",
+      "text": "分析股票风险"
+    }
+  }
+}

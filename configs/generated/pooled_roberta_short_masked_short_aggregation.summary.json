@@ -1,0 +1,12 @@
+{
+  "phase": "aggregation",
+  "tasks": 8,
+  "output": "configs/generated/pooled_roberta_short_masked_short_aggregation.tsv",
+  "models": [
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

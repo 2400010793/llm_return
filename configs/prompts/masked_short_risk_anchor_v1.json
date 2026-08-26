@@ -1,0 +1,13 @@
+{
+  "format_version": "masked_short_risk_anchor_v1",
+  "model": "roberta",
+  "variant": "masked_short",
+  "prompts": {
+    "risk": {
+      "label": "风险主题 anchor",
+      "prompt_id": "risk_anchor",
+      "target": "风险",
+      "text": "分析股票风险"
+    }
+  }
+}

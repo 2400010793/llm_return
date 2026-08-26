@@ -1,0 +1,12 @@
+{
+  "phase": "temporal_mlp",
+  "tasks": 28,
+  "output": "configs/generated/cninfo_2010_2026_bge_m3_temporal_mlp.tsv",
+  "models": [
+    "bge_m3"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "tasks": 1000,
+  "candidate_tasks": 1000,
+  "reused_outputs": 0,
+  "models": [
+    "roberta",
+    "bge_m3",
+    "ckip_bert",
+    "xlm_roberta_large"
+  ],
+  "variants": [
+    "plain",
+    "short",
+    "masked_short",
+    "long",
+    "masked_long"
+  ],
+  "features": [
+    "body_mean",
+    "title_body_mean",
+    "full_mean",
+    "cls",
+    "full_max"
+  ],
+  "classifiers": [
+    "logistic",
+    "linear_svm",
+    "sgd",
+    "simple_mlp",
+    "hist_gradient_boosting"
+  ],
+  "reducer": "none",
+  "target_modes": {
+    "event3_to_event3": {
+      "train_target": "event_return_3d",
+      "evaluation_target": "event_return_3d"
+    },
+    "next1_to_next1": {
+      "train_target": "next_day_return",
+      "evaluation_target": "next_day_return"
+    }
+  },
+  "protocol": "6y fit / 2y validation / 1y rolling OOS",
+  "embedding_root": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/embeddings",
+  "output_root": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/classification_results_v1",
+  "manifest": "/mnt/lustre3/home/gaozh/llm_return/configs/generated/sina_single_stock_classification_v1.tsv"
+}

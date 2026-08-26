@@ -1,0 +1,13 @@
+{
+  "phase": "triple_models",
+  "tasks": 20,
+  "output": "configs/generated/cninfo_2010_2026_classification/triple_models.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

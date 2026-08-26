@@ -1,0 +1,34 @@
+{
+  "model": "roberta",
+  "variants": [
+    "masked_short"
+  ],
+  "feature": "title_body_full_concat",
+  "targets": [
+    "next_day_open_to_open_cs_zscore"
+  ],
+  "regressors": [
+    "ridge"
+  ],
+  "run_mode": "screen",
+  "reducers": [
+    [
+      "pca",
+      32
+    ],
+    [
+      "pca",
+      64
+    ],
+    [
+      "pca",
+      128
+    ],
+    [
+      "pca",
+      256
+    ]
+  ],
+  "tasks": 4,
+  "output": "configs/generated/o2o_residual_refinement_zscore.tsv"
+}

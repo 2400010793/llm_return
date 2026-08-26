@@ -1,0 +1,7 @@
+task_id	model	prompt_length	semantic_name	variant	target	cluster_method	predictor
+0	roberta	short	future_span,return_span	masked_short	next_day_return	kmeans	ridge
+1	roberta	short	future_span,return_span	masked_short	next_day_return	gmm	ridge
+2	roberta	short	future_span,return_span	masked_short	next_day_return	agglomerative	ridge
+3	roberta	short	future_span,return_span	masked_short	next_day_return	kmeans	knn
+4	roberta	short	future_span,return_span	masked_short	next_day_return	gmm	knn
+5	roberta	short	future_span,return_span	masked_short	next_day_return	agglomerative	knn

@@ -1,0 +1,13 @@
+{
+  "phase": "screening",
+  "tasks": 24,
+  "output": "configs/generated/cninfo_2010_2026_classification/screening.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

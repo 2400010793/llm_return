@@ -1,0 +1,30 @@
+{
+  "format_version": "prompt_mechanism_manifests_v1",
+  "cache_tasks": 8,
+  "fold_tasks": 288,
+  "models": [
+    "roberta",
+    "bge_m3",
+    "ckip_bert",
+    "xlm_roberta_large"
+  ],
+  "prompt_lengths": [
+    "short",
+    "long"
+  ],
+  "targets": [
+    "event_return_3d",
+    "next_day_return"
+  ],
+  "test_years": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ]
+}

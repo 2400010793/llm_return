@@ -1,0 +1,2 @@
+task_id	embedding_root	model	variant	feature	target	regressor	run_mode	reducer	components	output
+0	data/processed/pooled_embeddings_v3	roberta	masked_short	title_body_full_concat	next_day_open_to_open_winsor_residual	huber_sgd	final-test	pca	256	reports/regression/pooled_embeddings/o2o_paper_filters/semantic_098_winsor_huber_pca256_final_2026.json

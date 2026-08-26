@@ -1,5 +1,43 @@
 # 中国市场中的大语言模型新闻收益预测
 
+> 当前研究快照：2026-08-26。项目已经从通用复现原型推进到新浪/巨潮
+> 双数据源、RoBERTa/BGE-M3/Qwen 三模型、prompt 目标 token 与正文表示的
+> 严格样本外比较。最新事实状态、已完成结果、未完成任务和接手命令见
+> [完整交接文档](docs/HANDOFF_2026-08-26.md)；论文依据见
+> [论文到实验的映射](references/paper_to_experiment_map.md)；日常操作见
+> [运行手册](docs/RUNBOOK.md)。
+
+## 当前主线
+
+当前预注册比较只使用四个 `masked_short` prompt：`盈利`、`收益`、
+`超额收益`、`亏损`，并在完全共同新闻上比较三个模型的目标 span token
+表示与正文表示。所有监督模型只使用训练期拟合的 PCA32，不做原始维回归；
+基础参数固定为 Ridge alpha 100、KMeans k 6、soft shrinkage 500、temperature
+0.5。新浪采用 6 年训练、2 年验证、1 年测试；巨潮基础模型采用 3 年历史、
+1 年测试，并保留历史窗口内部的 1 年 OOS 预测供二级融合训练。
+
+截至快照时的可核查数据：
+
+| 项目 | 状态 |
+|---|---:|
+| 新浪全量清洗面板 | 796,553 条 |
+| 巨潮全量面板 | 903,665 条 |
+| 中性六 prompt 新浪 RoBERTa | 256/256 shards |
+| 中性六 prompt 巨潮 RoBERTa | 255/256 shards，缺 shard-225 |
+| 中性六 prompt 新浪 BGE-M3 | 189/256 shards，任务已主动取消 |
+| 中性六 prompt 巨潮 BGE-M3 | 78/256 shards，任务已主动取消 |
+| 三模型四 prompt PCA32 公平比较 | 已提交，等待 Fairshare 调度；尚无结果 |
+
+使用下面的只读命令可以重新生成当前数据与 embedding 状态：
+
+```bash
+python scripts/audit_research_handoff.py --include-slurm
+```
+
+本仓库只保存源码、配置、测试和小型研究说明。授权数据、模型权重、PDF、
+embedding、任务快照和运行报告保留在工作区/Lustre，不进入 Git；它们通过
+清单、SHA256 和绝对路径在交接文档中追溯。
+
 ## 1. 项目目标
 
 复现 Chen、Kelly 和 Xiu 的 *Expected Returns and Large Language Models* 的核心结论，并将研究对象从美国/国际市场扩展到中国股票市场。
@@ -115,53 +153,61 @@ E(r_{i,t+1}\mid x_{i,t}) = x_{i,t}'\theta
 
 ```text
 llm_return/
-├── README.md                         # 项目目标、研究计划和复现规范
-├── ExpectedReturns_LLMs.pdf          # 第一篇参考论文
-├── Phd_thesis_Zhijiao_Yang_20219273_.pdf  # 第二篇参考论文
+├── README.md                          # 项目目标、研究计划和复现规范
+├── pyproject.toml                     # Python 包与测试配置
 ├── configs/
-│   ├── paths.yaml                    # 数据路径和输出路径
-│   ├── sample.yaml                   # 样本期、市场和过滤规则
-│   └── models.yaml                   # 文本模型和预测模型参数
+│   ├── paths.yaml                     # 数据路径和输出路径
+│   ├── sample.yaml                    # 样本期、市场和过滤规则
+│   └── models.yaml                    # 文本模型和预测模型参数
 ├── data/
-│   ├── raw/                          # 原始数据，只读保存
-│   ├── interim/                      # 清洗中间结果
-│   └── processed/                    # 可直接建模的数据集
-├── references/                       # 论文笔记、变量定义和数据说明
-├── notebooks/
-│   ├── 01_data_audit.ipynb           # 数据可得性和字段审计
-│   ├── 02_news_stock_merge.ipynb     # 新闻—股票匹配与时间对齐
-│   ├── 03_text_baselines.ipynb       # 词袋、词典、Word2Vec 基线
-│   ├── 04_llm_embeddings.ipynb       # LLM 嵌入生成与质量检查
-│   ├── 05_return_prediction.ipynb    # 样本外预测
-│   ├── 06_portfolio_backtest.ipynb   # 分组组合和交易成本
-│   └── 07_robustness.ipynb           # 稳健性和异质性
+│   ├── raw/                           # 原始数据，只读保存
+│   ├── interim/                       # 清洗和采集中间结果
+│   └── processed/                     # 可直接建模的数据与冻结嵌入
+├── references/                        # 论文笔记、变量定义和实施计划
 ├── src/
-│   ├── data/
-│   │   ├── ingest.py                 # 数据读取
-│   │   ├── clean_prices.py            # 行情清洗
-│   │   ├── clean_news.py              # 新闻清洗
-│   │   └── build_panel.py             # 新闻—股票面板
-│   ├── text/
-│   │   ├── preprocess_zh.py          # 中文分词、去重和规范化
-│   │   ├── sentiment_lexicon.py       # 词典情绪
-│   │   ├── embeddings.py              # LLM/句向量接口
-│   │   └── quality_checks.py          # 文本质量和泄漏检查
-│   ├── models/
-│   │   ├── baselines.py               # 传统基线
-│   │   ├── return_prediction.py       # 收益预测
-│   │   └── walk_forward.py            # 滚动/扩展窗口训练
+│   ├── data/                           # 清洗、去重、标签、面板和嵌入读取
+│   ├── text/                           # 文本预处理、表示和嵌入接口
+│   ├── models/                         # 可复用的模型与无泄漏预处理
+│   │   ├── return_prediction.py        # 股票—日聚合、评价、Ridge 选参
+│   │   ├── dimension_reduction.py      # 训练窗拟合的 PCA/SVD
+│   │   └── paper_pipeline.py           # 小型 TF-IDF 论文基线
 │   ├── portfolio/
-│   │   ├── formation.py               # 分组与持仓形成
-│   │   ├── constraints.py             # 涨跌停、停牌、卖空等约束
-│   │   └── backtest.py                # 回测
+│   │   ├── formation.py                # 每日等权分位数组合
+│   │   ├── strategy.py                 # EWCT、手续费、持仓和交易约束
+│   │   └── performance.py              # 毛/净收益、Sharpe、换手和回撤
 │   └── evaluation/
-│       ├── prediction_metrics.py      # MSE、方向准确率等
-│       ├── portfolio_metrics.py       # 收益、Sharpe、回撤、换手率
-│       └── robustness.py              # 稳健性检验
-├── tests/                             # 单元测试和无前视偏差测试
-├── reports/                            # 表格、图形和最终报告
+│       ├── prediction_metrics.py       # MSE、OOS R²、方向准确率、Rank IC
+│       ├── classification.py           # 分类指标与稳定性统计
+│       └── artifacts.py                # 内容寻址、锁、原子写和恢复
+├── scripts/                            # 薄 CLI、manifest、审计和 Slurm 入口
+├── tests/                              # 单元测试和无前视偏差测试
+├── task_records/                       # 长任务提交与审计记录
+├── reports/                            # 表格、预测、组合和最终报告
 └── logs/                               # 运行日志
 ```
+
+### 代码职责
+
+- `src/` 只放可导入、可测试、与命令行无关的研究逻辑；多个实验需要的代码应优先放在这里。
+- `scripts/` 只负责参数解析、数据路径、滚动窗口编排和任务提交，不重复实现指标、组合或预处理。
+- `src/models/return_prediction.py` 是连续收益任务的统一入口；公告级模型输出先聚合为股票—日，再进行验证选参和测试评价。
+- `src/portfolio/` 独立于模型，既可用于 TF-IDF，也可用于冻结 embedding 或其他预测器。
+- `src/evaluation/artifacts.py` 统一管理实验身份、文件指纹、单写者锁、原子保存和断点恢复。
+
+### 完整策略回测
+
+`scripts/run_portfolio_strategy.py` 接收股票—日预测文件，输出逐日收益、逐股持仓、逐笔交易和汇总指标。论文模式实现次日开盘建仓、顶部/底部五分位、多空组合、10/20 bps 大/小盘股成本，以及 EWCT 权重递推。A 股模式支持买卖双边佣金、卖出印花税、滑点、停牌/涨跌停可交易标记、融券标记和仅做多组合。
+
+```bash
+python scripts/run_portfolio_strategy.py \
+  reports/example.stock_day_predictions.parquet \
+  --output-dir reports/strategy/example \
+  --cost-model paper --gammas 1.0
+```
+
+`gamma < 1` 会延长持仓，因此必须通过 `--market-data` 提供稠密的股票—交易日收益；程序默认在持仓收益缺失时终止，不会静默填零。论文 10/20 bps 拆分还需要 `--market-cap-column` 或 `--small-stock-column`，否则仅采用论文的大盘股 10 bps 简化回退口径，并在汇总文件中记录该限制。
+
+`scripts/collect_strategy_ohlc.py` 可按预测文件中的股票池下载并缓存前复权 OHLC，构造 O2O、C2C、VWAP 代理收益，以及停牌、IPO 初期和开盘涨跌停交易标记。当前 RoBERTa 最终测试样本的 815 只股票已全部接入；修正交易时点和成本后的结果见 [2026 可执行交易回测审计](reports/strategy/real_trading_audit_2026.md) 与 [完整指标表](reports/strategy/roberta_corrected_v2_2026_execution_comparison.csv)。这些结果是历史可执行性回测，不是实盘成交记录。
 
 ## 5. 建议的第一版最小可行实验
 
@@ -210,8 +256,8 @@ llm_return/
 - [ ] 实现 TF-IDF 和词典情绪基线
 - [ ] 实现第一种中文 LLM 嵌入
 - [ ] 完成滚动样本外预测
-- [ ] 完成五分位组合回测
-- [ ] 加入交易约束和交易成本
+- [x] 完成五分位组合与持仓级净收益回测
+- [x] 实现 EWCT、交易成本及可配置交易约束，并接入测试股票池的稠密 OHLC/交易状态
 - [ ] 加入第二篇论文中的百度指数/股吧情绪参考变量
 - [ ] 完成稳健性检验和研究报告
 

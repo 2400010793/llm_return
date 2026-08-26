@@ -1,0 +1,7 @@
+task_id	model	prompt_length	semantic_name	phrase
+0	roberta	short	future_span	未来
+1	roberta	short	stock_span	股票
+2	roberta	short	return_span	收益
+3	bge_m3	short	future_span	未来
+4	bge_m3	short	stock_span	股票
+5	bge_m3	short	return_span	收益

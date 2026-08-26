@@ -1,0 +1,7 @@
+{
+  "valuation": ["market_adjusted_forward_return_20d"],
+  "certainty": ["post_realized_volatility_5d"],
+  "volatility": ["post_realized_volatility_5d", "volatility_jump_ratio_v2"],
+  "impact": ["abnormal_event_return_3d"],
+  "liquidity": ["volume_shock", "range_shock"]
+}

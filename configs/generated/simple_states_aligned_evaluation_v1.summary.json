@@ -1,0 +1,21 @@
+{
+  "source": "configs/generated/simple_states_aligned_regression_v1.tsv",
+  "output": "configs/generated/simple_states_aligned_evaluation_v1.tsv",
+  "output_root": "reports/simple_states/simple_states_aligned_v1",
+  "only_existing": false,
+  "tasks": 12,
+  "source_task_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ]
+}

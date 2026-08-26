@@ -11,7 +11,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.models.paper_pipeline import fit_predict_return_ridge, fit_predict_sentiment, portfolio_metrics, quantile_portfolio
+from src.models.paper_pipeline import fit_predict_return_ridge
+from src.portfolio import portfolio_metrics, quantile_portfolio
 
 
 def main() -> None:

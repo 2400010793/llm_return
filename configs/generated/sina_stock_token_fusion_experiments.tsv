@@ -1,0 +1,9 @@
+task_id	model	prompt_length	semantic_name	variant	target	cluster_method	predictor
+0	bge_m3	short	stock_span	short	next_day_return	kmeans	ridge
+1	bge_m3	short	stock_span	masked_short	next_day_return	kmeans	ridge
+2	bge_m3	short	stock_span	short	next_day_return	gmm	ridge
+3	bge_m3	short	stock_span	masked_short	next_day_return	gmm	ridge
+4	bge_m3	short	stock_span	short	next_day_return	kmeans	knn
+5	bge_m3	short	stock_span	masked_short	next_day_return	kmeans	knn
+6	bge_m3	short	stock_span	short	next_day_return	gmm	knn
+7	bge_m3	short	stock_span	masked_short	next_day_return	gmm	knn

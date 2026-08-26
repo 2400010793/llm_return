@@ -1,0 +1,27 @@
+{
+  "tasks": 48,
+  "models": [
+    "roberta",
+    "bge_m3"
+  ],
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "feature": "title_body_full_concat",
+  "gate_methods": [
+    "fisher",
+    "variance",
+    "logistic_l1"
+  ],
+  "keep_groups": [
+    1,
+    2
+  ],
+  "classifiers": [
+    "logistic",
+    "simple_mlp"
+  ],
+  "generates_embeddings": false,
+  "output": "configs/generated/pooled_segment_gating_seed42.tsv"
+}

@@ -1,0 +1,5 @@
+task_id	task	gate_method	gate_keep	seed	output
+0	regression	first	4	42	reports/dynamic_prompt/o2o_top4_controls_20260811/roberta_masked_short_first4_regression_seed42.json
+1	regression	random	4	13	reports/dynamic_prompt/o2o_top4_controls_20260811/roberta_masked_short_random4_regression_seed13.json
+2	regression	random	4	42	reports/dynamic_prompt/o2o_top4_controls_20260811/roberta_masked_short_random4_regression_seed42.json
+3	regression	random	4	2026	reports/dynamic_prompt/o2o_top4_controls_20260811/roberta_masked_short_random4_regression_seed2026.json

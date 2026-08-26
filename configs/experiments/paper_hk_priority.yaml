@@ -1,0 +1,33 @@
+experiment: paper_hk_priority
+paper: Expected Returns and Large Language Models
+market_reference: China (HK)
+text:
+  variant: plain
+  prompt: false
+  max_tokens: 512
+  pooling: mean
+encoders:
+  - alias: ckip_bert
+    model: ckiplab/bert-base-chinese
+    paper_role: China-HK BERT
+    enabled: false
+    status: retired_after_2026_oos_audit
+    reason: O2O AUC 0.503-0.508 and MCC approximately zero; retain only for reproducibility
+  - alias: xlm_roberta_large
+    model: xlm-roberta-large
+    paper_role: multilingual RoBERTa
+  - alias: openai_embedding
+    model: text-embedding-3-large
+    enabled: false
+    enable_when: OPENAI_API_KEY and data-transfer approval are both available
+classification:
+  target: next_day_return
+  models: [logistic, mlp]
+  reducers: [none, pca_128]
+regression:
+  target: next_day_open_to_open_return
+  models: [ridge, huber_sgd, small_mlp]
+  reducers: [none, pca_128]
+selection:
+  validation_only: true
+  final_tests: [dm, mcs, net_sharpe]

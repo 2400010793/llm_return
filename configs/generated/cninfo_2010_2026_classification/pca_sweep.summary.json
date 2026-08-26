@@ -1,0 +1,13 @@
+{
+  "phase": "pca_sweep",
+  "tasks": 32,
+  "output": "configs/generated/cninfo_2010_2026_classification/pca_sweep.tsv",
+  "models": [
+    "bge_m3",
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

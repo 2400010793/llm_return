@@ -1,0 +1,28 @@
+{
+  "format_version": "sina_minimal_prompt_v2",
+  "prompts": {
+    "short": {
+      "text": "分析股票未来收益",
+      "semantic_phrases": [
+        ["analysis", "分析"],
+        ["target_stock", "股票"],
+        ["future_return", "未来收益"]
+      ]
+    },
+    "long": {
+      "text": "分析股票未来收益：\n业绩现金流\n订单投资\n融资股权\n监管诉讼\n经营风险\n行业变化\n公司治理",
+      "semantic_phrases": [
+        ["analysis", "分析"],
+        ["target_stock", "股票"],
+        ["future_return", "未来收益"],
+        ["performance_cashflow", "业绩现金流"],
+        ["orders_investment", "订单投资"],
+        ["financing_equity", "融资股权"],
+        ["regulation_litigation", "监管诉讼"],
+        ["operating_risk", "经营风险"],
+        ["industry_change", "行业变化"],
+        ["company_governance", "公司治理"]
+      ]
+    }
+  }
+}

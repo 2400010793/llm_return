@@ -1,0 +1,21 @@
+{
+  "phase": "screen",
+  "tasks": 20,
+  "output": "configs/generated/pooled_next1_strong_screen.tsv",
+  "classifiers": [
+    "catboost",
+    "extra_trees",
+    "hist_gradient_boosting",
+    "lightgbm",
+    "xgboost"
+  ],
+  "representations": [
+    "bge_m3:masked_short:body_mean",
+    "roberta:masked_short:body_mean",
+    "roberta:masked_short:title_body_full_concat",
+    "roberta:short:body_mean"
+  ],
+  "seeds": [
+    42
+  ]
+}

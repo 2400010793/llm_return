@@ -1,0 +1,14 @@
+{
+  "source": "configs/generated/simple_states_aligned_best_seeds_v1.tsv",
+  "output": "configs/generated/simple_states_aligned_best_seeds_evaluation_v1.tsv",
+  "output_root": "reports/simple_states/simple_states_aligned_best_seeds_v1",
+  "only_existing": false,
+  "tasks": 5,
+  "source_task_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ]
+}

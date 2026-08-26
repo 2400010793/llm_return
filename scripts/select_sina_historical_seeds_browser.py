@@ -23,8 +23,14 @@ from urllib.parse import urldefrag, urlparse
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError, async_playwright
 
 ALLOWED_HOSTS = {"finance.sina.com.cn", "cj.sina.com.cn"}
-ARTICLE_URL_RE = re.compile(r"^https?://(?:finance\.sina\.com\.cn|cj\.sina\.com\.cn)/(t|s|e|y)/\d+\.html$", re.I)
+ARTICLE_URL_RE = re.compile(
+    r"^https?://(?:finance\.sina\.com\.cn|cj\.sina\.com\.cn)/"
+    r"(?:t|s|e|y|roll|stock|view|globe|special|focus|wm|jjxw|jhzx)/"
+    r"[^?#]+\.(?:html|shtml)$",
+    re.I,
+)
 DATE_RE = re.compile(r"(20\d{2})年\s*(\d{1,2})月\s*(\d{1,2})日(?:[^0-9]{0,12}(\d{1,2}):(\d{2}))?")
+ISO_DATE_RE = re.compile(r"(20\d{2})[-/]([0-9]{1,2})[-/]([0-9]{1,2})(?:[^0-9]{0,12}([0-9]{1,2}):([0-9]{2}))?")
 STOCK_LINK_RE = re.compile(r"/(?:realstock/company/)(?:sh|sz)(\d{6})/", re.I)
 LEGACY_STOCK_RE = re.compile(r"[?&]symbol=(?:sh|sz)?(\d{6})", re.I)
 BLOCK_MARKERS = ("验证码", "访问异常", "请求过于频繁", "安全验证", "captcha")
@@ -49,6 +55,8 @@ def body_hash(text: str) -> str:
 
 def parse_date(text: str) -> tuple[str | None, int | None, int | None]:
     match = DATE_RE.search(text)
+    if not match:
+        match = ISO_DATE_RE.search(text)
     if not match:
         return None, None, None
     year, month, day, hour, minute = match.groups()
@@ -85,8 +93,8 @@ async def rendered_page(page: Page, url: str, timeout_ms: int, render_wait_ms: i
     return {"html": html_text, "text": clean_text(visible_text), "title": title}
 
 
-async def inspect(page: Page, url: str, parent_url: str | None, depth: int, args, catalog: dict[str, str]) -> tuple[dict, list[str]]:
-    base = {"url": url, "parent_url": parent_url, "depth": depth, "checked_at": datetime.now(timezone.utc).isoformat()}
+async def inspect(page: Page, url: str, parent_url: str | None, depth: int, args, catalog: dict[str, str], discovery_method: str = "related_link") -> tuple[dict, list[str]]:
+    base = {"url": url, "parent_url": parent_url, "depth": depth, "discovery_method": discovery_method, "checked_at": datetime.now(timezone.utc).isoformat()}
     try:
         page_data = await rendered_page(page, url, args.timeout_ms, args.render_wait_ms)
         text = page_data["text"]
@@ -195,10 +203,21 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 async def main(args: argparse.Namespace) -> None:
     years = sorted(set(args.years))
+    candidate_metadata: dict[str, dict] = {}
+    candidate_urls: list[str] = []
+    if args.candidate_file:
+        payload = json.loads(Path(args.candidate_file).read_text(encoding="utf-8"))
+        for item in payload.get("records", []):
+            url = canonical_url(item.get("url", ""))
+            if url:
+                candidate_urls.append(url)
+                candidate_metadata[url] = item
     roots = [canonical_url(x) for x in args.root]
+    roots.extend(candidate_urls)
+    roots = list(dict.fromkeys(roots))
     roots = [x for x in roots if x]
     if not roots:
-        raise ValueError("至少需要一个合法的新浪历史文章 --root")
+        raise ValueError("至少需要一个合法的新浪历史文章 --root 或 --candidate-file")
     catalog: dict[str, str] = {}
     if args.stock_catalog:
         with Path(args.stock_catalog).open(encoding="utf-8-sig", newline="") as stream:
@@ -218,7 +237,8 @@ async def main(args: argparse.Namespace) -> None:
                 if url in visited:
                     continue
                 visited.add(url)
-                record, children = await inspect(page, url, parent, depth, args, catalog)
+                discovery_method = candidate_metadata.get(url, {}).get("discovery_method", "related_link")
+                record, children = await inspect(page, url, parent, depth, args, catalog, discovery_method)
                 records.append(record)
                 if depth < args.max_depth:
                     for child in children:
@@ -246,7 +266,8 @@ async def main(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="使用可见浏览器页面发现并选择新浪历史文章种子")
-    parser.add_argument("--root", action="append", required=True, help="历史新浪文章 URL，可重复")
+    parser.add_argument("--root", action="append", default=[], help="历史新浪文章 URL，可重复")
+    parser.add_argument("--candidate-file", help="候选 URL JSON 文件；格式为 records[].url，可与 --root 同时使用")
     parser.add_argument("--years", type=int, nargs="+", required=True)
     parser.add_argument("--per-year", type=int, default=20)
     parser.add_argument("--max-per-stock", type=int, default=3)

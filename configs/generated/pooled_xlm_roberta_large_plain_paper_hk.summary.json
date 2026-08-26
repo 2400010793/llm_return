@@ -1,0 +1,11 @@
+{
+  "phase": "paper_hk",
+  "tasks": 4,
+  "output": "configs/generated/pooled_xlm_roberta_large_plain_paper_hk.tsv",
+  "models": [
+    "xlm_roberta_large"
+  ],
+  "variants": [
+    "plain"
+  ]
+}

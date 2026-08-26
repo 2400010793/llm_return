@@ -6,11 +6,10 @@ from dataclasses import dataclass
 from typing import Iterable
 
 import numpy as np
-import pandas as pd
-from scipy import sparse
 from sklearn.linear_model import LogisticRegression, Ridge
 
 from src.evaluation.prediction_metrics import regression_metrics
+from src.portfolio import portfolio_metrics, quantile_portfolio
 from src.text.bow_features import fit_word_tfidf, transform_tfidf
 
 
@@ -83,36 +82,7 @@ def fit_predict_return_ridge(
     return ReturnResult(predictions, vectorizer, model, regression_metrics(y_test, predictions))
 
 
-def quantile_portfolio(
-    frame: pd.DataFrame,
-    *,
-    prediction: str = "prediction",
-    realized: str = "realized_return",
-    date: str = "entry_date",
-    quantiles: int = 5,
-) -> pd.DataFrame:
-    """Form daily equal-weighted low/high and long-short portfolios."""
-    required = {prediction, realized, date}
-    missing = required.difference(frame.columns)
-    if missing:
-        raise ValueError(f"missing portfolio columns: {', '.join(sorted(missing))}")
-    rows = []
-    for day, group in frame.dropna(subset=list(required)).groupby(date):
-        if len(group) < quantiles:
-            continue
-        ranks = group[prediction].rank(method="first")
-        bucket = pd.qcut(ranks, q=quantiles, labels=False, duplicates="drop")
-        low = group.loc[bucket == bucket.min(), realized].mean()
-        high = group.loc[bucket == bucket.max(), realized].mean()
-        rows.append({"date": day, "low": low, "high": high, "long_short": high - low, "n": len(group)})
-    return pd.DataFrame(rows)
-
-
-def portfolio_metrics(portfolio: pd.DataFrame, *, annualization: int = 252) -> dict[str, float]:
-    """Summarize daily portfolio returns."""
-    if portfolio.empty:
-        return {"n_days": 0.0, "mean": float("nan"), "volatility": float("nan"), "sharpe": float("nan")}
-    values = portfolio["long_short"].astype(float).to_numpy()
-    mean = float(np.mean(values))
-    vol = float(np.std(values, ddof=1)) if len(values) > 1 else float("nan")
-    return {"n_days": float(len(values)), "mean": mean, "volatility": vol, "sharpe": mean / vol * np.sqrt(annualization) if vol and np.isfinite(vol) else float("nan")}
+__all__ = [
+    "ReturnResult", "SentimentResult", "fit_predict_return_ridge",
+    "fit_predict_sentiment", "portfolio_metrics", "quantile_portfolio",
+]

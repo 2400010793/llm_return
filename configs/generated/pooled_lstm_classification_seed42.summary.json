@@ -1,0 +1,11 @@
+{
+  "phase": "lstm",
+  "tasks": 3,
+  "output": "configs/generated/pooled_lstm_classification_seed42.tsv",
+  "models": [
+    "roberta"
+  ],
+  "variants": [
+    "short"
+  ]
+}

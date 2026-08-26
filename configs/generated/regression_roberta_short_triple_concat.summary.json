@@ -1,0 +1,16 @@
+{
+  "model": "roberta",
+  "variants": [
+    "short",
+    "masked_short"
+  ],
+  "feature": "title_body_full_concat",
+  "targets": [
+    "return_1",
+    "return_3",
+    "return_5",
+    "return_20"
+  ],
+  "tasks": 16,
+  "output": "configs/generated/regression_roberta_short_triple_concat.tsv"
+}

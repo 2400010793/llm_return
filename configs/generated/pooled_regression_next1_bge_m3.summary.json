@@ -1,0 +1,13 @@
+{
+  "model": "bge_m3",
+  "variants": [
+    "masked_short",
+    "masked_long"
+  ],
+  "feature": "title_body_full_concat",
+  "targets": [
+    "next_day_return"
+  ],
+  "tasks": 4,
+  "output": "configs/generated/pooled_regression_next1_bge_m3.tsv"
+}

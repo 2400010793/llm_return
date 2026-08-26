@@ -1,0 +1,2 @@
+task_id	embedding_root	model	variant	feature	target	regressor	run_mode	reducer	components	output
+0	data/processed/pooled_finbert2_embeddings_2010_2026_v1	finbert2_base	plain	full_mean	next_day_open_to_open_return	ridge	final-test	none	0	reports/regression/pooled_embeddings/finbert2/finbert2_base_plain_full_mean_ridge.json

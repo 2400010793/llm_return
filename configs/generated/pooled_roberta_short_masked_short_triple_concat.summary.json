@@ -1,0 +1,12 @@
+{
+  "phase": "triple_concat",
+  "tasks": 4,
+  "output": "configs/generated/pooled_roberta_short_masked_short_triple_concat.tsv",
+  "models": [
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

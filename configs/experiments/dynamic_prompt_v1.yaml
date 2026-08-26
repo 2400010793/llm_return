@@ -1,0 +1,58 @@
+experiment_name: dynamic_prompt_v1
+research_scope: cninfo_announcement_method_replication
+status: exploratory_because_2026_results_were_previously_inspected
+
+data:
+  panel: data/processed/cninfo_full_classification_panel.parquet
+  prompt_embedding_root: data/processed/prompt_token_embeddings_v5
+  model: roberta
+  variant: masked_short
+  row_index_column: row_index
+  stock_column: stock_id
+  date_column: entry_date
+  regression_target: next_day_return
+  classification_target: next_day_label
+  expected_rows: 350577
+  expected_shards: 32
+  token_count: 28
+  hidden_size: 768
+
+time_design:
+  fit_years: [2018, 2019, 2020, 2021, 2022, 2023]
+  validation_years: [2024, 2025]
+  test_years: [2026]
+  prediction_unit: stock_day_mean_of_announcement_predictions
+  test_period_is_incomplete: true
+
+model:
+  gate_modes: [uniform, static, dynamic]
+  representation_size: 64
+  gate_hidden_size: 64
+  dropout: 0.1
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  gradient_clip_norm: 1.0
+  batch_size: 256
+  max_epochs: 50
+  early_stopping_patience: 7
+  regression_loss: smooth_l1_on_fit_standardized_target
+  classification_loss: binary_cross_entropy_with_logits
+
+selection:
+  regression_primary_metric: stock_day_validation_rank_ic_mean
+  classification_primary_metric: stock_day_validation_auc
+  threshold_source: validation_only
+  primary_seed: 42
+  confirmation_seeds: [13, 42, 2024, 2025, 2026]
+
+required_outputs:
+  - experiment_spec
+  - validation_metrics
+  - checkpoint
+  - announcement_predictions
+  - stock_day_predictions
+  - announcement_token_weights
+  - token_weight_summary
+  - runtime_and_provenance
+

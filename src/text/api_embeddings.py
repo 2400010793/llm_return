@@ -57,7 +57,7 @@ def api_chat_completion(
 def encode_api_embeddings(
     texts: list[str],
     *,
-    model: str = "text-embedding-3-small",
+    model: str = "text-embedding-3-large",
     api_key: str | None = None,
     base_url: str = "https://api.openai.com/v1",
     batch_size: int = 64,

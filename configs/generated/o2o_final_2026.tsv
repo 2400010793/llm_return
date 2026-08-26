@@ -1,0 +1,5 @@
+task_id	embedding_root	model	variant	feature	target	regressor	run_mode	reducer	components	output
+0	data/processed/pooled_embeddings_v3	roberta	masked_short	title_body_full_concat	next_day_open_to_open_return	huber_sgd	final-test	pca	128	reports/regression/pooled_embeddings/o2o_final_2026/raw_return_huber_pca128.json
+1	data/processed/pooled_embeddings_v3	roberta	masked_short	title_body_full_concat	next_day_open_to_open_winsor_residual	huber_sgd	final-test	pca	128	reports/regression/pooled_embeddings/o2o_final_2026/winsor_residual_huber_pca128.json
+2	data/processed/pooled_embeddings_v3	roberta	masked_short	title_body_full_concat	next_day_open_to_open_winsor_residual	huber_sgd	final-test	pca	256	reports/regression/pooled_embeddings/o2o_final_2026/winsor_residual_huber_pca256.json
+3	data/processed/pooled_embeddings_v3	roberta	masked_short	title_body_full_concat	next_day_open_to_open_cs_zscore	ridge	final-test	pca	256	reports/regression/pooled_embeddings/o2o_final_2026/cs_zscore_ridge_pca256.json

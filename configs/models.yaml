@@ -7,6 +7,9 @@ text_models:
   - chinese_sentiment_lexicon
   - word2vec_ridge
   - chinese_roberta_embedding
+  # Llama 2 13B base model; use frozen token hidden states with masked mean
+  # pooling for the paper-replication extension, not as a native embedding API.
+  - llama2_13b_hidden_state_embedding
   - qwen3_embedding
   # - bge_m3_embedding  # 完成基线并确认 GPU/磁盘后启用
 prediction_model: ridge
@@ -34,7 +37,9 @@ api_embeddings:
   enabled: false
   provider: openai_compatible
   base_url: https://api.openai.com/v1
-  model: text-embedding-3-small
+  # Paper-faithful OpenAI embedding benchmark.  It remains disabled unless an
+  # environment-only OPENAI_API_KEY is explicitly supplied.
+  model: text-embedding-3-large
   api_key_env: OPENAI_API_KEY
 chat_models:
   openai:
@@ -47,5 +52,10 @@ chat_models:
     api_key_env: null
 model_versions:
   chinese_roberta_embedding: hfl/chinese-roberta-wwm-ext
+  llama2_13b_hidden_state_embedding: /mnt/lustre3/home/gaozh/models/Llama-2-13b-hf
   chinese_bert_embedding: hfl/chinese-bert-wwm-ext
   bge_m3_embedding: BAAI/bge-m3
+  # Retired after the 2026 OOS audit; retained only to resolve archived runs.
+  paper_hk_bert_embedding: ckiplab/bert-base-chinese
+  paper_hk_roberta_embedding: xlm-roberta-large
+  paper_openai_embedding: text-embedding-3-large

@@ -1,0 +1,12 @@
+{
+  "phase": "screening",
+  "tasks": 12,
+  "output": "configs/generated/pooled_bge_m3_short_masked_short_screening.tsv",
+  "models": [
+    "bge_m3"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "phase": "temporal_mlp",
+  "tasks": 28,
+  "output": "configs/generated/cninfo_2010_2026_roberta_temporal_mlp.tsv",
+  "models": [
+    "roberta"
+  ],
+  "variants": [
+    "masked_short",
+    "short"
+  ]
+}
