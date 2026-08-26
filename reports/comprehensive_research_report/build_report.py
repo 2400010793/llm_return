@@ -13,6 +13,7 @@ ROOT = HERE.parents[1]
 SOURCE = HERE / "report.md"
 FACTS = HERE / "facts.json"
 FIGURES = HERE / "figures"
+AUDITS = HERE / "audits"
 OUTPUT = ROOT / "中国市场PromptToken新闻收益预测研究报告.pdf"
 CHECKSUMS = HERE / "checksums.sha256"
 
@@ -140,6 +141,24 @@ def generate_figures(facts: dict) -> None:
     fig.savefig(FIGURES / "new_prompt_return_axis_rankic.png", bbox_inches="tight")
     plt.close(fig)
 
+    hard_rows = facts["clustering"]["hard_kmeans_vs_ridge"]["by_prompt"]
+    labels = [row["prompt"] for row in hard_rows]
+    linear = [row["linear_net_daily_bp"] for row in hard_rows]
+    hard = [row["hard_net_daily_bp"] for row in hard_rows]
+    x = np.arange(len(hard_rows))
+    width = 0.34
+    fig, ax = plt.subplots(figsize=(7.0, 3.3), dpi=180)
+    ax.bar(x - width / 2, linear, width, label="PCA + Ridge", color="#1f4e79")
+    ax.bar(x + width / 2, hard, width, label="硬 KMeans + Ridge", color="#c45a3c")
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("净 bp / 信号日")
+    ax.set_title("四 Prompt 的集中 Top20% 多头执行结果")
+    ax.legend(frameon=False)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "hard_kmeans_daily_bp.png", bbox_inches="tight")
+    plt.close(fig)
+
 
 def render(facts: dict) -> None:
     import markdown
@@ -248,6 +267,7 @@ tbody tr:last-child td { border-bottom: 0.7pt solid #315f7d; }
 def write_checksums() -> None:
     files = [SOURCE, FACTS, Path(__file__), OUTPUT]
     files.extend(sorted(FIGURES.glob("*.png")))
+    files.extend(sorted(path for path in AUDITS.rglob("*") if path.is_file()))
     CHECKSUMS.write_text(
         "\n".join(f"{sha256(path)}  {path.relative_to(ROOT)}" for path in files) + "\n",
         encoding="utf-8",

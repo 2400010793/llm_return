@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -40,6 +41,17 @@ def test_frozen_facts_match_report_contract() -> None:
     assert all(row["horizon"] > row["volatility"] for row in comparison)
     assert new_axes["horizon_wins_methods"] == 4
     assert facts["token_body"]["models"][2]["token_rankic"] < facts["token_body"]["models"][2]["body_rankic"]
+    hard = facts["clustering"]["hard_kmeans_vs_ridge"]
+    assert hard["hard_net_daily_bp"] < hard["linear_net_daily_bp"]
+    assert hard["net_daily_bp_wins"] == 7
+    assert hard["average_holdings"] < 3
+    assert {row["prompt"] for row in hard["by_prompt"]} == {"盈利", "收益", "超额收益", "亏损"}
+    soft = facts["direction_prompt_results"]["soft_long_only_prompt_leaders"]
+    assert len(soft) == 4
+    assert all(row["average_holdings"] > 80 for row in soft)
+    density = facts["clustering"]["bge_loss_umap_hdbscan"]
+    assert density["umap_hdbscan_long_short_bp"] > density["pca_ridge_long_short_bp"]
+    assert density["costs_included"] is False
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -54,4 +66,23 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "0.05680" in source
     assert "两模型四方向 Prompt 的同口径收益统计" in source
     assert "新 Prompt 在同一收益标签上的公平比较" in source
+    assert "平均只持有 2.80 只股票" in source
+    assert "3.10--3.63 净 bp/交易日" in source
+    assert "加入 Prompt 的证据边界" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
+
+
+def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:
+    audit_dir = REPORT_DIR / "audits" / "prompt_cluster_portfolios"
+    summary = json.loads((audit_dir / "summary.json").read_text(encoding="utf-8"))
+    facts = load_builder().load_facts()
+    hard = facts["clustering"]["hard_kmeans_vs_ridge"]
+    assert summary["protocols_are_not_level_comparable"] is True
+    assert summary["linear_hard"]["pairs"] == 16
+    assert abs(
+        summary["linear_hard"]["hard_minus_linear_net_daily_bp_mean"]
+        - hard["hard_minus_linear_net_daily_bp"]
+    ) < 1e-5
+    assert len(summary["soft_long_only"]["leaders_by_prompt"]) == 4
+    for name in ("linear_hard_daily.csv", "soft_long_only_daily.csv", "umap_hdbscan_daily.csv"):
+        assert (audit_dir / name).stat().st_size > 0

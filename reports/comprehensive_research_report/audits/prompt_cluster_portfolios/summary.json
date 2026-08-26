@@ -1,0 +1,203 @@
+{
+  "protocols_are_not_level_comparable": true,
+  "linear_hard": {
+    "hard_minus_linear_net_daily_bp_mean": -0.4942386060783833,
+    "hard_wins": 7,
+    "pairs": 16,
+    "method_means": [
+      {
+        "method": "hard_kmeans_ridge",
+        "signal_days": 1991.0,
+        "average_holdings": 2.8046207935710696,
+        "gross_daily_bp": 18.73183021006562,
+        "cost_daily_bp": 14.454801118651575,
+        "net_daily_bp": 4.277029091414046,
+        "positive_day_rate": 0.45162606730286287
+      },
+      {
+        "method": "linear_ridge",
+        "signal_days": 1991.0,
+        "average_holdings": 2.8046207935710696,
+        "gross_daily_bp": 19.221852138789078,
+        "cost_daily_bp": 14.45058444129665,
+        "net_daily_bp": 4.771267697492429,
+        "positive_day_rate": 0.45150050226017074
+      }
+    ],
+    "by_prompt": [
+      {
+        "prompt": "excess_return",
+        "prompt_zh": "超额收益",
+        "linear_net_daily_bp": 1.8789173723294788,
+        "hard_net_daily_bp": 1.0523699566406424,
+        "hard_minus_linear_net_daily_bp": -0.826547415688836,
+        "hard_wins": 1,
+        "pairs": 4
+      },
+      {
+        "prompt": "loss",
+        "prompt_zh": "亏损",
+        "linear_net_daily_bp": 4.457109741459487,
+        "hard_net_daily_bp": 2.684391607123394,
+        "hard_minus_linear_net_daily_bp": -1.7727181343360927,
+        "hard_wins": 0,
+        "pairs": 4
+      },
+      {
+        "prompt": "profit",
+        "prompt_zh": "盈利",
+        "linear_net_daily_bp": 6.029158347888292,
+        "hard_net_daily_bp": 6.992971910237835,
+        "hard_minus_linear_net_daily_bp": 0.9638135623495423,
+        "hard_wins": 4,
+        "pairs": 4
+      },
+      {
+        "prompt": "return",
+        "prompt_zh": "收益",
+        "linear_net_daily_bp": 6.7198853282924595,
+        "hard_net_daily_bp": 6.378382891654313,
+        "hard_minus_linear_net_daily_bp": -0.3415024366381467,
+        "hard_wins": 2,
+        "pairs": 4
+      }
+    ],
+    "mask": {
+      "gross_daily_bp": {
+        "mean_delta": 3.2368695216749095,
+        "wins": 13,
+        "pairs": 16
+      },
+      "cost_daily_bp": {
+        "mean_delta": 0.029413068075899163,
+        "wins": 11,
+        "pairs": 16
+      },
+      "net_daily_bp": {
+        "mean_delta": 3.2074564535990104,
+        "wins": 13,
+        "pairs": 16
+      }
+    }
+  },
+  "soft_long_only": {
+    "leaders_by_prompt": [
+      {
+        "prompt": "excess_return",
+        "factor_id": "soft_excess_return_roberta_masked_short_long_short",
+        "prompt_zh": "超额收益",
+        "model": "roberta",
+        "variant": "masked_short",
+        "objective": "long_short",
+        "days": 2082,
+        "gross_daily_bp": 4.131599262030008,
+        "cost_daily_bp": 0.5606662536210176,
+        "net_daily_bp": 3.57093300840899,
+        "average_holdings": 103.57252641690683,
+        "median_holdings": 106.0,
+        "average_new_signals": 6.13640730067243,
+        "average_raw_signals": 14.863592699327569,
+        "daily_turnover": 0.05606662536210175,
+        "net_sharpe": 0.5256412783647745,
+        "net_geometric_annual_return": 0.0783131149991238
+      },
+      {
+        "prompt": "loss",
+        "factor_id": "soft_loss_bge_m3_masked_short_rank_ic",
+        "prompt_zh": "亏损",
+        "model": "bge_m3",
+        "variant": "masked_short",
+        "objective": "rank_ic",
+        "days": 2082,
+        "gross_daily_bp": 4.182464485529144,
+        "cost_daily_bp": 0.5506152382553406,
+        "net_daily_bp": 3.631849247273804,
+        "average_holdings": 97.37704130643611,
+        "median_holdings": 103.0,
+        "average_new_signals": 6.13640730067243,
+        "average_raw_signals": 14.863592699327569,
+        "daily_turnover": 0.055061523825534066,
+        "net_sharpe": 0.5950608985057427,
+        "net_geometric_annual_return": 0.0829722545911209
+      },
+      {
+        "prompt": "profit",
+        "factor_id": "soft_profit_roberta_masked_short_long_short",
+        "prompt_zh": "盈利",
+        "model": "roberta",
+        "variant": "masked_short",
+        "objective": "long_short",
+        "days": 2082,
+        "gross_daily_bp": 3.6527210877283123,
+        "cost_daily_bp": 0.5575174928308345,
+        "net_daily_bp": 3.095203594897478,
+        "average_holdings": 101.78194044188281,
+        "median_holdings": 107.0,
+        "average_new_signals": 6.13640730067243,
+        "average_raw_signals": 14.863592699327569,
+        "daily_turnover": 0.055751749283083456,
+        "net_sharpe": 0.4679897587108743,
+        "net_geometric_annual_return": 0.0662691158874526
+      },
+      {
+        "prompt": "return",
+        "factor_id": "soft_return_bge_m3_masked_short_long_short",
+        "prompt_zh": "收益",
+        "model": "bge_m3",
+        "variant": "masked_short",
+        "objective": "long_short",
+        "days": 2082,
+        "gross_daily_bp": 4.009776326338348,
+        "cost_daily_bp": 0.5528737762505208,
+        "net_daily_bp": 3.4569025500878263,
+        "average_holdings": 89.90201729106629,
+        "median_holdings": 94.0,
+        "average_new_signals": 6.13640730067243,
+        "average_raw_signals": 14.863592699327569,
+        "daily_turnover": 0.05528737762505208,
+        "net_sharpe": 0.537480494109504,
+        "net_geometric_annual_return": 0.0768223933639893
+      }
+    ],
+    "mask": {
+      "gross_daily_bp": {
+        "mean_delta": 0.42976068955006536,
+        "wins": 9,
+        "pairs": 16
+      },
+      "cost_daily_bp": {
+        "mean_delta": 0.0019692883486743043,
+        "wins": 11,
+        "pairs": 16
+      },
+      "net_daily_bp": {
+        "mean_delta": 0.427791401201391,
+        "wins": 9,
+        "pairs": 16
+      },
+      "net_sharpe": {
+        "mean_delta": 0.06895757049698081,
+        "wins": 9,
+        "pairs": 16
+      }
+    }
+  },
+  "umap_hdbscan": [
+    {
+      "method": "pca_ridge",
+      "valid_signal_days": 132.88888888888889,
+      "average_long_holdings": 4.8939261455784955,
+      "long_daily_bp": 0.13010563725944044,
+      "short_bucket_daily_bp": -14.829162964382725,
+      "long_short_daily_bp": 14.959268601642167
+    },
+    {
+      "method": "umap_hdbscan_ridge",
+      "valid_signal_days": 132.88888888888889,
+      "average_long_holdings": 4.8939261455784955,
+      "long_daily_bp": 5.175549127505132,
+      "short_bucket_daily_bp": -14.54300366879096,
+      "long_short_daily_bp": 19.71855279629609
+    }
+  ]
+}

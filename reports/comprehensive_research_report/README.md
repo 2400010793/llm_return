@@ -12,6 +12,7 @@
 - `facts.json`：正文和图表使用的冻结事实及来源；
 - `build_report.py`：生成图表、PDF 和校验和；
 - `figures/`：由冻结事实生成的图；
+- `audits/prompt_cluster_portfolios/`：从底层预测、逐日持仓重算的日均 bp、持仓和成本审计；
 - `checksums.sha256`：报告源文件、图和 PDF 的 SHA256。
 
 构建命令：
@@ -21,6 +22,13 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-report.txt
 python reports/comprehensive_research_report/build_report.py
+```
+
+需要从原实验目录重新生成聚类持仓审计时运行：
+
+```bash
+python scripts/audit_prompt_cluster_portfolios.py \
+  --root /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
 ```
 
 输出为仓库根目录的 `中国市场PromptToken新闻收益预测研究报告.pdf`。构建过程不访问
