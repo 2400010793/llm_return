@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import json
 from pathlib import Path
@@ -97,6 +98,12 @@ def test_frozen_facts_match_report_contract() -> None:
     assert "paired 6+2+1 RankIC delta positive in at least 6/9 test years" in roadmap["prompt_factor"]["acceptance"]
     assert "Top20 overlap and late-fusion incremental RankIC" in roadmap["model_correlation"]["next_measurements"]
     assert "CSI 300" in roadmap["regime_expansion"]["macro_news"]
+    return_comparison = facts["prompt_return_comparison"]
+    assert "no completed common-return regression" in return_comparison["standalone_neutral_status"]
+    axes = {row["axis"]: row for row in return_comparison["semantic_axes_pca_ridge_token"]}
+    assert set(axes) == {"确定性", "期限收益", "波动率", "流动性", "估值", "冲击"}
+    assert abs(axes["波动率"]["rankic"] - 0.0429753126) < 1e-10
+    assert abs(axes["波动率"]["top20_ls_bp"] - 14.4825706) < 1e-7
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -141,6 +148,11 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "沪市 64、深市 752" in source
     assert "新浪为什么必须在本地，以及实际爬取逻辑" in source
     assert "本地浏览器发现 + 本地普通 HTTP 扩展 + 本地去重/清洗" in source
+    assert "这里的 `N × P × D` 是数组形状" in source
+    assert "`N × 6 × 768`" in source
+    assert "六条单独中性 Prompt" in source
+    assert "+14.48" in source
+    assert "不能用 0.05623 和 0.05486 直接判断" in source
 
 
 def test_pdf_builder_resolves_the_simplified_chinese_font_by_family() -> None:
@@ -186,6 +198,21 @@ def test_prompt_representation_audit_matches_frozen_facts() -> None:
     assert "full_mean" in audit["true_body_mean_status"]
     for name in ("four_prompt_masked_rankic.csv", "qwen_masked_pca32_rankic.csv"):
         assert (audit_dir / name).stat().st_size > 0
+
+
+def test_prompt_return_display_audit_matches_frozen_facts() -> None:
+    audit_dir = REPORT_DIR / "audits" / "prompt_return_regressions"
+    summary = json.loads((audit_dir / "summary.json").read_text(encoding="utf-8"))
+    assert summary["four_direction_rows"] == 8
+    assert summary["semantic_axis_rows"] == 6
+    assert "no completed common-return regression" in summary["standalone_neutral_prompt_status"]
+    with (audit_dir / "semantic_axes_return3d_2026.csv").open(encoding="utf-8", newline="") as handle:
+        axes = {row["axis"]: row for row in csv.DictReader(handle)}
+    assert abs(float(axes["volatility"]["rankic"]) - 0.0429753126) < 1e-10
+    assert abs(float(axes["volatility"]["top20_ls_bp"]) - 14.4825706) < 1e-7
+    with (audit_dir / "four_direction_masked_next_day.csv").open(encoding="utf-8", newline="") as handle:
+        four = list(csv.DictReader(handle))
+    assert len(four) == 8
 
 
 def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:

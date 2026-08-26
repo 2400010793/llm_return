@@ -169,9 +169,20 @@ TF-IDF/词典/Word2Vec/pooled Transformer 等传统或整文基线；当前 prom
 均值，不含“分析股票”、句号、separator 或 special token。正文必须用 `body_mean`；
 Qwen 对应用 `article_mean`，禁止用 `full_mean` 冒充正文。
 
+`prompt_token_embeddings` 的 `N × P × D` 表示 `N` 条新闻、每条保存 `P` 个 Prompt
+token、每个 token 是 `D` 维 hidden state；不是三个数相乘后的标量。目标 span 或
+`prompt_mean` 沿 `P` 维取均值后才得到供 PCA 使用的 `N × D` 矩阵。
+
 扩展实验还把语义 prompt 对齐到对应标签：估值使用 PE/PB/PS/EV-EBITDA 的滞后
 log 相对偏离；波动率使用下一日实现波动率水平、log 增量和 5 日相对 20 日跳升；
 流动性使用下一日价差水平和 log 变化。它们回答的是不同预测任务，不能都解释为收益率。
+
+收益回归目前有两个不同口径：四方向 masked target span 对次日收益采用 2018--2026
+严格 6+2+1，RoBERTa/BGE-M3 四词平均 RankIC 为 0.05486/0.03630；18 条高中低 Prompt
+构成的六个 direction 轴对未来三日收益只有 2026 单折，PCA+Ridge token RankIC 为
+确定性 0.05623、期限收益 0.04311、波动率 0.04298、流动性 0.03324、估值 0.02241、
+冲击 0.01501。六条单独中性 Prompt 目前没有同一收益标签回归，不能把 direction 轴结果
+写成单独 `分析股票波动率` 的结果；两个已完成口径也不能按绝对 RankIC 直接排名。
 
 ## 5. PCA 与聚类方法
 

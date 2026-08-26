@@ -233,6 +233,20 @@
       "hidden_size": 4096
     }
   },
+  "prompt_return_comparison": {
+    "standalone_neutral_status": "The six standalone neutral prompts have embedding/similarity outputs but no completed common-return regression table.",
+    "four_direction_protocol": "Sina legacy common panel; masked_short target span; next_day_return; 2018-2026 strict 6+2+1; no-cluster linear Ridge.",
+    "semantic_axes_protocol": "18 aligned high/neutral/low prompts collapsed to direction axes; RoBERTa masked_short target span; forward_compounded_return_3d; 2018-2023 train, 2024-2025 validation, 2026 test; PCA+Ridge.",
+    "semantic_axes_pca_ridge_token": [
+      {"axis": "确定性", "rankic": 0.0562306571, "top20_ls_bp": 7.2938311, "test_stock_days": 1683},
+      {"axis": "期限收益", "rankic": 0.0431054706, "top20_ls_bp": 45.2109760, "test_stock_days": 1683},
+      {"axis": "波动率", "rankic": 0.0429753126, "top20_ls_bp": 14.4825706, "test_stock_days": 1683},
+      {"axis": "流动性", "rankic": 0.0332433674, "top20_ls_bp": 36.0740507, "test_stock_days": 1683},
+      {"axis": "估值", "rankic": 0.0224141026, "top20_ls_bp": 52.8968960, "test_stock_days": 1683},
+      {"axis": "冲击", "rankic": 0.0150103980, "top20_ls_bp": 6.4273105, "test_stock_days": 1683}
+    ],
+    "comparability_warning": "The four-direction table predicts next-day return over nine rolling test years; the semantic-axis table predicts overlapping forward three-day return in the 2026 test fold. Do not rank their absolute values in one league table."
+  },
   "clustering": {
     "hard_kmeans_vs_ridge": {
       "mean_rankic_delta": -0.00026,

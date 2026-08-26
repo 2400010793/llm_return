@@ -1,0 +1,7 @@
+{
+  "standalone_neutral_prompt_status": "Embedding/similarity complete or partial by model; no completed common-return regression for the six standalone neutral prompts.",
+  "four_direction_protocol": "Sina legacy common panel; masked_short target span; next_day_return; 2018-2026 strict 6+2+1; no-cluster linear Ridge.",
+  "semantic_axis_protocol": "18 aligned high/neutral/low prompts collapsed to six direction axes; RoBERTa masked_short target span; forward_compounded_return_3d; 2018-2023 train, 2024-2025 validation, 2026 test; PCA+Ridge.",
+  "four_direction_rows": 8,
+  "semantic_axis_rows": 6
+}

@@ -341,6 +341,18 @@ CLS 和 `prompt_token_embeddings`，因此不是只保存 Prompt token。
 | `full_mean` | `mean(h_i, i∈Prompt+标题+正文)` | 是 | 不能命名为 `body_mean` |
 | `title_body_mean` | `mean(h_i, i∈标题+正文)` | 不直接池化 Prompt | 双向模型中仍是 Prompt-conditioned 正文表示 |
 
+这里的 `N × P × D` 是数组形状，不是把三个数相乘后得到一个指标：
+
+- `N`：该文件中的新闻/公告条数，一行对应一篇输入；
+- `P`：该 Prompt 保存的 token 位置数，不同 tokenizer 和 Prompt 可以不同；
+- `D`：模型 hidden size，RoBERTa/BGE-M3/Qwen 分别为 768/1,024/4,096。
+
+例如 RoBERTa 的 `分析股票收益` 有六个目标 Prompt token，所以一个含 `N` 条新闻的文件是
+`N × 6 × 768`；第 `n` 条新闻、第 `p` 个 Prompt token 对应一个 768 维上下文化向量。
+BGE-M3 的同一句审计为四个 Prompt token，对应 `N × 4 × 1,024`。选取“收益”目标位置并
+对多 token span 求均值后，数组由 `N × P × D` 变成 `N × D`；`prompt_mean` 则对全部
+`P` 个 Prompt 位置平均，同样得到 `N × D`，随后才进入训练期 PCA 和回归。
+
 所有 mean 都排除 BOS/EOS、padding 和不可见位置。目标 `token_embedding` 也不是词典中的
 静态 token embedding，而是**整篇输入前向计算后的最后一层上下文化 hidden state**。
 Qwen 的 `prompt_mean` 对历史四词任务平均全部 Prompt token，包括末尾句号；“收益”token
@@ -363,6 +375,9 @@ prompt 收益能力。下面改用现有最完整的严格可比表：旧新浪�
 四个 prompt 在两个模型中均为正，且该口径下 RoBERTa 全部高于 BGE-M3。RoBERTa
 内部由“超额收益”最高，BGE-M3 内部由“盈利”最高；“收益”并非每个模型的最高点。
 因此这张表支持方向词 token 含有收益排序信息和模型差异，不支持某个方向词普遍最优。
+四词平均 RankIC 为 RoBERTa **0.05486**、BGE-M3 **0.03630**。这里的 RankIC 是每个
+测试日横截面 Spearman IC 的平均，不是回归系数；表中没有把九年收益组合、成本或 Sharpe
+混入同一个数。
 来源为 `reports/prompt_cluster_token_comparison.json` 中
 `method_family=linear_ridge, variant=masked_short` 的八个配置。
 
@@ -696,6 +711,14 @@ token 坐标，而比较训练期标准化后的因子和样本外预测。
 
 ### 7.2 新 Prompt 在同一收益标签上的公平比较
 
+这里必须先区分“单独中性 Prompt”和“三点式语义轴”：
+
+| 输入 | 示例 | 是否已有同一收益标签回归 | 当前可报告内容 |
+|---|---|---|---|
+| 六条单独中性 Prompt | `分析股票波动率`、`分析股票估值`、`分析股票风险`等 | **没有** | 已有 embedding、tokenizer preflight 和相似度/完整度；不能填造 RankIC |
+| 六个三点式 direction 轴 | 高波动率 token - 低波动率 token；长期收益 - 短期收益 | **有** | RoBERTa、PCA 后回归、2026 单折的三日收益 RankIC 和 Top20 多空 |
+| 四方向历史 Prompt | 盈利、收益、超额收益、亏损 | **有** | RoBERTa/BGE-M3、次日收益、2018--2026 严格 6+2+1；见 4.2 节 |
+
 已有监督结果不是六条单独中性 prompt，而是 18 条对齐 prompt 组成的六个三点轴。
 每个轴都使用 RoBERTa `masked_short` 目标 span，并构造
 `direction = high - low`；期限轴对应“长期收益 - 短期收益”。所有行使用同一新闻池、
@@ -704,14 +727,20 @@ token 坐标，而比较训练期标准化后的因子和样本外预测。
 
 主口径 PCA32+Ridge 的绝对 RankIC 如下。这里展示绝对值而不是只展示 Token-Body 差值。
 
-| 新语义轴 | Token direction RankIC | Body direction RankIC | Token - Body |
-|---|---:|---:|---:|
-| 确定性 | **0.05623** | -0.04496 | +0.10119 |
-| 期限收益 | 0.04311 | **0.05147** | -0.00837 |
-| 波动率 | 0.04298 | -0.03323 | +0.07621 |
-| 流动性 | 0.03324 | -0.01451 | +0.04775 |
-| 估值 | 0.02241 | 0.02276 | -0.00035 |
-| 冲击 | 0.01501 | 0.01125 | +0.00376 |
+| 新语义轴 | Token direction RankIC | Body direction RankIC | Token - Body | Token Top20 多空毛 bp |
+|---|---:|---:|---:|---:|
+| 确定性 | **0.05623** | -0.04496 | +0.10119 | +7.29 |
+| 期限收益 | 0.04311 | **0.05147** | -0.00837 | +45.21 |
+| 波动率 | 0.04298 | -0.03323 | +0.07621 | +14.48 |
+| 流动性 | 0.03324 | -0.01451 | +0.04775 | +36.07 |
+| 估值 | 0.02241 | 0.02276 | -0.00035 | +52.90 |
+| 冲击 | 0.01501 | 0.01125 | +0.00376 | +6.43 |
+
+最后一列是在每天至少 10 只股票时，预测最高 20% 的未来三日复合收益减去最低 20% 的
+未来三日复合收益，再对 2026 测试日取均值并换算为 bp。它是**未扣成本、三日窗口可能
+重叠的诊断量**，不能当成可交易的“日均净 bp”，也不能与第 5 节使用不同执行器的成本后
+组合直接比较。估值轴虽然 Top20 多空毛差最高，但 RankIC 只有 0.02241，说明尾部差异和
+全横截面排序不是同一个指标。
 
 PCA 线性结果中，期限收益轴 token 比波动率轴仅高 0.00013，不能单凭这一行声称明显
 领先。进一步保持同一输入和标签，只替换监督/聚类方法，期限收益轴在四种方法中均高于
@@ -735,6 +764,13 @@ PCA 线性结果中，期限收益轴 token 比波动率轴仅高 0.00013，不�
 且确定性轴在线性结果中更高。正确表述是“收益语义在非线性分层中相对波动率更匹配三日
 收益”，不是“收益 prompt 已被证明普遍最好”。六条不含高中低的中性 prompt 目前只有
 embedding/相似度及各自匹配标签结果，尚无同一收益标签上的公平 RankIC 横表。
+
+因此目前最准确的横向总结是：四方向 Prompt 对次日收益已经有九年滚动证据，RoBERTa/
+BGE-M3 四词平均 RankIC 为 0.05486/0.03630；新三点轴对三日收益只有 2026 单折，
+RankIC 从确定性的 0.05623 到冲击的 0.01501。两组标签、测试期和表示构造不同，只能分别
+展示，不能用 0.05623 和 0.05486 直接判断新 Prompt 优于旧 Prompt。要回答单独的
+`分析股票波动率` 是否也能预测收益，仍需在同一新闻交集上运行 PCA32+Ridge，并和
+`分析股票收益` 使用完全相同的 6+2+1 折与 `next_day_return` 标签。
 
 ### 7.3 估值的可检验定义
 
@@ -1109,6 +1145,7 @@ Regime 的交互项。候选来源包括新浪本地抓取、巨潮公告、指�
 | 四方向 Prompt、mask、成本和聚类结果 | 工作区 `REPORT_ALL_RESULTS.md`，SHA256 `23ade165...e4ff` |
 | short/masked-short 线性 RankIC 配对 | `audits/prompt_mask/rankic_pairs.csv`、`summary.json`；生成器 `scripts/audit_prompt_mask_rankic.py` |
 | Prompt mean、方向 span 与 Qwen 三表示 RankIC | `audits/prompt_representations/`；生成器 `scripts/audit_prompt_representation_rankic.py` |
+| 四方向与新语义轴的收益回归展示 | `audits/prompt_return_regressions/`；生成器 `scripts/audit_prompt_return_regression_display.py` |
 | 估值、波动率、价差配对结果 | `reports/aligned_extended_regression/token_body_selected.csv` |
 | 新语义轴聚类配对 | `reports/aligned_factor_clusters/token_minus_body_delta.csv` |
 | 中性 embedding 完成度 | `docs/status_snapshot_2026-08-26.json` 和 embedding shard `COMPLETED` |
