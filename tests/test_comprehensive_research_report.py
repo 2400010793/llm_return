@@ -27,6 +27,18 @@ def test_frozen_facts_match_report_contract() -> None:
         if "year_counts" in dataset:
             assert sum(dataset["year_counts"].values()) == dataset["rows"]
     assert facts["direction_prompt_results"]["folds_complete"] == 144
+    original = facts["direction_prompt_results"]["masked_short_linear_ridge"]
+    assert len(original) == 8
+    assert {(row["model"], row["prompt"]) for row in original} == {
+        (model, prompt)
+        for model in ("RoBERTa", "BGE-M3")
+        for prompt in ("盈利", "收益", "超额收益", "亏损")
+    }
+    new_axes = facts["clustering"]["new_axes_single_2026"]
+    comparison = new_axes["horizon_vs_volatility_token_rankic"]
+    assert len(comparison) == 4
+    assert all(row["horizon"] > row["volatility"] for row in comparison)
+    assert new_axes["horizon_wins_methods"] == 4
     assert facts["token_body"]["models"][2]["token_rankic"] < facts["token_body"]["models"][2]["body_rankic"]
 
 
@@ -40,3 +52,6 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "903,665" in source
     assert "0.05360" in source
     assert "0.05680" in source
+    assert "两模型四方向 Prompt 的同口径收益统计" in source
+    assert "新 Prompt 在同一收益标签上的公平比较" in source
+    assert "尚无同一收益标签上的公平 RankIC 横表" in source

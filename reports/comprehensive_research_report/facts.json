@@ -90,6 +90,17 @@
     "rolling_protocol": "6 train years + 2 validation years + 1 test year; test years 2018-2026",
     "folds_complete": 144,
     "folds_expected": 144,
+    "masked_short_linear_ridge": [
+      {"prompt": "盈利", "model": "RoBERTa", "rankic": 0.0542951585},
+      {"prompt": "收益", "model": "RoBERTa", "rankic": 0.0539368898},
+      {"prompt": "超额收益", "model": "RoBERTa", "rankic": 0.0564363982},
+      {"prompt": "亏损", "model": "RoBERTa", "rankic": 0.0547868823},
+      {"prompt": "盈利", "model": "BGE-M3", "rankic": 0.0381168425},
+      {"prompt": "收益", "model": "BGE-M3", "rankic": 0.0355617912},
+      {"prompt": "超额收益", "model": "BGE-M3", "rankic": 0.0372033078},
+      {"prompt": "亏损", "model": "BGE-M3", "rankic": 0.0343115154}
+    ],
+    "masked_short_linear_source": "reports/prompt_cluster_token_comparison.json linear_and_hard; method_family=linear_ridge, variant=masked_short",
     "rankic_leaders": [
       {"prompt": "超额收益", "model": "BGE-M3", "variant": "short", "rankic": 0.04439, "positive_years": 9},
       {"prompt": "收益", "model": "BGE-M3", "variant": "short", "rankic": 0.04327, "positive_years": 9},
@@ -123,13 +134,35 @@
     "bge_loss_umap_hdbscan": {"pca_ridge_long_bp": 1.50, "pca_ridge_long_short_bp": 15.26, "umap_hdbscan_long_bp": 6.17, "umap_hdbscan_long_short_bp": 20.35, "positive_years": 8, "years": 9},
     "new_axes_single_2026": {
       "protocol": "2018-2023 train, 2024-2025 validation, 2026 test",
+      "representation": "RoBERTa masked-short target-span direction embedding; high/long minus low/short",
+      "target": "forward_compounded_return_3d",
+      "common_test_stock_days": 1683,
+      "pca_ridge_axis_rankic": {
+        "certainty": 0.056231,
+        "horizon": 0.043105,
+        "volatility": 0.042975,
+        "liquidity": 0.033243,
+        "valuation": 0.022414,
+        "impact": 0.015010
+      },
+      "horizon_vs_volatility_token_rankic": [
+        {"method": "PCA32 + Ridge", "horizon": 0.043105, "volatility": 0.042975, "delta": 0.000130},
+        {"method": "hard KMeans + Ridge", "horizon": 0.060592, "volatility": 0.042397, "delta": 0.018195},
+        {"method": "soft KMeans", "horizon": 0.064589, "volatility": -0.012115, "delta": 0.076705},
+        {"method": "UMAP8 + HDBSCAN", "horizon": -0.008814, "volatility": -0.034561, "delta": 0.025747}
+      ],
+      "horizon_method_mean_rankic": 0.039868,
+      "volatility_method_mean_rankic": 0.009674,
+      "horizon_wins_methods": 4,
+      "comparison_methods": 4,
       "pca_ridge_mean_token_body_rankic_delta": 0.03670,
       "pca_ridge_rankic_wins": 4,
       "axes": 6,
       "hard_kmeans_mean_token_body_rankic_delta": 0.03344,
       "hard_kmeans_rankic_wins": 5,
       "soft_kmeans_mean_token_body_rankic_delta": -0.01451,
-      "umap_hdbscan_mean_token_body_rankic_delta": -0.00881
+      "umap_hdbscan_mean_token_body_rankic_delta": -0.00881,
+      "source": "reports/aligned_factor_clusters/all_results.csv"
     }
   },
   "matched_semantic_targets": [

@@ -64,9 +64,11 @@ token、正文及模型间融合。为了减少公司身份记忆和时间泄漏
 5. **聚类主要是结构诊断，不是稳定的主预测器。** 四方向硬 KMeans 相对同 PCA Ridge
    的平均 RankIC 增量为 -0.00026，仅 6/16 胜。UMAP+HDBSCAN 在一个 BGE-M3 loss
    输入上把多空从 15.26bp 提高到 20.35bp，但仍是局部结果。
-6. **语义轴必须匹配预测标签。** 估值 token 对下一日 PE 历史相对偏离取得 0.0764
-   RankIC，正文为 0.0651；波动率 token 对下一日绝对实现波动率为 0.0553，与正文
-   0.0550 几乎相同，对波动率 log 增量则更差。这证明“预测水平”和“预测变化”是不同任务。
+6. **新 Prompt 在同一收益标签上呈现任务相关差异，但证据仍是单年。** 2026 同新闻、
+   同三日收益标签下，期限收益轴 token 在 PCA Ridge、硬 KMeans、软 KMeans 和
+   UMAP+HDBSCAN 四种方法中都高于波动率轴，四方法平均 RankIC 为 0.03987 对
+   0.00967；但线性 PCA Ridge 仅为 0.043105 对 0.042975。匹配标签实验中，估值
+   token 对下一日 PE 相对偏离为 0.0764，波动率 token 对下一日实现波动率为 0.0553。
 7. **当前最关键的结论仍未完成验证。** 三模型、四 Prompt、token/body 的严格共同样本
    PCA32 比较已经设计，但尚未产生完整结果。因此不能写成“Qwen 已经证明兼顾共同语义
    和细粒度差别”，也不能写成“token 普遍优于正文”。
@@ -199,23 +201,41 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 
 ### 4.1 模型与表示
 
-| 模型 | 模型来源/runner ID | 结构 | 原始维度 | 输入上限 | 正文表示 | 已有代表 RankIC |
-|---|---|---|---:|---:|---|---:|
-| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder | 768 | 512 | `body_mean` | 新浪 0.06044；巨潮 0.01764 |
-| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder | 1,024 | 1,000 | `body_mean` | 新浪 0.04439；巨潮 0.01415 |
-| Qwen3-Embedding-8B | Ollama `qwen3-embedding:8b` | 因果模型 | 4,096 | 既有任务合同 | `article_mean` | 新浪正文 0.05680；巨潮 0.02732 |
+| 模型 | 模型来源/runner ID | 结构 | 原始维度 | 输入上限 | 正文表示 |
+|---|---|---|---:|---:|---|
+| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder | 768 | 512 | `body_mean` |
+| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder | 1,024 | 1,000 | `body_mean` |
+| Qwen3-Embedding-8B | Ollama `qwen3-embedding:8b` | 因果模型 | 4,096 | 既有任务合同 | `article_mean` |
 
 六个中性 Prompt 固定为：`分析股票估值`、`分析股票确定性`、`分析股票波动率`、
 `分析股票冲击`、`分析股票流动性`、`分析股票风险`。不添加“请”“综合分析”、高中低
 或无意义 padding。RoBERTa/BGE-M3 输出同时保存 prompt/title/body/full 的 mean/max、
 CLS 和 `prompt_token_embeddings`，因此不是只保存 Prompt token。
 
-表中性能来自不同标签和历史实验，只说明各 runner 已产生有预测力的表示，不能当作严格
-模型排名。公平比较使用同新闻、同 prompt、同 next-day 标签和各模型训练期 PCA32。
 双向模型的前置 prompt 可以影响正文 token；Qwen 的 prompt 后置，因果注意力下此前的
 `article_mean` 不受 prompt 反向影响。这一结构差异不能通过统一 PCA 消除。
 
-### 4.2 四方向 Prompt 的 span 定义
+### 4.2 两模型四方向 Prompt 的同口径收益统计
+
+上一版在模型介绍表中混放了新浪/巨潮、next-day/event/O2O 和不同表示，不能用于判断
+prompt 收益能力。下面改用现有最完整的严格可比表：旧新浪共同面板、2018--2026 的
+6+2+1 滚动、`next_day_return`、`masked_short`、各 prompt 自身目标 span、无聚类
+线性 Ridge。`late_fusion` 是历史文件名，表中四行均为独立 prompt 预测。
+
+| Prompt 目标 span | RoBERTa RankIC | BGE-M3 RankIC | RoBERTa - BGE |
+|---|---:|---:|---:|
+| 盈利 | 0.05430 | 0.03812 | +0.01618 |
+| 收益 | 0.05394 | 0.03556 | +0.01838 |
+| 超额收益 | **0.05644** | 0.03720 | +0.01923 |
+| 亏损 | 0.05479 | 0.03431 | +0.02048 |
+
+四个 prompt 在两个模型中均为正，且该口径下 RoBERTa 全部高于 BGE-M3。RoBERTa
+内部由“超额收益”最高，BGE-M3 内部由“盈利”最高；“收益”并非每个模型的最高点。
+因此这张表支持方向词 token 含有收益排序信息和模型差异，不支持某个方向词普遍最优。
+来源为 `reports/prompt_cluster_token_comparison.json` 中
+`method_family=linear_ridge, variant=masked_short` 的八个配置。
+
+### 4.3 四方向 Prompt 的 span 定义
 
 | Prompt | 目标 span | 说明 |
 |---|---|---|
@@ -227,7 +247,7 @@ CLS 和 `prompt_token_embeddings`，因此不是只保存 Prompt token。
 历史结果保留原有 span 定义，不能事后更改。新的三模型公平比较使用完整目标短语，并在
 manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 Prompt hash。
 
-### 4.3 Benchmark 层级
+### 4.4 Benchmark 层级
 
 原始论文的主骨架是冻结文本表示、简单监督头、严格滚动和组合检验。本项目按以下顺序
 区分 benchmark 与扩展，防止把模型复杂度误当作 prompt 信息：
@@ -243,7 +263,7 @@ manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 
 每个 token/body/聚类配置都与它配对；不做原始 768/1024/4096 维回归，不因最终测试
 结果切换 PCA 维数。历史 PCA64/raw 结果保留为历史证据，但不混入新主表。
 
-### 4.4 时间切分与固定参数
+### 4.5 时间切分与固定参数
 
 新浪主结果使用严格 6+2+1，测试年 2018--2026。巨潮三模型公平比较因历史 embedding
 交集限制，基础预测采用 3 年历史加 1 年测试，并在历史窗口内保留 1 年 OOS 供二级融合。
@@ -254,7 +274,7 @@ manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 
 seeds 17/29/42/71/113、soft shrinkage 500、temperature 0.5、UMAP8 和 HDBSCAN
 `min_cluster_size=50, min_samples=10`。不做原始维回归，也不根据九年最终结果改参数。
 
-### 4.5 评价指标
+### 4.6 评价指标
 
 主指标为日均 RankIC、RankIC IR、逐年 RankIC、正 RankIC 年份数、月度正 RankIC 比例
 和日期区块 bootstrap 区间。辅助指标为同新闻池 Top20% 超额、多空收益、Accuracy、
@@ -263,7 +283,7 @@ seeds 17/29/42/71/113、soft shrinkage 500、temperature 0.5、UMAP8 和 HDBSCAN
 Embedding cosine、centered cosine、CKA、ARI 和 silhouette 只描述表示结构，不能选择
 收益模型。三模型原始坐标不可直接比较；跨模型只比较标准化几何统计和完全样本外因子。
 
-### 4.6 组合与成本
+### 4.7 组合与成本
 
 四方向历史成本回测固定 `gamma=0.1`，买入和卖出各 5bp。只做多、独立做空和多空必须
 分别报告。A 股缺少逐股券源、借券费和召回数据时，任何空头腿都是理论诊断，不能称为
@@ -375,20 +395,47 @@ direction、high/low deviation、magnitude、clarity 和 neutral distance。后�
 tokenizer、最大长度、mask 和正文截断合同。不同目标词 token 数不同时，不直接比较原始
 token 坐标，而比较训练期标准化后的因子和样本外预测。
 
-### 7.2 收益标签上的单年结构探索
+### 7.2 新 Prompt 在同一收益标签上的公平比较
 
-18 个新 Prompt 的 RoBERTa masked-short token direction 与 body direction 在 2026
-严格测试上的平均配对结果如下。
+已有监督结果不是六条单独中性 prompt，而是 18 条对齐 prompt 组成的六个三点轴。
+每个轴都使用 RoBERTa `masked_short` 目标 span，并构造
+`direction = high - low`；期限轴对应“长期收益 - 短期收益”。所有行使用同一新闻池、
+同一 `forward_compounded_return_3d`、2018--2023 训练、2024--2025 验证、2026 测试，
+测试集均为 1,683 个股票日。
 
-| 方法 | 平均 Token-Body RankIC | RankIC 胜出轴数 | 解释 |
-|---|---:|---:|---|
-| PCA32 + Ridge | +0.03670 | 4/6 | 线性主结果在部分轴显示 token 增量 |
-| PCA + hard KMeans + Ridge | +0.03344 | 5/6 | 硬簇特征局部有效 |
-| soft KMeans | -0.01451 | 1/6 | 不稳定 |
-| UMAP8 + HDBSCAN + Ridge | -0.00881 | 3/6 | 平均无增量 |
+主口径 PCA32+Ridge 的绝对 RankIC 如下。这里展示绝对值而不是只展示 Token-Body 差值。
 
-这是 2026 单个测试年，不能替代至少 6/9 年稳定性或日期区块 bootstrap。它支持
-“新 token 改变了可预测表示”，不支持“所有语义轴 token 普遍优于正文”。
+| 新语义轴 | Token direction RankIC | Body direction RankIC | Token - Body |
+|---|---:|---:|---:|
+| 确定性 | **0.05623** | -0.04496 | +0.10119 |
+| 期限收益 | 0.04311 | **0.05147** | -0.00837 |
+| 波动率 | 0.04298 | -0.03323 | +0.07621 |
+| 流动性 | 0.03324 | -0.01451 | +0.04775 |
+| 估值 | 0.02241 | 0.02276 | -0.00035 |
+| 冲击 | 0.01501 | 0.01125 | +0.00376 |
+
+PCA 线性结果中，期限收益轴 token 比波动率轴仅高 0.00013，不能单凭这一行声称明显
+领先。进一步保持同一输入和标签，只替换监督/聚类方法，期限收益轴在四种方法中均高于
+波动率轴：
+
+| 方法 | 期限收益轴 Token RankIC | 波动率轴 Token RankIC | 差值 |
+|---|---:|---:|---:|
+| PCA32 + Ridge | 0.04311 | 0.04298 | +0.00013 |
+| hard KMeans + Ridge | 0.06059 | 0.04240 | +0.01820 |
+| soft KMeans | 0.06459 | -0.01212 | +0.07670 |
+| UMAP8 + HDBSCAN | -0.00881 | -0.03456 | +0.02575 |
+| **四方法平均** | **0.03987** | **0.00967** | **+0.03019** |
+
+<div class="figure">
+<img src="figures/new_prompt_return_axis_rankic.png" alt="Return-horizon versus volatility prompt axes">
+<p>图 3. 同新闻、同三日收益标签下，期限收益轴与波动率轴的 2026 样本外 RankIC。</p>
+</div>
+
+这组结果与“收益相关 prompt 对收益更容易形成可预测分层”一致，因为期限收益轴在 4/4
+方法中高于波动率轴；但证据仍有限：它只有 2026 一个测试年，PCA 主口径差距几乎为零，
+且确定性轴在线性结果中更高。正确表述是“收益语义在非线性分层中相对波动率更匹配三日
+收益”，不是“收益 prompt 已被证明普遍最好”。六条不含高中低的中性 prompt 目前只有
+embedding/相似度及各自匹配标签结果，尚无同一收益标签上的公平 RankIC 横表。
 
 ### 7.3 估值的可检验定义
 
@@ -544,6 +591,7 @@ UMAP+HDBSCAN 为 -0.01451/-0.00881，进一步说明聚类增量依赖任务，�
 | Token 普遍优于正文 | 两模型平均 RankIC token 略低；Qwen token 也低于正文 | 不支持 |
 | RoBERTa 与 BGE 的 Prompt 几何不同 | 因子相关 0.653 对 0.892，正文相关均很高 | 支持结构差异，不等于理解优劣 |
 | 聚类稳定提高收益预测 | 硬聚类平均负增量；UMAP 只有局部正例 | 当前不支持 |
+| 收益语义比波动率语义更匹配三日收益 | 同一 2026 折中期限收益轴 4/4 方法高于波动率轴；PCA 仅高 0.00013 | 与假设一致，但只是单年探索证据 |
 | 估值 Prompt 预测高估/低估 | PE 有正点估计，PB/PS/EV 分化，单年小样本 | 探索性证据 |
 | 波动率 Prompt 预测未来风险 | 水平略正，log 增量更弱 | 仅支持水平信息，增量未验证 |
 | Qwen 兼顾共同语义和细粒度并可融合 | 严格三模型四 Prompt 结果未完成 | 尚未验证 |
@@ -572,7 +620,7 @@ UMAP+HDBSCAN 为 -0.01451/-0.00881，进一步说明聚类增量依赖任务，�
 
 <div class="figure">
 <img src="figures/neutral_embedding_completion.png" alt="Neutral prompt embedding completion">
-<p>图 3. 中性六 Prompt embedding 分片完成度。未完成 BGE-M3 不能冒充全量结果。</p>
+<p>图 4. 中性六 Prompt embedding 分片完成度。未完成 BGE-M3 不能冒充全量结果。</p>
 </div>
 
 ## 12. 研究边界
@@ -583,6 +631,8 @@ UMAP+HDBSCAN 为 -0.01451/-0.00881，进一步说明聚类增量依赖任务，�
 - 巨潮当前全量面板只覆盖 816 只股票，不代表无偏全 A 股公告历史。
 - RoBERTa/BGE-M3 是双向编码器，Qwen 是因果模型；Prompt 位置影响机制不同。
 - Qwen 当前只完成单一“收益”Prompt 的 token/body 对照，不能代表四 Prompt 平均。
+- 六条不含高中低的中性 Prompt 尚无同一收益标签监督横表；新 Prompt 收益横比来自三点
+  direction 轴，不能写成单一 `分析股票波动率` token 的结果。
 - 估值、波动率和价差结果目前主要来自 2026 单折和约 1,100--1,700 个股票日。
 - 聚类超参数、PCA 和 scaler 必须在训练期拟合；ARI/silhouette 不能选择收益模型。
 - 成本回测未包含容量、冲击、涨跌停、融资、借券费和券源召回。

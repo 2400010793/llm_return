@@ -117,6 +117,29 @@ def generate_figures(facts: dict) -> None:
     fig.savefig(FIGURES / "neutral_embedding_completion.png", bbox_inches="tight")
     plt.close(fig)
 
+    comparison = facts["clustering"]["new_axes_single_2026"]["horizon_vs_volatility_token_rankic"]
+    methods = [
+        row["method"].replace("hard KMeans + Ridge", "hard KMeans")
+        .replace("UMAP8 + HDBSCAN", "UMAP + HDBSCAN")
+        for row in comparison
+    ]
+    horizon = [row["horizon"] for row in comparison]
+    volatility = [row["volatility"] for row in comparison]
+    x = np.arange(len(comparison))
+    width = 0.34
+    fig, ax = plt.subplots(figsize=(7.2, 3.4), dpi=180)
+    ax.bar(x - width / 2, horizon, width, label="期限收益轴", color="#1f4e79")
+    ax.bar(x + width / 2, volatility, width, label="波动率轴", color="#c45a3c")
+    ax.axhline(0, color="#687580", linewidth=0.7)
+    ax.set_xticks(x, methods)
+    ax.set_ylabel("2026 测试 RankIC")
+    ax.set_title("同新闻、同三日收益标签下的新 Prompt 方向轴")
+    ax.legend(frameon=False)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "new_prompt_return_axis_rankic.png", bbox_inches="tight")
+    plt.close(fig)
+
 
 def render(facts: dict) -> None:
     import markdown

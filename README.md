@@ -103,17 +103,29 @@ BFS 4 页/4.90 秒，浏览器 DFS 4 页/4.77 秒。这些样本太小，只用�
 态，storage state 必须由用户显式提供且已获授权；检测到验证码、访问异常或请求过频时
 程序会停止，不能增加重试、代理或隐藏 API 绕过。
 
-## 3. 模型、来源与实测性能
+## 3. 模型、来源与同口径收益结果
 
-| 模型 | 代码中的模型来源 | 结构/维度 | 本项目输入合同 | 已有代表结果 |
-|---|---|---|---|---|
-| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder，768 维 | 最大 512 token；保存 prompt/title/body/full mean/max、CLS 和 prompt token | 新浪 next-day 最佳单模型 0.06044；巨潮 pooled 0.01764 |
-| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder，1024 维 | 最大 1000 token；输出与 RoBERTa 分目录、同类型 pooled/token 产物 | 新浪四方向最佳 0.04439；巨潮 pooled 0.01415 |
-| Qwen3-Embedding-8B | 本地/Ollama `qwen3-embedding:8b` | 因果模型，4096 维 | prompt 放在正文后；正文用 `article_mean`，目标 span 排除句号 | 新浪正文 0.05680、收益 token 0.05360；巨潮 residual O2O 0.02732 |
+| 模型 | 代码中的模型来源 | 结构/维度 | 本项目输入合同 |
+|---|---|---|---|
+| 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder，768 维 | 最大 512 token；保存 prompt/title/body/full mean/max、CLS 和 prompt token |
+| BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder，1024 维 | 最大 1000 token；输出与 RoBERTa 分目录、同类型 pooled/token 产物 |
+| Qwen3-Embedding-8B | 本地/Ollama `qwen3-embedding:8b` | 因果模型，4096 维 | prompt 放在正文后；正文用 `article_mean`，目标 span 排除句号 |
 
-“性能”统一指严格样本外 RankIC 或明确标注的成本后组合，不使用模型参数量或发布时间
-代替实测性能。三模型维度和结构不同，不能直接比较原始坐标；跨模型只比较同新闻、
-同标签、同 PCA 算法下的标准化统计和样本外因子。
+下面只比较已有结果中严格同口径的两个模型：新浪共同面板、2018--2026 严格 6+2+1
+滚动、`next_day_return`、`masked_short`、各 Prompt 自身目标 span、无聚类线性 Ridge。
+
+| Prompt 目标 span | RoBERTa RankIC | BGE-M3 RankIC |
+|---|---:|---:|
+| 盈利 | 0.05430 | **0.03812** |
+| 收益 | 0.05394 | 0.03556 |
+| 超额收益 | **0.05644** | 0.03720 |
+| 亏损 | 0.05479 | 0.03431 |
+
+四个 Prompt 在两个模型中均为正；RoBERTa 内部以“超额收益”最高，BGE-M3 内部以
+“盈利”最高。因此结果支持方向词 token 含有收益排序信息，但不支持“收益”一词在所有
+模型中普遍最优。三模型维度和结构不同，不能直接比较原始坐标；跨模型只比较同新闻、
+同标签、同 PCA 算法下的标准化统计和样本外因子。完整口径和新 Prompt 对照见
+[综合研究报告](reports/comprehensive_research_report/report.md)。
 
 ## 4. Benchmark 与扩展实验
 
