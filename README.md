@@ -92,6 +92,20 @@ BFS 4 页/4.90 秒，浏览器 DFS 4 页/4.77 秒。这些样本太小，只用�
 2010-01-03 至 2026-07-31，`row_index` 和 `document_id` 均唯一。正文至少 100 字的
 记录为 882,610 条，next-day 标签 895,251 条，event-3 标签 894,851 条。
 
+巨潮的 816 只不是网站爬取上限，而是当前研究范围：采集器接受
+`CODE:ORG_ID:NAME`，技术上可处理任何能在巨潮公开公司页解析出 `stockCode/orgId` 的
+上市公司。本次完整历史审计使用 1,000 只候选股票与公告/收益面板的交集，实际为沪市 64
+只、深市 752 只，未纳入北交所。若扩展到全 A 股，必须先建立新的代码和 orgId 目录，分
+股票年探针并做缺失审计，不能直接把 `--expected-stocks` 改成全市场。
+
+新浪的本地限制是访问上下文和可复现性要求，不是 CPU 限制。浏览器发现 seed、HTTP 请求、
+历史编码处理、限速、原始文件和 state 都在本地完成；集群只处理复制并校验后的文件。
+完整逻辑为：浏览器按股票/年份/季度发现 seed，普通 HTTP 做 depth-3 扩展，按 URL 和
+正文 SHA256 去重，再把有效文章做 depth-5 扩展；动态入口和年份断档再用年度浏览器
+runner 补洞，最后生成 records/state/manifest/checksum。默认 HTTP 为 20 workers、1 秒
+批次 pause、30 秒 timeout；浏览器 selector 为 8 pages、3 秒 pause、500ms render wait。
+20 workers 不是 20 页/秒，微型探针不能代表全量速度。禁止在 Slurm CPU/GPU 节点联网抓取。
+
 ### 2.3 东方财富和雪球
 
 `scripts/collect_browser_visible.py` 只读取浏览器可见内容：东方财富要闻、个股页、公告、

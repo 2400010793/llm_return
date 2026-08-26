@@ -28,6 +28,12 @@ def test_frozen_facts_match_report_contract() -> None:
         if "year_counts" in dataset:
             assert sum(dataset["year_counts"].values()) == dataset["rows"]
     assert facts["direction_prompt_results"]["folds_complete"] == 144
+    cninfo_collection = facts["collection"]["cninfo"]
+    assert cninfo_collection["candidate_universe_rows"] == 1_000
+    assert cninfo_collection["completed_universe_rows"] == 816
+    assert sum(cninfo_collection["completed_by_exchange"].values()) == 816
+    assert sum(cninfo_collection["completed_code_prefixes"].values()) == 816
+    assert "not all A shares" in cninfo_collection["technical_scope"]
     original = facts["direction_prompt_results"]["masked_short_linear_ridge"]
     assert len(original) == 8
     assert {(row["model"], row["prompt"]) for row in original} == {
@@ -131,6 +137,10 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "全股票横截面" in source
     assert "CSI 300" in source
     assert "同长度、同位置但与标签无关的中文短语" in source
+    assert "巨潮目前爬取范围：技术范围与已完成范围不是一回事" in source
+    assert "沪市 64、深市 752" in source
+    assert "新浪为什么必须在本地，以及实际爬取逻辑" in source
+    assert "本地浏览器发现 + 本地普通 HTTP 扩展 + 本地去重/清洗" in source
 
 
 def test_prompt_mask_rankic_audit_matches_frozen_facts() -> None:
