@@ -300,6 +300,40 @@
       "source": "reports/aligned_factor_clusters/all_results.csv"
     }
   },
+  "research_roadmap": {
+    "prompt_factor": {
+      "hypothesis": "在相同正文、mask、模型、PCA32、滚动折和标签下，不同目标 Prompt 会产生相关但不相同的可预测因子，而差异不是输入长度或位置伪影。",
+      "current_evidence": {
+        "roberta_token_cross_prompt_spearman": 0.653,
+        "bge_m3_token_cross_prompt_spearman": 0.892,
+        "roberta_full_mean_cross_prompt_spearman": 0.997,
+        "bge_m3_full_mean_cross_prompt_spearman": 0.972
+      },
+      "acceptance": [
+        "matched same-length/no-prompt controls",
+        "paired 6+2+1 RankIC delta positive in at least 6/9 test years",
+        "date-block bootstrap interval for the delta excludes zero",
+        "Top20 holdings and daily bp retain an incremental signal after standard factor residualization"
+      ]
+    },
+    "model_correlation": {
+      "interpretation": "RoBERTa/BGE-M3 are bidirectional encoders with a pre-text Prompt; Qwen is causal and places the Prompt after the article. Correlation is therefore a standardized predictive/geometry statistic, not a direct understanding score.",
+      "next_measurements": [
+        "per-day z-scored PCA32 factor correlation",
+        "centered cosine and linear CKA",
+        "residual out-of-sample prediction correlation",
+        "Top20 overlap and late-fusion incremental RankIC"
+      ],
+      "complementarity_rule": "Only call models complementary when frozen out-of-sample fusion beats the best single model in at least 6/9 years and the paired block-bootstrap interval excludes zero."
+    },
+    "regime_expansion": {
+      "volatility": ["next-day realized volatility level", "next-day log change", "5/20-day jump", "tail/jump event"],
+      "liquidity": ["next-day 1-minute spread level", "spread log change", "turnover/volume shock"],
+      "full_universe": "Score every eligible stock-day, retain explicit no-news and missingness indicators, and compare coverage, effective holdings, turnover and industry/size exposures.",
+      "macro_news": ["CSI 300", "CSI 500", "CSI 1000", "上证综指", "深证成指", "创业板指", "industry indices"],
+      "hierarchical_design": "Index/news aggregate predicts market targets; stock news residualized against the index factor predicts stock excess targets; interact both with volatility/liquidity regimes."
+    }
+  },
   "matched_semantic_targets": [
     {"axis": "流动性", "target": "下一日价差水平", "token_rankic": 0.1881, "body_rankic": 0.2151, "token_minus_body": -0.0270, "test_n": 1673},
     {"axis": "流动性", "target": "下一日价差 log 变化", "token_rankic": -0.0092, "body_rankic": -0.0325, "token_minus_body": 0.0233, "test_n": 1673},

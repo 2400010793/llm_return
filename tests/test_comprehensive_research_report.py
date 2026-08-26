@@ -85,6 +85,12 @@ def test_frozen_facts_match_report_contract() -> None:
     density = facts["clustering"]["bge_loss_umap_hdbscan"]
     assert density["umap_hdbscan_long_short_bp"] > density["pca_ridge_long_short_bp"]
     assert density["costs_included"] is False
+    roadmap = facts["research_roadmap"]
+    assert roadmap["prompt_factor"]["current_evidence"]["roberta_token_cross_prompt_spearman"] == 0.653
+    assert roadmap["prompt_factor"]["current_evidence"]["bge_m3_token_cross_prompt_spearman"] == 0.892
+    assert "paired 6+2+1 RankIC delta positive in at least 6/9 test years" in roadmap["prompt_factor"]["acceptance"]
+    assert "Top20 overlap and late-fusion incremental RankIC" in roadmap["model_correlation"]["next_measurements"]
+    assert "CSI 300" in roadmap["regime_expansion"]["macro_news"]
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -119,6 +125,12 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "0.05547" in source
     assert "真正的 `body_mean` embedding 已经保存" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
+    assert "主线一：证明不同 Prompt 真的产生不同因子" in source
+    assert "三模型相关性应该如何理解" in source
+    assert "主线二：Regime、全股票与宏观新闻扩展" in source
+    assert "全股票横截面" in source
+    assert "CSI 300" in source
+    assert "同长度、同位置但与标签无关的中文短语" in source
 
 
 def test_prompt_mask_rankic_audit_matches_frozen_facts() -> None:
