@@ -48,6 +48,8 @@ def configure_plotting() -> None:
     plt.rcParams.update(
         {
             "font.family": "sans-serif",
+            # Matplotlib resolves the first face of this TTC as the JP family;
+            # WeasyPrint uses the explicit SC family below for report text.
             "font.sans-serif": ["Noto Sans CJK JP", "DejaVu Sans"],
             "axes.unicode_minus": False,
             "font.size": 9,
@@ -241,23 +243,13 @@ def render(facts: dict) -> None:
     )
     css = CSS(
         string=r"""
-@font-face {
-  font-family: "ReportSans";
-  src: url("file:///usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc");
-  font-weight: 400;
-}
-@font-face {
-  font-family: "ReportSans";
-  src: url("file:///usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc");
-  font-weight: 700;
-}
 @page {
   size: A4;
   margin: 15mm 15mm 18mm 15mm;
   @bottom-left {
     content: "中国市场 Prompt Token 与新闻收益预测研究";
     color: #687580;
-    font-family: "ReportSans";
+    font-family: "Noto Sans CJK SC";
     font-size: 7pt;
     border-top: 0.35pt solid #cbd5dc;
     padding-top: 2.4mm;
@@ -265,7 +257,7 @@ def render(facts: dict) -> None:
   @bottom-right {
     content: counter(page);
     color: #687580;
-    font-family: "ReportSans";
+    font-family: "Noto Sans CJK SC";
     font-size: 7pt;
     border-top: 0.35pt solid #cbd5dc;
     padding-top: 2.4mm;
@@ -276,7 +268,7 @@ def render(facts: dict) -> None:
   @bottom-right { content: none; border: none; }
 }
 * { box-sizing: border-box; }
-html { font-family: "ReportSans", sans-serif; color: #20272d; }
+html { font-family: "Noto Sans CJK SC", sans-serif; color: #20272d; }
 body { margin: 0; font-size: 8.4pt; line-height: 1.58; letter-spacing: 0; }
 .cover {
   min-height: 250mm;

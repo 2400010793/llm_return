@@ -143,6 +143,14 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "本地浏览器发现 + 本地普通 HTTP 扩展 + 本地去重/清洗" in source
 
 
+def test_pdf_builder_resolves_the_simplified_chinese_font_by_family() -> None:
+    source = (REPORT_DIR / "build_report.py").read_text(encoding="utf-8")
+    assert 'font-family: "Noto Sans CJK SC"' in source
+    assert 'html { font-family: "Noto Sans CJK SC", sans-serif;' in source
+    assert "ReportSans" not in source
+    assert "NotoSansCJK-Regular.ttc" not in source
+
+
 def test_prompt_mask_rankic_audit_matches_frozen_facts() -> None:
     audit_dir = REPORT_DIR / "audits" / "prompt_mask"
     audit = json.loads((audit_dir / "summary.json").read_text(encoding="utf-8"))
