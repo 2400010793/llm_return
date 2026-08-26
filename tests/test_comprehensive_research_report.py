@@ -51,6 +51,11 @@ def test_frozen_facts_match_report_contract() -> None:
     assert all(row["average_nominal_holdings"] > 80 for row in soft)
     assert all(13 < row["average_effective_holdings"] < 16 for row in soft)
     assert all(abs(row["average_current_top20_names"] - 1.10) < 0.01 for row in soft)
+    gamma = facts["direction_prompt_results"]["soft_gamma_sensitivity"]
+    assert len(gamma) == 10
+    assert gamma[0]["net_daily_bp"] > 0
+    assert gamma[-1]["net_daily_bp"] < 0
+    assert gamma[0]["average_current_top20_names"] == gamma[-1]["average_current_top20_names"]
     density = facts["clustering"]["bge_loss_umap_hdbscan"]
     assert density["umap_hdbscan_long_short_bp"] > density["pca_ridge_long_short_bp"]
     assert density["costs_included"] is False
@@ -72,6 +77,8 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "3.10--3.63 净 bp/交易日" in source
     assert "当日 Q5 平均" in source
     assert "权重有效持仓只有 13.9--15.1 只" in source
+    assert "Gamma 敏感性" in source
+    assert "成本后为 -0.55 bp" in source
     assert "加入 Prompt 的证据边界" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
 
@@ -88,5 +95,10 @@ def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:
         - hard["hard_minus_linear_net_daily_bp"]
     ) < 1e-5
     assert len(summary["soft_long_only"]["leaders_by_prompt"]) == 4
-    for name in ("linear_hard_daily.csv", "soft_long_only_daily.csv", "umap_hdbscan_daily.csv"):
+    for name in (
+        "linear_hard_daily.csv",
+        "soft_long_only_daily.csv",
+        "soft_gamma_sensitivity.csv",
+        "umap_hdbscan_daily.csv",
+    ):
         assert (audit_dir / name).stat().st_size > 0

@@ -36,6 +36,33 @@ FACTOR_RE = re.compile(
 )
 
 
+def holding_diagnostics(run_dir: Path, daily: pd.DataFrame) -> dict[str, float]:
+    holdings = pd.read_parquet(
+        run_dir / "holdings.parquet", columns=["date", "signal_weight", "weight"]
+    )
+    current_top = (
+        holdings.assign(selected=holdings["signal_weight"].gt(0.0))
+        .groupby("date")["selected"]
+        .sum()
+        .reindex(daily["date"], fill_value=0)
+    )
+    effective_holdings = holdings.groupby("date")["weight"].apply(
+        lambda weights: (
+            float(weights.abs().sum() ** 2 / weights.pow(2).sum())
+            if weights.pow(2).sum() > 0.0
+            else 0.0
+        )
+    )
+    return {
+        "average_nominal_holdings": float(daily["n_long"].mean()),
+        "median_nominal_holdings": float(daily["n_long"].median()),
+        "average_effective_holdings": float(effective_holdings.mean()),
+        "average_current_top20_names": float(current_top.mean()),
+        "average_eligible_stocks": float(daily["n_signal"].mean()),
+        "average_raw_signal_rows": float(daily["n_signal_raw"].mean()),
+    }
+
+
 def top20_execution(path: Path) -> dict[str, float | int]:
     frame = pd.read_parquet(
         path, columns=["stock_id", "entry_date", "actual_return", "prediction"]
@@ -124,22 +151,6 @@ def audit_soft(root: Path) -> pd.DataFrame:
         prompt, model, variant, objective = match.groups()
         run_dir = Path(row.path).parent
         daily = pd.read_parquet(run_dir / "daily.parquet")
-        holdings = pd.read_parquet(
-            run_dir / "holdings.parquet", columns=["date", "signal_weight", "weight"]
-        )
-        current_top = (
-            holdings.assign(selected=holdings["signal_weight"].gt(0.0))
-            .groupby("date")["selected"]
-            .sum()
-            .reindex(daily["date"], fill_value=0)
-        )
-        effective_holdings = holdings.groupby("date")["weight"].apply(
-            lambda weights: (
-                float(weights.abs().sum() ** 2 / weights.pow(2).sum())
-                if weights.pow(2).sum() > 0.0
-                else 0.0
-            )
-        )
         rows.append(
             {
                 "factor_id": row.factor_id,
@@ -152,18 +163,50 @@ def audit_soft(root: Path) -> pd.DataFrame:
                 "gross_daily_bp": float(daily["gross_return"].mean() * 10_000),
                 "cost_daily_bp": float(daily["transaction_cost"].mean() * 10_000),
                 "net_daily_bp": float(daily["net_return"].mean() * 10_000),
-                "average_nominal_holdings": float(daily["n_long"].mean()),
-                "median_nominal_holdings": float(daily["n_long"].median()),
-                "average_effective_holdings": float(effective_holdings.mean()),
-                "average_current_top20_names": float(current_top.mean()),
-                "average_eligible_stocks": float(daily["n_signal"].mean()),
-                "average_raw_signal_rows": float(daily["n_signal_raw"].mean()),
+                **holding_diagnostics(run_dir, daily),
                 "daily_turnover": float(daily["turnover"].mean()),
                 "net_sharpe": float(row.net_sharpe),
                 "net_geometric_annual_return": float(row.net_geometric_annual_return),
             }
         )
     return pd.DataFrame(rows)
+
+
+def audit_soft_gamma(root: Path, factor_ids: set[str]) -> pd.DataFrame:
+    source = root / "soft_direction_tokens_v1" / "portfolio_all_gamma.csv"
+    frame = pd.read_csv(source)
+    frame = frame[
+        (frame["cost"] == "china_a_5bp")
+        & (frame["mode"] == "long_only")
+        & frame["factor_id"].isin(factor_ids)
+    ].copy()
+    rows: list[dict] = []
+    for row in frame.itertuples(index=False):
+        match = FACTOR_RE.match(row.factor_id)
+        if match is None:
+            raise ValueError(f"unexpected factor id: {row.factor_id}")
+        prompt, model, variant, objective = match.groups()
+        run_dir = Path(row.path).parent
+        daily = pd.read_parquet(run_dir / "daily.parquet")
+        rows.append(
+            {
+                "factor_id": row.factor_id,
+                "prompt": prompt,
+                "prompt_zh": PROMPT_ZH[prompt],
+                "model": model,
+                "variant": variant,
+                "objective": objective,
+                "gamma": float(row.gamma),
+                "gross_daily_bp": float(daily["gross_return"].mean() * 10_000),
+                "cost_daily_bp": float(daily["transaction_cost"].mean() * 10_000),
+                "net_daily_bp": float(daily["net_return"].mean() * 10_000),
+                "daily_turnover": float(daily["turnover"].mean()),
+                "net_sharpe": float(row.net_sharpe),
+                "net_geometric_annual_return": float(row.net_geometric_annual_return),
+                **holding_diagnostics(run_dir, daily),
+            }
+        )
+    return pd.DataFrame(rows).sort_values(["prompt", "gamma"]).reset_index(drop=True)
 
 
 def audit_umap_hdbscan(root: Path) -> pd.DataFrame:
@@ -264,6 +307,13 @@ def main() -> None:
         .groupby("prompt", as_index=False)
         .first()
     )
+    soft_gamma = audit_soft_gamma(args.root, set(soft_leaders["factor_id"]))
+    soft_gamma.to_csv(args.output_dir / "soft_gamma_sensitivity.csv", index=False)
+    soft_gamma_means = (
+        soft_gamma.groupby("gamma", as_index=False)
+        .mean(numeric_only=True)
+        .to_dict(orient="records")
+    )
     hdbscan_overall = hdbscan.drop(columns="year").groupby("method", as_index=False).mean(numeric_only=True)
     summary = {
         "protocols_are_not_level_comparable": True,
@@ -281,6 +331,7 @@ def main() -> None:
         },
         "soft_long_only": {
             "leaders_by_prompt": soft_leaders.to_dict(orient="records"),
+            "leader_gamma_sensitivity_means": soft_gamma_means,
             "mask": paired_mask_summary(
                 soft, ["gross_daily_bp", "cost_daily_bp", "net_daily_bp", "net_sharpe"]
             ),

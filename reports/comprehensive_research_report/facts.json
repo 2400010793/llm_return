@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "frozen_at": "2026-08-26T15:33:29+08:00",
+  "frozen_at": "2026-08-26T15:47:04+08:00",
   "report_scope": "Completed and traceable results only; pending fair-comparison tasks are design, not evidence.",
   "collection": {
     "sina": {
@@ -130,6 +130,18 @@
       {"prompt": "收益", "configuration": "BGE-M3 masked / long-short validation objective", "gross_daily_bp": 4.00978, "cost_daily_bp": 0.55287, "net_daily_bp": 3.45690, "average_nominal_holdings": 89.90, "average_effective_holdings": 13.93, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05529, "net_cagr": 0.07682, "net_sharpe": 0.53748},
       {"prompt": "超额收益", "configuration": "RoBERTa masked / long-short validation objective", "gross_daily_bp": 4.13160, "cost_daily_bp": 0.56067, "net_daily_bp": 3.57093, "average_nominal_holdings": 103.57, "average_effective_holdings": 15.11, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05607, "net_cagr": 0.07831, "net_sharpe": 0.52564},
       {"prompt": "亏损", "configuration": "BGE-M3 masked / RankIC validation objective", "gross_daily_bp": 4.18246, "cost_daily_bp": 0.55062, "net_daily_bp": 3.63185, "average_nominal_holdings": 97.38, "average_effective_holdings": 13.90, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05506, "net_cagr": 0.08297, "net_sharpe": 0.59506}
+    ],
+    "soft_gamma_sensitivity": [
+      {"gamma": 0.1, "gross_daily_bp": 3.99414, "cost_daily_bp": 0.55542, "net_daily_bp": 3.43872, "daily_turnover": 0.05554, "net_sharpe": 0.53154, "average_nominal_holdings": 98.16, "average_effective_holdings": 14.40, "average_current_top20_names": 1.10183},
+      {"gamma": 0.2, "gross_daily_bp": 4.60485, "cost_daily_bp": 1.07918, "net_daily_bp": 3.52568, "daily_turnover": 0.10792, "net_sharpe": 0.51855, "average_nominal_holdings": 69.24, "average_effective_holdings": 9.59, "average_current_top20_names": 1.10183},
+      {"gamma": 0.3, "gross_daily_bp": 4.92488, "cost_daily_bp": 1.60017, "net_daily_bp": 3.32470, "daily_turnover": 0.16002, "net_sharpe": 0.46302, "average_nominal_holdings": 54.82, "average_effective_holdings": 7.03, "average_current_top20_names": 1.10183},
+      {"gamma": 0.4, "gross_daily_bp": 5.06491, "cost_daily_bp": 2.11960, "net_daily_bp": 2.94531, "daily_turnover": 0.21196, "net_sharpe": 0.38778, "average_nominal_holdings": 44.99, "average_effective_holdings": 5.45, "average_current_top20_names": 1.10183},
+      {"gamma": 0.5, "gross_daily_bp": 5.07521, "cost_daily_bp": 2.63905, "net_daily_bp": 2.43616, "daily_turnover": 0.26391, "net_sharpe": 0.30347, "average_nominal_holdings": 37.91, "average_effective_holdings": 4.37, "average_current_top20_names": 1.10183},
+      {"gamma": 0.6, "gross_daily_bp": 5.00430, "cost_daily_bp": 3.16186, "net_daily_bp": 1.84244, "daily_turnover": 0.31619, "net_sharpe": 0.21780, "average_nominal_holdings": 32.00, "average_effective_holdings": 3.58, "average_current_top20_names": 1.10183},
+      {"gamma": 0.7, "gross_daily_bp": 4.89636, "cost_daily_bp": 3.68696, "net_daily_bp": 1.20940, "daily_turnover": 0.36870, "net_sharpe": 0.13674, "average_nominal_holdings": 27.05, "average_effective_holdings": 2.97, "average_current_top20_names": 1.10183},
+      {"gamma": 0.8, "gross_daily_bp": 4.79072, "cost_daily_bp": 4.21562, "net_daily_bp": 0.57509, "daily_turnover": 0.42156, "net_sharpe": 0.06429, "average_nominal_holdings": 22.50, "average_effective_holdings": 2.49, "average_current_top20_names": 1.10183},
+      {"gamma": 0.9, "gross_daily_bp": 4.72380, "cost_daily_bp": 4.74639, "net_daily_bp": -0.02259, "daily_turnover": 0.47464, "net_sharpe": 0.00348, "average_nominal_holdings": 17.44, "average_effective_holdings": 2.08, "average_current_top20_names": 1.10183},
+      {"gamma": 1.0, "gross_daily_bp": 4.73071, "cost_daily_bp": 5.28014, "net_daily_bp": -0.54943, "daily_turnover": 0.52801, "net_sharpe": -0.04374, "average_nominal_holdings": 1.74, "average_effective_holdings": 1.74, "average_current_top20_names": 1.10183}
     ],
     "source": "REPORT_ALL_RESULTS.md sections 13-14"
   },

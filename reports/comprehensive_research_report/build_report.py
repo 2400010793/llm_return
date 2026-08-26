@@ -79,6 +79,47 @@ def generate_figures(facts: dict) -> None:
     fig.savefig(FIGURES / "direction_prompt_rankic.png", bbox_inches="tight")
     plt.close(fig)
 
+    gamma_rows = facts["direction_prompt_results"]["soft_gamma_sensitivity"]
+    gamma = [row["gamma"] for row in gamma_rows]
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.15), dpi=180)
+    axes[0].plot(gamma, [row["gross_daily_bp"] for row in gamma_rows], marker="o", label="毛收益")
+    axes[0].plot(gamma, [row["cost_daily_bp"] for row in gamma_rows], marker="o", label="成本")
+    axes[0].plot(gamma, [row["net_daily_bp"] for row in gamma_rows], marker="o", label="净收益")
+    axes[0].axhline(0, color="#687580", linewidth=0.7)
+    axes[0].set_xlabel("EWCT gamma")
+    axes[0].set_ylabel("bp / 交易日")
+    axes[0].set_title("收益与成本")
+    axes[0].legend(frameon=False, fontsize=7)
+    axes[1].plot(
+        gamma,
+        [row["average_nominal_holdings"] for row in gamma_rows],
+        marker="o",
+        label="名义持仓",
+    )
+    axes[1].plot(
+        gamma,
+        [row["average_effective_holdings"] for row in gamma_rows],
+        marker="o",
+        label="有效持仓",
+    )
+    axes[1].plot(
+        gamma,
+        [row["average_current_top20_names"] for row in gamma_rows],
+        linestyle="--",
+        label="当日 Q5",
+    )
+    axes[1].set_xlabel("EWCT gamma")
+    axes[1].set_ylabel("股票数")
+    axes[1].set_title("持仓衰减")
+    axes[1].legend(frameon=False, fontsize=7)
+    for ax in axes:
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.set_xticks([0.1, 0.3, 0.5, 0.7, 0.9, 1.0])
+    fig.suptitle("四 Prompt 固定 leader 的执行层 gamma 敏感性", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "soft_gamma_sensitivity.png", bbox_inches="tight")
+    plt.close(fig)
+
     rows = facts["token_body"]["models"]
     names = [row["model"].replace("Qwen3-Embedding-8B", "Qwen3") for row in rows]
     body = [row["body_rankic"] for row in rows]

@@ -65,7 +65,9 @@ token、正文及模型间融合。为了减少公司身份记忆和时间泄漏
 5. **聚类主要是结构诊断，不是稳定的主预测器。** 四方向硬 KMeans 相对同 PCA Ridge
    的平均 RankIC 增量为 -0.00026，仅 6/16 胜；Top20% 多头也由线性的 4.77 降至
    4.28 净 bp/信号日。UMAP+HDBSCAN 在一个 BGE-M3 loss 输入上把无成本多空从
-   14.96 提高到 19.72 bp/信号日，但每腿平均不足 5 只，仍是局部结果。
+   14.96 提高到 19.72 bp/信号日，但每腿平均不足 5 只，仍是局部结果。软聚类固定因子
+   在 `gamma=1` 时毛收益仍为 4.73 bp/日，但成本后为 -0.55 bp，说明慢调仓是经济结果的
+   关键组成部分。
 6. **新 Prompt 在同一收益标签上呈现任务相关差异，但证据仍是单年。** 2026 同新闻、
    同三日收益标签下，期限收益轴 token 在 PCA Ridge、硬 KMeans、软 KMeans 和
    UMAP+HDBSCAN 四种方法中都高于波动率轴，四方法平均 RankIC 为 0.03987 对
@@ -355,7 +357,32 @@ Top20% 仍然只作用于**当日可用股票池**：每天平均 6.14 只有效
 所有独立 `short_only` 配置的成本后 Sharpe 均为负。现有经济结果的主要含义是“低分组
 相对更弱”和持仓平滑可能有价值，不能直接解释为可实施卖空收益。
 
-### 5.5 Mask 的配对结果
+### 5.5 Gamma 敏感性：拆分 Top20% 与慢调仓
+
+固定上表四个 Prompt leader 的因子和预测，不重新选模型，只改变 `gamma`。下表是四个
+配置的平均值；当日 Q5 始终为 1.10 只，因此股票数量变化完全来自执行层。
+
+| gamma | 毛 bp/日 | 成本 bp/日 | 净 bp/日 | 换手/日 | 名义持仓 | 有效持仓 | 净 Sharpe |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.1 | 3.99 | 0.56 | 3.44 | 5.55% | 98.2 | 14.40 | **0.532** |
+| 0.2 | 4.60 | 1.08 | **3.53** | 10.79% | 69.2 | 9.59 | 0.519 |
+| 0.5 | 5.08 | 2.64 | 2.44 | 26.39% | 37.9 | 4.37 | 0.303 |
+| 1.0 | 4.73 | 5.28 | **-0.55** | 52.80% | 1.74 | 1.74 | -0.044 |
+
+<div class="figure">
+<img src="figures/soft_gamma_sensitivity.png" alt="Soft-cluster EWCT gamma sensitivity">
+<p>图 2. 同一四个软聚类因子只改变执行层 gamma；当日 Q5 数量不变，持仓与成本显著变化。</p>
+</div>
+
+`gamma=1` 时毛收益仍有 4.73 bp/日，甚至高于 `gamma=0.1`，说明软聚类分数的当日排序
+不是完全无效；但 5.28 bp/日成本将平均净收益压到 -0.55 bp，四 Prompt 只有盈利和亏损
+仍为正。`gamma=0.2` 的平均净 bp 略高于 0.1，而 0.1 的净 Sharpe 更高。由于这些是全测试期
+敏感性，不能事后把 0.2 升级为正式参数；主表继续固定 0.1。
+
+所以当前最严格的表述是：软聚类有毛收益排序信息，EWCT 通过降低换手把它转化为成本后
+收益。还缺少同一 `gamma` 下线性 Ridge 与软聚类的配对组合，聚类算法的独立净增量尚未识别。
+
+### 5.6 Mask 的配对结果
 
 只看 RankIC 会漏掉 mask 对组合尾部的影响。四个目标 span、两个模型的线性/硬聚类
 Top20% 模拟合计 16 个配对中，`masked-short - short` 的净收益平均为 **+3.21 bp/信号日**，
@@ -374,7 +401,7 @@ Top20% 仅 +0.03 bp，硬聚类反而 -0.22 bp。另一方面，`simple_states` 
 增量为 -0.00480，仅 8/16 胜。结论应写成“mask 明显改变股票选择，并在现有组合协议中
 平均改善净 bp”，不能写成“mask 必然提高表示质量”。它的第一职责仍是移除身份和日期泄漏。
 
-### 5.6 加入 Prompt 的证据边界
+### 5.7 加入 Prompt 的证据边界
 
 现有四词 embedding 都是在已加入 Prompt 后生成的；尚无正文 token 位置、截断预算和
 tokenizer 完全匹配的 `no-prompt body` 反事实。因此不能用这些表宣称“加入 Prompt 因果提高
@@ -411,7 +438,7 @@ RoBERTa token 的 Prompt 间差异更大，BGE-M3 token 更接近共同方向。
 
 <div class="figure">
 <img src="figures/token_body_rankic.png" alt="Token and body RankIC">
-<p>图 2. 三模型现有 token/body 结果。RoBERTa/BGE-M3 是四 Prompt 汇总，Qwen 是单一“收益”Prompt，不能当作完全公平的模型排名。</p>
+<p>图 3. 三模型现有 token/body 结果。RoBERTa/BGE-M3 是四 Prompt 汇总，Qwen 是单一“收益”Prompt，不能当作完全公平的模型排名。</p>
 </div>
 
 Qwen 当前 token 没有整体超过正文。Qwen 是因果模型且 Prompt 位于正文之后，其
@@ -472,7 +499,7 @@ PCA 线性结果中，期限收益轴 token 比波动率轴仅高 0.00013，不�
 
 <div class="figure">
 <img src="figures/new_prompt_return_axis_rankic.png" alt="Return-horizon versus volatility prompt axes">
-<p>图 3. 同新闻、同三日收益标签下，期限收益轴与波动率轴的 2026 样本外 RankIC。</p>
+<p>图 4. 同新闻、同三日收益标签下，期限收益轴与波动率轴的 2026 样本外 RankIC。</p>
 </div>
 
 这组结果与“收益相关 prompt 对收益更容易形成可预测分层”一致，因为期限收益轴在 4/4
@@ -615,7 +642,7 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 
 <div class="figure">
 <img src="figures/hard_kmeans_daily_bp.png" alt="Hard KMeans versus Ridge daily basis points">
-<p>图 4. 相同四 Prompt、模型和 mask 配对下的 Top20% 多头净 bp；成本已扣，但组合平均仅 2.80 只。</p>
+<p>图 5. 相同四 Prompt、模型和 mask 配对下的 Top20% 多头净 bp；成本已扣，但组合平均仅 2.80 只。</p>
 </div>
 
 两种方法都覆盖 1,991 个信号日，平均只持有 2.80 只股票；日均交易成本分别高达
@@ -676,7 +703,7 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 | Prompt token 提供可区分任务视角 | 四方向持仓/bp、因子相关、不同 span 排名 | 支持；加入 Prompt 的因果增量尚未识别 |
 | Token 普遍优于正文 | 两模型平均 RankIC token 略低；Qwen token 也低于正文 | 不支持 |
 | RoBERTa 与 BGE 的 Prompt 几何不同 | 因子相关 0.653 对 0.892，正文相关均很高 | 支持结构差异，不等于理解优劣 |
-| 聚类稳定提高收益预测 | 硬聚类净 bp 平均 -0.49；UMAP 只有单 Prompt 无成本正例 | 当前不支持 |
+| 聚类稳定提高收益预测 | 硬聚类净 bp 平均 -0.49；软簇 gamma=1 净 -0.55；UMAP 只有单 Prompt 无成本正例 | 当前不支持 |
 | 收益语义比波动率语义更匹配三日收益 | 同一 2026 折中期限收益轴 4/4 方法高于波动率轴；PCA 仅高 0.00013 | 与假设一致，但只是单年探索证据 |
 | 估值 Prompt 预测高估/低估 | PE 有正点估计，PB/PS/EV 分化，单年小样本 | 探索性证据 |
 | 波动率 Prompt 预测未来风险 | 水平略正，log 增量更弱 | 仅支持水平信息，增量未验证 |
@@ -695,9 +722,10 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 1. 完成新浪和巨潮三模型四 Prompt 共同样本构建，先核对实际交集、年份、标签和选择偏差。
 2. 运行 PCA32 token/body Ridge，并生成逐年 RankIC、配对 bootstrap、因子相关和 Top20 重合。
 3. 在基础 OOS 因子完成后做等权、Ridge、ElasticNet 和 HistGradientBoosting late fusion。
-4. 将估值标签扩展为行业相对和横截面分位；将波动率/价差同时报告水平、变化和滞后基线增量。
-5. 把文本因子与量价、beta、行业、规模、动量、反转和流动性因子放入完全共同股票日比较。
-6. 只有达到至少 6/9 年方向一致且区块 bootstrap 区间不跨 0，才升级为主结论。
+4. 在相同股票日上让线性 Ridge、硬簇和软簇共用 `gamma=0.1/1.0` 与 hold/close 规则，拆出算法净增量。
+5. 将估值标签扩展为行业相对和横截面分位；将波动率/价差同时报告水平、变化和滞后基线增量。
+6. 把文本因子与量价、beta、行业、规模、动量、反转和流动性因子放入完全共同股票日比较。
+7. 只有达到至少 6/9 年方向一致且区块 bootstrap 区间不跨 0，才升级为主结论。
 
 ### 11.4 当前资产完整性
 
@@ -706,7 +734,7 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 
 <div class="figure">
 <img src="figures/neutral_embedding_completion.png" alt="Neutral prompt embedding completion">
-<p>图 5. 中性六 Prompt embedding 分片完成度。未完成 BGE-M3 不能冒充全量结果。</p>
+<p>图 6. 中性六 Prompt embedding 分片完成度。未完成 BGE-M3 不能冒充全量结果。</p>
 </div>
 
 ## 12. 研究边界
