@@ -122,7 +122,24 @@ def audit_soft(root: Path) -> pd.DataFrame:
         if match is None:
             raise ValueError(f"unexpected factor id: {row.factor_id}")
         prompt, model, variant, objective = match.groups()
-        daily = pd.read_parquet(Path(row.path).parent / "daily.parquet")
+        run_dir = Path(row.path).parent
+        daily = pd.read_parquet(run_dir / "daily.parquet")
+        holdings = pd.read_parquet(
+            run_dir / "holdings.parquet", columns=["date", "signal_weight", "weight"]
+        )
+        current_top = (
+            holdings.assign(selected=holdings["signal_weight"].gt(0.0))
+            .groupby("date")["selected"]
+            .sum()
+            .reindex(daily["date"], fill_value=0)
+        )
+        effective_holdings = holdings.groupby("date")["weight"].apply(
+            lambda weights: (
+                float(weights.abs().sum() ** 2 / weights.pow(2).sum())
+                if weights.pow(2).sum() > 0.0
+                else 0.0
+            )
+        )
         rows.append(
             {
                 "factor_id": row.factor_id,
@@ -135,10 +152,12 @@ def audit_soft(root: Path) -> pd.DataFrame:
                 "gross_daily_bp": float(daily["gross_return"].mean() * 10_000),
                 "cost_daily_bp": float(daily["transaction_cost"].mean() * 10_000),
                 "net_daily_bp": float(daily["net_return"].mean() * 10_000),
-                "average_holdings": float(daily["n_long"].mean()),
-                "median_holdings": float(daily["n_long"].median()),
-                "average_new_signals": float(daily["n_signal"].mean()),
-                "average_raw_signals": float(daily["n_signal_raw"].mean()),
+                "average_nominal_holdings": float(daily["n_long"].mean()),
+                "median_nominal_holdings": float(daily["n_long"].median()),
+                "average_effective_holdings": float(effective_holdings.mean()),
+                "average_current_top20_names": float(current_top.mean()),
+                "average_eligible_stocks": float(daily["n_signal"].mean()),
+                "average_raw_signal_rows": float(daily["n_signal_raw"].mean()),
                 "daily_turnover": float(daily["turnover"].mean()),
                 "net_sharpe": float(row.net_sharpe),
                 "net_geometric_annual_return": float(row.net_geometric_annual_return),

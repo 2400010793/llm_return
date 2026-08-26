@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "frozen_at": "2026-08-26T15:24:59+08:00",
+  "frozen_at": "2026-08-26T15:33:29+08:00",
   "report_scope": "Completed and traceable results only; pending fair-comparison tasks are design, not evidence.",
   "collection": {
     "sina": {
@@ -126,10 +126,10 @@
       "simple_states_ic_wins": 8
     },
     "soft_long_only_prompt_leaders": [
-      {"prompt": "盈利", "configuration": "RoBERTa masked / long-short validation objective", "gross_daily_bp": 3.65272, "cost_daily_bp": 0.55752, "net_daily_bp": 3.09520, "average_holdings": 101.78, "average_new_signals": 6.14, "daily_turnover": 0.05575, "net_cagr": 0.06627, "net_sharpe": 0.46799},
-      {"prompt": "收益", "configuration": "BGE-M3 masked / long-short validation objective", "gross_daily_bp": 4.00978, "cost_daily_bp": 0.55287, "net_daily_bp": 3.45690, "average_holdings": 89.90, "average_new_signals": 6.14, "daily_turnover": 0.05529, "net_cagr": 0.07682, "net_sharpe": 0.53748},
-      {"prompt": "超额收益", "configuration": "RoBERTa masked / long-short validation objective", "gross_daily_bp": 4.13160, "cost_daily_bp": 0.56067, "net_daily_bp": 3.57093, "average_holdings": 103.57, "average_new_signals": 6.14, "daily_turnover": 0.05607, "net_cagr": 0.07831, "net_sharpe": 0.52564},
-      {"prompt": "亏损", "configuration": "BGE-M3 masked / RankIC validation objective", "gross_daily_bp": 4.18246, "cost_daily_bp": 0.55062, "net_daily_bp": 3.63185, "average_holdings": 97.38, "average_new_signals": 6.14, "daily_turnover": 0.05506, "net_cagr": 0.08297, "net_sharpe": 0.59506}
+      {"prompt": "盈利", "configuration": "RoBERTa masked / long-short validation objective", "gross_daily_bp": 3.65272, "cost_daily_bp": 0.55752, "net_daily_bp": 3.09520, "average_nominal_holdings": 101.78, "average_effective_holdings": 14.66, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05575, "net_cagr": 0.06627, "net_sharpe": 0.46799},
+      {"prompt": "收益", "configuration": "BGE-M3 masked / long-short validation objective", "gross_daily_bp": 4.00978, "cost_daily_bp": 0.55287, "net_daily_bp": 3.45690, "average_nominal_holdings": 89.90, "average_effective_holdings": 13.93, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05529, "net_cagr": 0.07682, "net_sharpe": 0.53748},
+      {"prompt": "超额收益", "configuration": "RoBERTa masked / long-short validation objective", "gross_daily_bp": 4.13160, "cost_daily_bp": 0.56067, "net_daily_bp": 3.57093, "average_nominal_holdings": 103.57, "average_effective_holdings": 15.11, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05607, "net_cagr": 0.07831, "net_sharpe": 0.52564},
+      {"prompt": "亏损", "configuration": "BGE-M3 masked / RankIC validation objective", "gross_daily_bp": 4.18246, "cost_daily_bp": 0.55062, "net_daily_bp": 3.63185, "average_nominal_holdings": 97.38, "average_effective_holdings": 13.90, "average_current_top20_names": 1.10, "average_eligible_stocks": 6.14, "daily_turnover": 0.05506, "net_cagr": 0.08297, "net_sharpe": 0.59506}
     ],
     "source": "REPORT_ALL_RESULTS.md sections 13-14"
   },

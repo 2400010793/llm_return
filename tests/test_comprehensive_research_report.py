@@ -48,7 +48,9 @@ def test_frozen_facts_match_report_contract() -> None:
     assert {row["prompt"] for row in hard["by_prompt"]} == {"盈利", "收益", "超额收益", "亏损"}
     soft = facts["direction_prompt_results"]["soft_long_only_prompt_leaders"]
     assert len(soft) == 4
-    assert all(row["average_holdings"] > 80 for row in soft)
+    assert all(row["average_nominal_holdings"] > 80 for row in soft)
+    assert all(13 < row["average_effective_holdings"] < 16 for row in soft)
+    assert all(abs(row["average_current_top20_names"] - 1.10) < 0.01 for row in soft)
     density = facts["clustering"]["bge_loss_umap_hdbscan"]
     assert density["umap_hdbscan_long_short_bp"] > density["pca_ridge_long_short_bp"]
     assert density["costs_included"] is False
@@ -68,6 +70,8 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "新 Prompt 在同一收益标签上的公平比较" in source
     assert "平均只持有 2.80 只股票" in source
     assert "3.10--3.63 净 bp/交易日" in source
+    assert "当日 Q5 平均" in source
+    assert "权重有效持仓只有 13.9--15.1 只" in source
     assert "加入 Prompt 的证据边界" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
 
