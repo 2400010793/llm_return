@@ -234,3 +234,99 @@ llm_return/
 - 配置检查命令：[src/cli.py](src/cli.py)。
 
 运行配置检查时使用 `python -m src.cli --prepare-dirs`。该命令只读取 YAML 并创建配置中声明的运行目录，不下载新闻、不下载模型，也不执行回测。
+
+## 11. 新浪财经历史 HTML 采集（本地普通 HTTP）
+
+`scripts/crawl_sina_bfs_fast.py` 现在是低速、单并发、可恢复的普通
+`urllib` 采集器，BFS 为默认策略；`scripts/crawl_sina_dfs.py` 使用同一套
+解析器和 HTTP 策略提供 DFS 顺序对照。正式采集不使用 Playwright、Selenium、
+Chromium、代理轮换或访问控制绕过；robots.txt 无法读取时默认跳过域名。
+浏览器脚本仅用于人工发现和验证种子 URL。
+
+### 均匀 frontier 探索
+
+普通 BFS 会优先耗尽最早发现的链接，容易集中在某一个频道或单个历史分支。
+采集器现在支持 `--frontier-policy uniform`：每次从当前候选 frontier 中按照
+URL 和 `--uniform-seed` 生成的稳定伪随机顺序选择一个页面。它不改变请求频率，
+也不绕过任何访问控制；同一 seed 下可复现，并且断点恢复不会因为 Python 随机数
+状态变化而改变顺序。该机制是**图结构上的均匀探索**，不是严格的按年份均匀抽样；
+若要实现年度或月份配额，应在获得足够历史 URL 后再增加分层采样器。
+
+示例（先用 100 页验证覆盖率，不直接扩大到全量）：
+
+```powershell
+$env:PYTHONPATH = "scripts"
+python scripts/crawl_sina_bfs_fast.py `
+	--strategy bfs `
+	--frontier-policy uniform `
+	--uniform-seed 20260806 `
+	--root https://finance.sina.com.cn/t/34687.html `
+	--max-pages 100 `
+	--max-depth 2 `
+	--pause-seconds 3 `
+	--raw-dir data/interim/uniform_probe_raw `
+	--articles-output data/interim/uniform_probe_articles.jsonl
+```
+
+建议先比较 FIFO 和 uniform 的 `coverage.article_year_counts`、
+`coverage.page_quality_counts`、频道路径分布和股票覆盖率，再决定是否进行更大规模
+采集。uniform 运行必须固定 `--uniform-seed`；resume 时不能修改该 seed 或 frontier
+策略。
+
+### 历史连续扩展与年份种子
+
+500 页结果显示单个种子会被现代页面占据，因此后续不直接扩大全站搜索。采集器支持
+`--historical-only-links`，只继续扩展符合 `/t|s|e|y/数字.html` 的旧新浪文章 URL，
+从而把历史连续性验证与现代导航探索分开。`--root` 可以重复指定多个历史文章种子，
+summary 的 `coverage.root_counts` 会分别记录每个根 URL 的访问数、有效页数、文章数和
+404 数量。
+
+推荐先从 5—10 个 2000—2001 年文章种子运行 BFS，`max-depth` 设为 1 或 2；每次使用
+独立输出目录，或者在同一批次重复指定 `--root` 并按 `root_counts` 审计。确认历史文章
+的年份连续性、股票覆盖率和正文重复率后，再按年份建立独立种子批次。该流程仍不代表
+全量覆盖，年份种子只用于可审计的分层扩展。
+
+Windows PowerShell 单页探针：
+
+```powershell
+$env:PYTHONPATH = "scripts"
+python scripts/crawl_sina_bfs_fast.py `
+	--strategy bfs `
+	--root https://finance.sina.com.cn/t/34687.html `
+	--max-pages 1 `
+	--max-depth 0 `
+	--max-seconds 60 `
+	--pause-seconds 2 `
+	--raw-dir data/interim/local_http_probe_raw `
+	--articles-output data/interim/local_http_probe_articles.jsonl `
+	--manifest-output data/interim/local_http_probe_manifest.jsonl `
+	--summary-output data/interim/local_http_probe_summary.json `
+	--state-output data/interim/local_http_probe_state.json
+```
+
+小规模 BFS：
+
+```powershell
+$env:PYTHONPATH = "scripts"
+python scripts/crawl_sina_bfs_fast.py `
+	--strategy bfs `
+	--root https://finance.sina.com.cn/t/34687.html `
+	--root https://finance.sina.com.cn/view/general/2000-06-11/36092.html `
+	--max-pages 50 --max-depth 2 --max-seconds 600 --pause-seconds 2 `
+	--raw-dir data/interim/local_sina_bfs_raw `
+	--articles-output data/interim/local_sina_bfs_articles.jsonl `
+	--manifest-output data/interim/local_sina_bfs_manifest.jsonl `
+	--summary-output data/interim/local_sina_bfs_summary.json `
+	--state-output data/interim/local_sina_bfs_state.json --resume
+```
+
+DFS 对照只需将入口改为 `scripts/crawl_sina_dfs.py`，并使用同样的输出参数。
+默认安全值为 20 页、深度 2、300 秒、请求间隔 2 秒、超时 30 秒、最多重试
+1 次、响应上限 10 MB、robots 检查开启；默认仅允许
+`finance.sina.com.cn` 和 `cj.sina.com.cn`。`--include-http` 可显式允许旧版
+HTTP 链接，`--include-navigation-pages` 可加入低优先级导航页。
+
+采集会追加写入文章 JSONL 和逐页 manifest，并用 state 文件保存队列/栈、已访问
+URL、发现顺序、策略、根 URL、白名单、解析器版本和参数。恢复时这些元数据不一致
+会明确报错，不会静默混用。原始 HTML 按稳定 URL 哈希保存。真实网络探针不会由
+pytest 自动执行。

@@ -23,7 +23,8 @@ from urllib.parse import urldefrag, urlparse
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError, async_playwright
 
 ALLOWED_HOSTS = {"finance.sina.com.cn", "cj.sina.com.cn"}
-ARTICLE_URL_RE = re.compile(r"^https?://(?:finance\.sina\.com\.cn|cj\.sina\.com\.cn)/(t|s|e|y)/\d+\.html$", re.I)
+ARTICLE_URL_RE = re.compile(r"^https?://(?:finance\.sina\.com\.cn|cj\.sina\.com\.cn)/(?:t|s|e|y)/\d+\.html$", re.I)
+ROOT_ARTICLE_URL_RE = re.compile(r"^https?://(?:finance\.sina\.com\.cn|cj\.sina\.com\.cn)/(?:[^/?#]+/)+20\d{2}(?:-\d{2}-\d{2}|\d{4,8})/[^?#]+\.(?:html|shtml)$|^https?://(?:finance\.sina\.com\.cn|cj\.sina\.com\.cn)/(?:[^/?#]+/)+20\d{2}(?:-\d{2}-\d{2})/[^?#]+\.shtml$", re.I)
 DATE_RE = re.compile(r"(20\d{2})年\s*(\d{1,2})月\s*(\d{1,2})日(?:[^0-9]{0,12}(\d{1,2}):(\d{2}))?")
 STOCK_LINK_RE = re.compile(r"/(?:realstock/company/)(?:sh|sz)(\d{6})/", re.I)
 LEGACY_STOCK_RE = re.compile(r"[?&]symbol=(?:sh|sz)?(\d{6})", re.I)
@@ -34,7 +35,7 @@ NAVIGATION_MARKERS = ("新浪财经_", "股票首页", "港股", "美股", "新�
 def canonical_url(url: str) -> str | None:
     url = urldefrag(url)[0]
     parsed = urlparse(url)
-    if parsed.hostname not in ALLOWED_HOSTS or not ARTICLE_URL_RE.fullmatch(url):
+    if parsed.hostname not in ALLOWED_HOSTS or not (ARTICLE_URL_RE.fullmatch(url) or ROOT_ARTICLE_URL_RE.fullmatch(url)):
         return None
     return url.replace("http://", "https://", 1)
 
@@ -125,6 +126,45 @@ def rank(candidate: dict, target_year: int) -> tuple:
     return (int(exact_one), int(target), int(long_body), min(candidate.get("body_chars", 0), 5000), -candidate.get("depth", 99))
 
 
+GENERIC_TITLE_TOKENS = {
+    "关于", "公司", "市场", "证券", "股票", "股市", "中国", "年度", "新闻",
+    "十大", "盘点", "公告", "记者", "新浪", "财经", "分析", "评论", "今日",
+}
+
+
+def title_tokens(title: str) -> set[str]:
+    """Return coarse Chinese/Latin title tokens for diversity scoring."""
+    tokens: set[str] = set()
+    for value in re.findall(r"[\u4e00-\u9fff]{2,}|[A-Za-z0-9]{2,}", title or ""):
+        if re.fullmatch(r"[\u4e00-\u9fff]+", value):
+            tokens.update(value[index:index + 2] for index in range(len(value) - 1))
+        elif value not in GENERIC_TITLE_TOKENS:
+            tokens.add(value.lower())
+    return {value for value in tokens if value not in GENERIC_TITLE_TOKENS}
+
+
+def title_overlap(left: dict, right: dict) -> float:
+    a = title_tokens(left.get("title", ""))
+    b = title_tokens(right.get("title", ""))
+    if not a or not b:
+        return 0.0
+    return len(a & b) / min(len(a), len(b))
+
+
+def diversity_gain(candidate: dict, chosen: list[dict], stock_counts: dict[str, int], used_paths: set[str], used_quarters: set[int]) -> tuple:
+    """Score a candidate for farthest-first, low-relatedness selection."""
+    stock = candidate["stock_ids"][0] if candidate.get("stock_count") == 1 else None
+    quarter = (candidate.get("published_month", 1) - 1) // 3 + 1
+    max_overlap = max((title_overlap(candidate, item) for item in chosen), default=0.0)
+    return (
+        int(stock is not None and stock not in stock_counts),
+        int(candidate.get("path_prefix") not in used_paths),
+        int(quarter not in used_quarters),
+        -max_overlap,
+        *rank(candidate, candidate.get("published_year", 0)),
+    )
+
+
 def select_seeds(
     records: list[dict],
     years: list[int],
@@ -147,37 +187,36 @@ def select_seeds(
         chosen: list[dict] = []
         seen_hashes: set[str] = set()
         stock_counts: dict[str, int] = defaultdict(int)
-        # First pass: one per quarter where possible, then fill the quota.
-        for quarter in range(1, 5):
-            for item in pool:
-                if item in chosen or (item.get("published_month") - 1) // 3 + 1 != quarter:
-                    continue
+        used_paths: set[str] = set()
+        used_quarters: set[int] = set()
+        # Greedy farthest-first selection: prefer a new stock, URL section,
+        # quarter, and title vocabulary instead of near-duplicate summaries.
+        remaining = list(pool)
+        while remaining and len(chosen) < per_year:
+            eligible = []
+            for item in remaining:
                 if item["body_sha256"] in seen_hashes:
                     continue
                 stock = item["stock_ids"][0] if item["stock_count"] == 1 else None
                 if stock and stock_counts[stock] >= max_per_stock:
                     continue
-                chosen.append(item)
-                seen_hashes.add(item["body_sha256"])
-                if stock:
-                    stock_counts[stock] += 1
+                eligible.append(item)
+            if not eligible:
                 break
-        for item in pool:
-            if len(chosen) >= per_year:
-                break
-            if item in chosen or item["body_sha256"] in seen_hashes:
-                continue
-            stock = item["stock_ids"][0] if item["stock_count"] == 1 else None
-            if stock and stock_counts[stock] >= max_per_stock:
-                continue
+            item = max(eligible, key=lambda value: diversity_gain(value, chosen, stock_counts, used_paths, used_quarters))
+            remaining.remove(item)
             chosen.append(item)
             seen_hashes.add(item["body_sha256"])
+            stock = item["stock_ids"][0] if item["stock_count"] == 1 else None
             if stock:
                 stock_counts[stock] += 1
+            used_paths.add(item.get("path_prefix", ""))
+            used_quarters.add((item.get("published_month", 1) - 1) // 3 + 1)
         for index, item in enumerate(chosen, 1):
             item = dict(item)
             item["seed_id"] = f"{year}_{index:02d}"
             item["selection_score"] = list(rank(item, year))
+            item["selection_strategy"] = "farthest_first_title_stock_path_quarter"
             item["selection_status"] = "accepted" if len(chosen) >= per_year else "accepted_under_quota"
             selected.append(item)
     return selected
@@ -190,12 +229,17 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            writer.writerow({**row, "stock_ids": ",".join(row.get("stock_ids", []))})
+            csv_row = {field: row.get(field, "") for field in fields}
+            csv_row["stock_ids"] = ",".join(row.get("stock_ids", []))
+            writer.writerow(csv_row)
 
 
 async def main(args: argparse.Namespace) -> None:
     years = sorted(set(args.years))
-    roots = [canonical_url(x) for x in args.root]
+    root_values = list(args.root or [])
+    if args.root_file:
+        root_values.extend(Path(args.root_file).read_text(encoding="utf-8").splitlines())
+    roots = [canonical_url(x.strip()) for x in root_values if x.strip()]
     roots = [x for x in roots if x]
     if not roots:
         raise ValueError("至少需要一个合法的新浪历史文章 --root")
@@ -205,30 +249,61 @@ async def main(args: argparse.Namespace) -> None:
             for row in csv.DictReader(stream):
                 if row.get("stock_id") and row.get("stock_name"):
                     catalog[row["stock_id"].zfill(6)] = row["stock_name"]
-    queue = deque((url, None, 0) for url in roots)
+    queue: asyncio.Queue[tuple[str, str | None, int] | None] = asyncio.Queue()
     queued = set(roots)
     visited: set[str] = set()
     records: list[dict] = []
+    stream_output = Path(args.stream_output or (str(args.output) + ".records.jsonl"))
+    stream_output.parent.mkdir(parents=True, exist_ok=True)
+    stream_handle = stream_output.open("w", encoding="utf-8")
+    for root in roots:
+        queue.put_nowait((root, None, 0))
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=not args.headed)
-        page = await browser.new_page()
-        try:
-            while queue and len(visited) < args.max_pages:
-                url, parent, depth = queue.popleft()
-                if url in visited:
+        pages = [await browser.new_page() for _ in range(args.workers)]
+
+        async def worker(page: Page) -> None:
+            while True:
+                job = await queue.get()
+                if job is None:
+                    queue.task_done()
+                    return
+                url, parent, depth = job
+                if len(visited) >= args.max_pages or url in visited:
+                    queue.task_done()
                     continue
                 visited.add(url)
                 record, children = await inspect(page, url, parent, depth, args, catalog)
                 records.append(record)
+                # Write and flush immediately: a completed page is durable even
+                # if a later page or the browser process fails.
+                stream_handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+                stream_handle.flush()
                 if depth < args.max_depth:
                     for child in children:
                         if child not in queued:
                             queued.add(child)
-                            queue.append((child, url, depth + 1))
+                            queue.put_nowait((child, url, depth + 1))
+                queue.task_done()
                 if args.pause_seconds:
                     await asyncio.sleep(args.pause_seconds)
+
+        tasks = [asyncio.create_task(worker(page)) for page in pages]
+        try:
+            await queue.join()
         finally:
-            await browser.close()
+            for _ in tasks:
+                queue.put_nowait(None)
+            await asyncio.gather(*tasks, return_exceptions=True)
+            # A completed Chromium driver can disconnect during shutdown on
+            # Windows.  The collected records are still valid, so shutdown
+            # failure must not discard the output or turn a successful crawl
+            # into a failed run.
+            try:
+                await browser.close()
+            except Exception:
+                pass
+            stream_handle.close()
     selected = select_seeds(
         records,
         years,
@@ -241,18 +316,20 @@ async def main(args: argparse.Namespace) -> None:
     output.write_text(json.dumps({"years": years, "per_year": args.per_year, "visited": len(visited), "records": records, "selected": selected}, ensure_ascii=False, indent=2), encoding="utf-8")
     write_csv(Path(args.catalog_output), selected)
     summary = {str(year): sum(1 for x in selected if x.get("published_year") == year) for year in years}
-    print(json.dumps({"output": str(output), "catalog_output": args.catalog_output, "visited": len(visited), "selected": summary, "single_stock_selected": sum(x.get("stock_count") == 1 for x in selected), "single_stock_only": not args.allow_multi_stock}, ensure_ascii=False))
+    print(json.dumps({"output": str(output), "stream_output": str(stream_output), "catalog_output": args.catalog_output, "workers": args.workers, "visited": len(visited), "selected": summary, "single_stock_selected": sum(x.get("stock_count") == 1 for x in selected), "single_stock_only": not args.allow_multi_stock}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="使用可见浏览器页面发现并选择新浪历史文章种子")
-    parser.add_argument("--root", action="append", required=True, help="历史新浪文章 URL，可重复")
+    parser.add_argument("--root", action="append", help="历史新浪文章 URL，可重复")
+    parser.add_argument("--root-file", help="每行一个历史新浪文章 URL")
     parser.add_argument("--years", type=int, nargs="+", required=True)
     parser.add_argument("--per-year", type=int, default=20)
-    parser.add_argument("--max-per-stock", type=int, default=3)
+    parser.add_argument("--max-per-stock", type=int, default=1, help="同一股票最多保留多少个 seed；默认 1 以降低相关性")
     parser.add_argument("--allow-multi-stock", action="store_true", help="允许多股票文章作为补足；默认只选择恰好匹配一只股票的文章")
     parser.add_argument("--max-pages", type=int, default=300)
     parser.add_argument("--max-depth", type=int, default=2)
+    parser.add_argument("--workers", type=int, default=8, help="并行浏览器页面数；默认 8，避免历史站点压力过高")
     parser.add_argument("--pause-seconds", type=float, default=3.0)
     parser.add_argument("--timeout-ms", type=int, default=30000)
     parser.add_argument("--render-wait-ms", type=int, default=500)
@@ -261,6 +338,12 @@ if __name__ == "__main__":
     parser.add_argument("--max-body-chars", type=int, default=12000, help="种子正文最多保存字符数；超过部分仍保留原始 HTML")
     parser.add_argument("--stock-catalog")
     parser.add_argument("--output", required=True)
+    parser.add_argument("--stream-output", help="逐页追加 JSONL；默认 OUTPUT.records.jsonl")
     parser.add_argument("--catalog-output", required=True)
     parser.add_argument("--headed", action="store_true")
-    asyncio.run(main(parser.parse_args()))
+    parsed = parser.parse_args()
+    if not parsed.root and not parsed.root_file:
+        parser.error("至少需要一个 --root 或 --root-file")
+    if parsed.workers < 1 or parsed.max_pages < 1 or parsed.max_depth < 0:
+        parser.error("workers、max-pages 必须为正数，max-depth 不能为负数")
+    asyncio.run(main(parsed))
