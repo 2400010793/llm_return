@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-08-26T13:30:45+08:00",
+  "report_scope": "Completed and traceable results only; pending fair-comparison tasks are design, not evidence.",
+  "datasets": {
+    "sina_full": {
+      "rows": 796553,
+      "stocks": 5466,
+      "start": "2010-01-01",
+      "end": "2026-08-18",
+      "unique_row_index": 796553,
+      "unique_document_id": 796553,
+      "body_chars_median": 2579,
+      "body_chars_p90": 9384,
+      "next_day_labels": 646222,
+      "event_3d_labels": 643517,
+      "year_counts": {"2010": 17741, "2011": 20264, "2012": 14658, "2013": 5682, "2014": 1320, "2015": 2120, "2016": 7797, "2017": 6884, "2018": 33170, "2019": 66774, "2020": 85195, "2021": 82768, "2022": 74865, "2023": 47643, "2024": 60843, "2025": 59885, "2026": 208944},
+      "source": "classification/sina_full_classification_panel.parquet"
+    },
+    "cninfo_full": {
+      "rows": 903665,
+      "stocks": 816,
+      "start": "2010-01-03",
+      "end": "2026-07-31",
+      "unique_row_index": 903665,
+      "unique_document_id": 903665,
+      "text_chars_median": 1765,
+      "text_chars_p90": 11737,
+      "eligible_text_100": 882610,
+      "next_day_labels": 895251,
+      "event_3d_labels": 894851,
+      "year_counts": {"2010": 49255, "2011": 50982, "2012": 56101, "2013": 59963, "2014": 71882, "2015": 86714, "2016": 90227, "2017": 87964, "2018": 39524, "2019": 38070, "2020": 39675, "2021": 41081, "2022": 42669, "2023": 45543, "2024": 39929, "2025": 42219, "2026": 21867},
+      "source": "data/processed/cninfo_full_classification_panel_2010_2026.parquet"
+    },
+    "sina_legacy_aligned": {
+      "rows": 75894,
+      "stocks": 5085,
+      "start": "2010-01-01",
+      "end": "2026-08-16",
+      "unique_row_index": 75894,
+      "unique_document_id": 75894,
+      "next_day_labels": 58528,
+      "event_3d_labels": 58090,
+      "year_counts": {"2010": 3849, "2011": 4342, "2012": 3635, "2013": 2100, "2014": 448, "2015": 686, "2016": 1463, "2017": 1459, "2018": 5171, "2019": 8097, "2020": 5369, "2021": 3478, "2022": 2969, "2023": 2104, "2024": 2744, "2025": 3524, "2026": 24456},
+      "source": "single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet"
+    },
+    "expected_fair_intersections": {
+      "sina": 35576,
+      "cninfo": 254544,
+      "status": "Expected counts enforced by builders; not yet completed analysis populations."
+    }
+  },
+  "direction_prompt_results": {
+    "rolling_protocol": "6 train years + 2 validation years + 1 test year; test years 2018-2026",
+    "folds_complete": 144,
+    "folds_expected": 144,
+    "rankic_leaders": [
+      {"prompt": "超额收益", "model": "BGE-M3", "variant": "short", "rankic": 0.04439, "positive_years": 9},
+      {"prompt": "收益", "model": "BGE-M3", "variant": "short", "rankic": 0.04327, "positive_years": 9},
+      {"prompt": "亏损", "model": "RoBERTa", "variant": "short", "rankic": 0.04317, "positive_years": 8},
+      {"prompt": "收益", "model": "RoBERTa", "variant": "short", "rankic": 0.04061, "positive_years": 9},
+      {"prompt": "盈利", "model": "RoBERTa", "variant": "masked_short", "rankic": 0.03920, "positive_years": 9}
+    ],
+    "best_long_only": {"prompt": "亏损", "model": "BGE-M3", "variant": "masked_short", "net_cagr": 0.0830, "net_sharpe": 0.595, "max_drawdown": -0.2287},
+    "best_long_short": {"prompt": "亏损", "model": "RoBERTa", "variant": "short", "net_cagr": 0.0464, "net_sharpe": 0.515, "max_drawdown": -0.2645},
+    "mask_paired": {"long_sharpe_mean_delta": 0.069, "long_sharpe_wins": 9, "pairs": 16, "simple_states_ic_mean_delta": -0.00480, "simple_states_ic_wins": 8},
+    "source": "REPORT_ALL_RESULTS.md sections 13-14"
+  },
+  "supervised_leaders": [
+    {"target": "Sina event_return_3d", "representation": "RoBERTa+BGE-M3 masked 收益 span", "method": "separate PCA64 then concatenate + Ridge", "rankic": 0.08945, "positive_years": 9},
+    {"target": "Sina next_day_return", "representation": "RoBERTa masked 分析股票收益 prompt_mean", "method": "Ridge", "rankic": 0.06044, "positive_years": 9},
+    {"target": "Sina next_day_return", "representation": "RoBERTa short 超额收益 span", "method": "Ridge", "rankic": 0.05851, "positive_years": 9},
+    {"target": "CNINFO Qwen residual O2O 3+1+1", "representation": "Qwen3-Embedding-8B masked_short PCA32", "method": "Huber SGD", "rankic": 0.02732, "positive_years": 5},
+    {"target": "CNINFO Qwen residual O2O strict 2026", "representation": "Qwen3-Embedding-8B masked_short PCA32", "method": "Huber SGD", "rankic": 0.02247, "positive_years": 1}
+  ],
+  "token_body": {
+    "common_stock_days": 30946,
+    "models": [
+      {"model": "RoBERTa", "body_rankic": 0.04391, "token_rankic": 0.04010, "cross_prompt_body_spearman": 0.997, "cross_prompt_token_spearman": 0.653, "token_body_top20_overlap": 0.44},
+      {"model": "BGE-M3", "body_rankic": 0.03307, "token_rankic": 0.03154, "cross_prompt_body_spearman": 0.972, "cross_prompt_token_spearman": 0.892, "token_body_top20_overlap": 0.70},
+      {"model": "Qwen3-Embedding-8B", "body_rankic": 0.05680, "token_rankic": 0.05360, "body_after_cost_annual": 0.0857, "token_after_cost_annual": 0.0737, "comparison": "Sina masked article mean versus masked 收益 token; not a four-prompt average"}
+    ],
+    "source": "REPORT_ALL_RESULTS.md sections 627-680 and 844-884"
+  },
+  "clustering": {
+    "hard_kmeans_vs_ridge": {"mean_rankic_delta": -0.00026, "wins": 6, "pairs": 16},
+    "bge_loss_umap_hdbscan": {"pca_ridge_long_bp": 1.50, "pca_ridge_long_short_bp": 15.26, "umap_hdbscan_long_bp": 6.17, "umap_hdbscan_long_short_bp": 20.35, "positive_years": 8, "years": 9},
+    "new_axes_single_2026": {
+      "protocol": "2018-2023 train, 2024-2025 validation, 2026 test",
+      "pca_ridge_mean_token_body_rankic_delta": 0.03670,
+      "pca_ridge_rankic_wins": 4,
+      "axes": 6,
+      "hard_kmeans_mean_token_body_rankic_delta": 0.03344,
+      "hard_kmeans_rankic_wins": 5,
+      "soft_kmeans_mean_token_body_rankic_delta": -0.01451,
+      "umap_hdbscan_mean_token_body_rankic_delta": -0.00881
+    }
+  },
+  "matched_semantic_targets": [
+    {"axis": "流动性", "target": "下一日价差水平", "token_rankic": 0.1881, "body_rankic": 0.2151, "token_minus_body": -0.0270, "test_n": 1673},
+    {"axis": "流动性", "target": "下一日价差 log 变化", "token_rankic": -0.0092, "body_rankic": -0.0325, "token_minus_body": 0.0233, "test_n": 1673},
+    {"axis": "估值", "target": "下一日 PE log 偏离", "token_rankic": 0.0764, "body_rankic": 0.0651, "token_minus_body": 0.0113, "test_n": 1119},
+    {"axis": "估值", "target": "下一日 PB log 偏离", "token_rankic": -0.0056, "body_rankic": 0.0197, "token_minus_body": -0.0254, "test_n": 1683},
+    {"axis": "波动率", "target": "下一日实现波动率水平", "token_rankic": 0.0553, "body_rankic": 0.0550, "token_minus_body": 0.0003, "test_n": 1671},
+    {"axis": "波动率", "target": "下一日实现波动率 log 变化", "token_rankic": -0.0236, "body_rankic": -0.0085, "token_minus_body": -0.0151, "test_n": 1671},
+    {"axis": "波动率", "target": "五日相对二十日波动率跳升", "token_rankic": 0.0310, "body_rankic": 0.0253, "token_minus_body": 0.0057, "test_n": 1674}
+  ],
+  "cninfo_pooled": {
+    "rows": 903665,
+    "oos_configs": 72,
+    "test_years": "2018-2026",
+    "leaders": [
+      {"model": "RoBERTa masked full_mean SmallMLP PCA128", "rankic": 0.01764, "positive_years": 9},
+      {"model": "RoBERTa short body_mean SmallMLP raw", "rankic": 0.01665, "positive_years": 7},
+      {"model": "BGE-M3 masked concat Huber raw", "rankic": 0.01415, "positive_years": 9},
+      {"model": "BGE-M3 masked full_mean Huber raw", "rankic": 0.01369, "positive_years": 9}
+    ]
+  },
+  "neutral_embedding_completion": [
+    {"dataset": "新浪", "model": "RoBERTa", "complete": 256, "expected": 256, "status": "complete"},
+    {"dataset": "巨潮", "model": "RoBERTa", "complete": 255, "expected": 256, "status": "missing shard-225"},
+    {"dataset": "新浪", "model": "BGE-M3", "complete": 189, "expected": 256, "status": "remaining tasks canceled; completed outputs retained"},
+    {"dataset": "巨潮", "model": "BGE-M3", "complete": 78, "expected": 256, "status": "remaining tasks canceled; completed outputs retained"}
+  ],
+  "provenance": {
+    "master_report_path": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md",
+    "master_report_sha256": "23ade165d796cb77772360a113c26e9594b6decfecd6c2ab14b021a754d0e4ff",
+    "master_report_lines": 884,
+    "handoff_snapshot": "docs/status_snapshot_2026-08-26.json",
+    "papers_manifest": "references/papers_manifest.tsv",
+    "semantic_regression": "reports/aligned_extended_regression/token_body_selected.csv",
+    "semantic_clustering": "reports/aligned_factor_clusters/token_minus_body_delta.csv"
+  }
+}

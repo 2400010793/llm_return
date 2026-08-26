@@ -5,7 +5,8 @@
 > 严格样本外比较。最新事实状态、已完成结果、未完成任务和接手命令见
 > [完整交接文档](docs/HANDOFF_2026-08-26.md)；论文依据见
 > [论文到实验的映射](references/paper_to_experiment_map.md)；日常操作见
-> [运行手册](docs/RUNBOOK.md)。
+> [运行手册](docs/RUNBOOK.md)。面向研究汇报的完整事实、负面结果、证据等级和
+> 下一阶段见[综合研究报告](reports/comprehensive_research_report/report.md)。
 
 ## 当前主线
 

@@ -16,6 +16,11 @@ data/raw/*
 data/interim/*
 data/processed/*
 reports/*
+!/reports/README.md
+!/reports/comprehensive_research_report/
+!/reports/comprehensive_research_report/**
+/reports/comprehensive_research_report/__pycache__/
+!/中国市场PromptToken新闻收益预测研究报告.pdf
 /data/source_stock_lists/
 /data/stock_universe_cninfo_current_with_returns.csv
 /data/stock_universe_index_coverage.csv
