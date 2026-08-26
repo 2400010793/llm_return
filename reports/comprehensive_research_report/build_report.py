@@ -327,6 +327,7 @@ def write_checksums() -> None:
         ROOT / "scripts/audit_prompt_mask_rankic.py",
         ROOT / "scripts/audit_prompt_representation_rankic.py",
         ROOT / "scripts/audit_prompt_return_regression_display.py",
+        ROOT / "references/embedding_runtime_audit_20260826.md",
         OUTPUT,
     ]
     files.extend(sorted(FIGURES.glob("*.png")))

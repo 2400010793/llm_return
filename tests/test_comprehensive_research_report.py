@@ -44,6 +44,24 @@ def test_frozen_facts_match_report_contract() -> None:
         + cninfo_collection["clean_panel_rows_2018_2026_focus_announcements"]
         == facts["datasets"]["cninfo_full"]["rows"]
     )
+    cleaning = facts["data_cleaning"]
+    assert cleaning["sina"]["accepted_source_articles"] == 167_713
+    assert cleaning["sina"]["expanded_stock_article_rows"] == 796_553
+    assert cleaning["cninfo"]["generic_combined_clean_rows"] == 903_816
+    assert cleaning["cninfo"]["frozen_research_panel_rows"] == 903_665
+    assert "151-row difference" in cleaning["cninfo"]["version_warning"]
+    alignment = facts["date_alignment"]
+    assert "strictly after" in alignment["entry_date"]
+    assert "does not use a publication-time close cutoff" in alignment["main_contract"]
+    runtime = facts["embedding_runtime"]
+    arrays = {(row["dataset"], row["model"]): row for row in runtime["arrays"]}
+    assert arrays[("Sina", "RoBERTa")]["completed_shards"] == 256
+    assert arrays[("Sina", "RoBERTa")]["observed_array_wall_seconds"] == 16_097
+    assert arrays[("CNINFO", "RoBERTa")]["completed_shards"] == 255
+    assert arrays[("Sina", "BGE-M3")]["cancelled_shards"] == 67
+    assert arrays[("CNINFO", "BGE-M3")]["cancelled_shards"] == 178
+    assert runtime["qwen_reference"]["elapsed_seconds"] == 18_715
+    assert abs(runtime["qwen_reference"]["rows_per_second"] - 3.085) < 1e-12
     original = facts["direction_prompt_results"]["masked_short_linear_ridge"]
     assert len(original) == 8
     assert {(row["model"], row["prompt"]) for row in original} == {
@@ -167,6 +185,15 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "**重点公告**" in source
     assert "2018 年筛选断点" in source
     assert "`full` 文件名解释为全时期全公告" in source
+    assert "从原始文本到可交易日期：清洗与对齐合同" in source
+    assert "167,713 篇源文章" in source
+    assert "903,816 中间档不等于 903,665 冻结面板" in source
+    assert "entry_date        = 严格晚于公告自然日的首个交易所交易日" in source
+    assert "Embedding 用时、并行资源和估算边界" in source
+    assert "4时28分17秒，完整" in source
+    assert "不是全量完成时间" in source
+    assert "单次 pooled pass" in source
+    assert "71.7 小时" in source
 
 
 def test_pdf_builder_resolves_the_simplified_chinese_font_by_family() -> None:
@@ -175,6 +202,7 @@ def test_pdf_builder_resolves_the_simplified_chinese_font_by_family() -> None:
     assert 'html { font-family: "Noto Sans CJK SC", sans-serif;' in source
     assert "ReportSans" not in source
     assert "NotoSansCJK-Regular.ttc" not in source
+    assert "references/embedding_runtime_audit_20260826.md" in source
 
 
 def test_prompt_mask_rankic_audit_matches_frozen_facts() -> None:

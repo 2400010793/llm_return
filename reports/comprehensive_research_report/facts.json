@@ -51,6 +51,76 @@
     "bge_m3": {"model_id": "BAAI/bge-m3", "architecture": "bidirectional multilingual embedding encoder", "hidden_size": 1024, "project_max_length": 1000, "body_representation": "body_mean"},
     "qwen3_embedding_8b": {"runner_model_id": "qwen3-embedding:8b", "architecture": "causal embedding model", "hidden_size": 4096, "prompt_position": "after article", "body_representation": "article_mean"}
   },
+  "data_cleaning": {
+    "sina": {
+      "raw_input_lines": 714555,
+      "valid_input_rows": 714549,
+      "accepted_source_articles": 167713,
+      "expanded_stock_article_rows": 796553,
+      "unique_stocks": 5466,
+      "minimum_body_chars": 120,
+      "date_cutoff": "2026-08-18",
+      "stock_attribution": "explicit stock codes or unambiguous company names found in cleaned title/body; raw page stock links are not trusted alone",
+      "deduplication_keys": ["source_article_id+stock_id", "url+stock_id", "stock_id+cleaned_text_hash"],
+      "timezone": "parse timestamp as UTC, convert to Asia/Shanghai, then store timezone-naive local time"
+    },
+    "cninfo": {
+      "historical_raw_completed_records": 554451,
+      "generic_combined_input_rows": 913014,
+      "generic_combined_duplicate_rows_removed": 9198,
+      "generic_combined_clean_rows": 903816,
+      "generic_deduplication_key": "stock_id+text_hash; identical text is preserved across different stocks",
+      "frozen_research_panel_rows": 903665,
+      "frozen_period_components": {"2010-2017_all": 553088, "2018-2026_focus": 350577},
+      "version_warning": "903816 is a generic combined clean archive; 903665 is the frozen audited research panel. The 151-row difference has not received a row-level cause audit, so the two artifacts must not be substituted."
+    }
+  },
+  "date_alignment": {
+    "stock_code": "normalize to six digits; codes beginning 5 or 6 map to .SH, all others to .SZ",
+    "sina_timestamp": "parse UTC then convert to Asia/Shanghai; invalid timestamps are rejected",
+    "cninfo_timestamp": "use published_at when valid and fall back to announcement_date; many historical records have date-level rather than intraday precision",
+    "event_center_date": "first exchange trading date greater than or equal to publication calendar date",
+    "entry_date": "first exchange trading date strictly after publication calendar date",
+    "main_contract": "conservative next-exchange-day entry for every record; the main panel does not use a publication-time close cutoff",
+    "next_day_return": "return observation on entry_date",
+    "event_return_3d": "compound center-1, center, and center+1 exchange-day returns; this is an event label and may include a pre-publication day",
+    "o2o": "entry_date open to the next exchange-date open, retained only when both eligible opens are observed",
+    "valuation": "backward as-of join using the latest available_at less than or equal to published_at",
+    "intraday_metrics": "future levels and changes are constructed with explicit ticker-wise shifts before stock/date joins"
+  },
+  "embedding_runtime": {
+    "neutral_six_prompt_contract": {
+      "shards": 256,
+      "max_concurrency": 256,
+      "cpus_per_task": 8,
+      "memory_gb_per_task": 32,
+      "time_limit_hours": 24,
+      "prompts_per_task": 6,
+      "model_loads_per_task": 1,
+      "roberta_batch_size": 8,
+      "roberta_max_length": 512,
+      "bge_m3_batch_size": 4,
+      "bge_m3_max_length": 1000
+    },
+    "arrays": [
+      {"dataset": "Sina", "model": "RoBERTa", "base_job_id": 4985394, "rows": 796553, "completed_shards": 256, "failed_shards": 0, "cancelled_shards": 0, "elapsed_seconds_min": 2101, "elapsed_seconds_median": 2810, "elapsed_seconds_p90": 11076, "elapsed_seconds_max": 12732, "observed_array_wall_seconds": 16097, "wall_status": "complete"},
+      {"dataset": "Sina", "model": "BGE-M3", "base_job_id": 4985395, "rows_completed": 588049, "completed_shards": 189, "failed_shards": 0, "cancelled_shards": 67, "elapsed_seconds_min": 5214, "elapsed_seconds_median": 18951, "elapsed_seconds_p90": 32855, "elapsed_seconds_max": 55155, "observed_array_wall_seconds": 56985, "wall_status": "partial; not a full-array completion time"},
+      {"dataset": "CNINFO", "model": "RoBERTa", "base_job_id": 4985396, "rows": 903665, "rows_completed_in_base_array": 899344, "completed_shards": 255, "failed_shards": 1, "cancelled_shards": 0, "elapsed_seconds_min": 2327, "elapsed_seconds_median": 4270, "elapsed_seconds_p90": 7307, "elapsed_seconds_max": 16421, "observed_array_wall_seconds": 33417, "wall_status": "partial base array; shard-225 required supplemental run"},
+      {"dataset": "CNINFO", "model": "BGE-M3", "base_job_id": 4985397, "rows_completed": 221551, "completed_shards": 78, "failed_shards": 0, "cancelled_shards": 178, "elapsed_seconds_min": 15169, "elapsed_seconds_median": 16604, "elapsed_seconds_p90": 17647, "elapsed_seconds_max": 24125, "observed_array_wall_seconds": 30481, "wall_status": "partial; not a full-array completion time"}
+    ],
+    "qwen_reference": {
+      "job_id": 3651805,
+      "gpu": "one RTX 4090",
+      "rows": 57741,
+      "elapsed_seconds": 18715,
+      "rows_per_second": 3.085,
+      "output_contract": "one pooled 4096-dimensional embedding pass; not the full prompt-token output contract",
+      "linear_one_pass_estimates_hours": {"Sina_796553": 71.7, "CNINFO_903665": 81.4}
+    },
+    "estimation_formula": "ceil(shards/effective_concurrency) * representative_shard_elapsed, then add at least 20 percent for I/O and validation; scheduler queue delay is reported separately",
+    "conditional_full_array_budget": {"BGE_M3_Sina_hours": "10-16", "BGE_M3_CNINFO_hours": "5-7"},
+    "source_note": "Slurm sacct completed task ElapsedRaw values and frozen task manifests; partial arrays are not treated as completed wall times"
+  },
   "datasets": {
     "sina_full": {
       "rows": 796553,
