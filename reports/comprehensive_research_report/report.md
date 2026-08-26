@@ -58,8 +58,8 @@ token、正文及模型间融合。为了减少公司身份记忆和时间泄漏
    BGE-M3 masked“亏损”领先，净 3.63 bp/交易日、年化 8.30%、Sharpe 0.595。尚缺
    位置匹配的无 Prompt 反事实，不能把它表述为加入 Prompt 的因果增量。
 3. **Token 的模型结构差异是真实的，但不能直接等同于理解能力。** 在 30,946 个共同
-   股票日上，RoBERTa 四 Prompt token 因子平均相关约 0.653，BGE-M3 约 0.892；正文
-   因子则分别约 0.997 和 0.972。RoBERTa 更 prompt-specific，BGE-M3 更平滑，但哪个
+   股票日上，RoBERTa 四 Prompt token 因子平均相关约 0.653，BGE-M3 约 0.892；历史
+   `full_mean` 因子则分别约 0.997 和 0.972。RoBERTa 更 prompt-specific，BGE-M3 更平滑，但哪个
    更有用仍必须由同样本的样本外增量判定。
 4. **Qwen token 尚未整体超过正文。** 当前新浪 PCA32 结果中，Qwen masked“收益”
    token RankIC 为 0.05360，低于 masked article mean 的 0.05680；成本后年化 7.37%
@@ -107,7 +107,7 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 |---|---|---|---|
 | 全文基线 | 新闻/公告全文是否预测未来收益 | `body_mean/full_mean` + Ridge/Huber/MLP | 新浪、巨潮均已有结果 |
 | Prompt 条件 | 加入简短任务词是否改变表示 | short 与 masked-short、Prompt 间配对 | 历史四方向完成 |
-| Token 定位 | 精确目标 span 是否优于正文 | token 对 `body_mean/article_mean` | 两模型完成，三模型公平比较待完成 |
+| Token 定位 | 精确目标 span 是否优于正文 | token 对 `body_mean/article_mean` | Qwen article 对照完成；两 encoder 的历史表实际为 `full_mean`，true body 待完成 |
 | 几何结构 | 模型是否把四个词表示为共同语义 | cosine、centered cosine、CKA、ARI | 部分完成，统一三模型待完成 |
 | 语义因子 | 估值、波动率、流动性等是否预测匹配标签 | 三点轴与风险/估值目标 | 2026 单折探索完成 |
 | 模型融合 | 多 Prompt、多模型是否产生非线性增量 | Ridge/ElasticNet/HistGB late fusion | 设计和部分旧结果，公平比较待完成 |
@@ -225,34 +225,76 @@ mask 的第一职责是控制身份与时间捷径，不是天然的模型增强
 
 ## 4. Embedding、训练与评价流程
 
-### 4.1 模型与表示
+### 4.1 模型、输入布局与表示
 
-| 模型 | 模型来源/runner ID | 结构 | 原始维度 | 输入上限 | 正文表示 |
+| 模型 | 模型来源/runner ID | 结构 | 原始维度 | 本轮输入上限 | 正文表示 |
 |---|---|---|---:|---:|---|
 | 中文 RoBERTa | `hfl/chinese-roberta-wwm-ext` | 双向 encoder | 768 | 512 | `body_mean` |
 | BGE-M3 | `BAAI/bge-m3` | 双向多语言 embedding encoder | 1,024 | 1,000 | `body_mean` |
-| Qwen3-Embedding-8B | Ollama `qwen3-embedding:8b` | 因果模型 | 4,096 | 既有任务合同 | `article_mean` |
+| Qwen3-Embedding-8B | Ollama/GGUF `qwen3-embedding:8b` | 因果模型 | 4,096 | 500 | `article_mean` |
 
 六个中性 Prompt 固定为：`分析股票估值`、`分析股票确定性`、`分析股票波动率`、
 `分析股票冲击`、`分析股票流动性`、`分析股票风险`。不添加“请”“综合分析”、高中低
 或无意义 padding。RoBERTa/BGE-M3 输出同时保存 prompt/title/body/full 的 mean/max、
 CLS 和 `prompt_token_embeddings`，因此不是只保存 Prompt token。
 
-双向模型的前置 prompt 可以影响正文 token；Qwen 的 prompt 后置，因果注意力下此前的
-`article_mean` 不受 prompt 反向影响。这一结构差异不能通过统一 PCA 消除。
+#### 4.1.1 Prompt 与正文如何隔断
+
+实现不是三模型共用一个字符串模板，而是两种不同的序列合同：
+
+- RoBERTa / BGE-M3：`[BOS] → Prompt → 标题 → 正文 → [EOS]`；
+- Qwen3-Embedding-8B：`标题正文 → \n\n → Prompt → [EOS]`。
+
+| 项目 | RoBERTa / BGE-M3 | Qwen3-Embedding-8B |
+|---|---|---|
+| Prompt 位置 | 正文前 | 正文后 |
+| 模型可见的 Prompt/正文 separator | **没有额外 separator token** | 双换行 `\n\n`；已审计 GGUF 中为 1 token |
+| 标题/正文 separator | 没有额外 token，只保存内部段标签 | 标题和正文直接拼成 article |
+| 段标签 | `segment_id=0/1/2` 只用于输出池化，不作为 `token_type_ids` 传给模型 | 由位置和双换行确定边界 |
+| 注意力方向 | 双向：Prompt、标题和可见正文互相上下文化 | 因果：Prompt 可看此前正文，正文不能看后置 Prompt |
+| 超长处理 | 从序列尾部截断；优先保留 Prompt/标题，正文尾部及可能的 EOS 被截去 | 先为 separator、Prompt、EOS 预留预算，再截断 article |
+
+因此 RoBERTa/BGE-M3 的“隔断”是**池化边界**而非模型注意力边界：模型仍把相邻 Prompt、
+标题和正文作为一个连续序列处理。Qwen 的双换行是模型可见边界，同时由于因果注意力，
+`article_mean` 的每个 article token 都位于 Prompt 之前，不会被后置 Prompt 反向改变。
+
+相同中文也不是相同 token。以收益 Prompt 为例，实际 tokenizer 审计为：RoBERTa 的
+`分析股票收益` 是 `分/析/股/票/收/益` 六个 token；BGE-M3 是
+`▁/分析/股票/收益` 四个 token；Qwen 输入为 `分析股票收益。`，是
+`分析/股票/收益/。` 四个 token。跨模型比较的是相同算法和样本外统计，不是相同 token
+数量或原始 embedding 坐标。
+
+#### 4.1.2 `prompt_mean`、目标 token、`body_mean` 和 `full_mean`
+
+令最后一层上下文化 hidden state 为 `h_i`，各表示只改变取哪些位置平均：
+
+| 表示 | 计算位置 | 是否包含 Prompt | 解释 |
+|---|---|---:|---|
+| `prompt_token_embeddings` | 保存每个 Prompt 位置的 `h_i`，形状为 `N × P × D` | 是 | 这是张量，不是单一向量 |
+| 目标 token/span | `mean(h_i, i∈目标词位置)` | 只含目标词 | 例如只取“收益”；多 token 目标取 span 均值 |
+| `prompt_mean` | `mean(h_i, i∈全部 Prompt 位置)` | 是 | 同时混合“分析”“股票”和目标词；Qwen 历史输入还含句号 |
+| `body_mean` | `mean(h_i, i∈正文段)` | 不直接池化 Prompt | RoBERTa/BGE-M3 中正文 hidden state 仍受前置 Prompt 双向影响 |
+| `article_mean` | `mean(h_i, i∈Qwen 标题+正文)` | 否 | 因果结构下不受后置 Prompt 影响 |
+| `full_mean` | `mean(h_i, i∈Prompt+标题+正文)` | 是 | 不能命名为 `body_mean` |
+| `title_body_mean` | `mean(h_i, i∈标题+正文)` | 不直接池化 Prompt | 双向模型中仍是 Prompt-conditioned 正文表示 |
+
+所有 mean 都排除 BOS/EOS、padding 和不可见位置。目标 `token_embedding` 也不是词典中的
+静态 token embedding，而是**整篇输入前向计算后的最后一层上下文化 hidden state**。
+Qwen 的 `prompt_mean` 对历史四词任务平均全部 Prompt token，包括末尾句号；“收益”token
+只选 `收益`，排除“分析”“股票”和句号。
 
 ### 4.2 两模型四方向 Prompt 的同口径收益统计
 
 上一版在模型介绍表中混放了新浪/巨潮、next-day/event/O2O 和不同表示，不能用于判断
 prompt 收益能力。下面改用现有最完整的严格可比表：旧新浪共同面板、2018--2026 的
-6+2+1 滚动、`next_day_return`、`masked_short`、各 prompt 自身目标 span、无聚类
+6+2+1 滚动、`next_day_return`、`masked_short`、各 prompt 历史 direction span、无聚类
 线性 Ridge。`late_fusion` 是历史文件名，表中四行均为独立 prompt 预测。
 
-| Prompt 目标 span | RoBERTa RankIC | BGE-M3 RankIC | RoBERTa - BGE |
+| Prompt / 历史 direction span | RoBERTa RankIC | BGE-M3 RankIC | RoBERTa - BGE |
 |---|---:|---:|---:|
 | 盈利 | 0.05430 | 0.03812 | +0.01618 |
 | 收益 | 0.05394 | 0.03556 | +0.01838 |
-| 超额收益 | **0.05644** | 0.03720 | +0.01923 |
+| 超额收益 / 实际取“超额” | **0.05644** | 0.03720 | +0.01923 |
 | 亏损 | 0.05479 | 0.03431 | +0.02048 |
 
 四个 prompt 在两个模型中均为正，且该口径下 RoBERTa 全部高于 BGE-M3。RoBERTa
@@ -265,12 +307,13 @@ prompt 收益能力。下面改用现有最完整的严格可比表：旧新浪�
 
 | Prompt | 目标 span | 说明 |
 |---|---|---|
-| `分析股票盈利` | `盈利` | 两个中文 token 的均值 |
-| `分析股票收益` | `收益` | 两个中文 token 的均值 |
-| `分析股票超额收益` | `超额收益` | 公平比较使用完整四字目标 span；部分历史软聚类使用“超额”并单列 |
-| `分析股票亏损` | `亏损` | 两个中文 token 的均值 |
+| `分析股票盈利` | `盈利` | 取语义字符 span；实际 token 数由各模型 tokenizer 决定 |
+| `分析股票收益` | `收益` | 取语义字符 span；不包含“分析股票” |
+| `分析股票超额收益` | `超额` | **本报告历史 word-span 结果只取“超额”**；不是完整目标短语 |
+| `分析股票亏损` | `亏损` | 取语义字符 span；不包含“分析股票” |
 
-历史结果保留原有 span 定义，不能事后更改。新的三模型公平比较使用完整目标短语，并在
+历史结果必须保留原有 span 定义，不能事后把“超额”改写成“超额收益”。新的三模型公平
+比较才使用完整目标短语，并在
 manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 Prompt hash。
 
 ### 4.4 Benchmark 层级
@@ -358,7 +401,7 @@ winner。
 |---|---:|---|---:|---:|
 | 盈利 | **0.04480** | RoBERTa masked `prompt_mean` | 0.05791 | 9/9 |
 | 收益 | 0.04393 | RoBERTa masked `prompt_mean` | **0.06044** | 9/9 |
-| 超额收益 | 0.04385 | RoBERTa short 目标 span | 0.05851 | 9/9 |
+| 超额收益 | 0.04385 | RoBERTa short “超额”span | 0.05851 | 9/9 |
 | 亏损 | 0.04281 | RoBERTa masked `prompt_mean` | 0.05957 | 9/9 |
 
 四 Prompt 平均差仅 0.00199，而最佳单配置的词和变体并不相同。它说明四词都含收益排序
@@ -419,10 +462,10 @@ Top20% 仍然只作用于**当日可用股票池**：每天平均 6.14 只有效
 #### 5.6.1 线性 RankIC：同模型、同表示的直接配对
 
 以下每一行固定新浪旧共同面板、`next_day_return`、6+2+1、2018--2026 测试年和无聚类
-Ridge，只改变 `short → masked_short`。`prompt_mean` 是整个短 Prompt 槽位平均；目标 span
-只平均“盈利/收益/超额收益/亏损”，不包含“分析股票”、句号和 special token。
+Ridge，只改变 `short → masked_short`。`prompt_mean` 是整个短 Prompt 槽位平均；历史
+direction span 只平均“盈利/收益/超额/亏损”，不包含“分析股票”、句号和 special token。
 
-| Prompt / 模型 | Prompt mean short | masked | 增量 | 目标 span short | masked | 增量 |
+| Prompt / 模型 | Prompt mean short | masked | 增量 | 历史 span short | masked | 增量 |
 |---|---:|---:|---:|---:|---:|---:|
 | 盈利 / RoBERTa | 0.05510 | 0.05791 | +0.00281 | 0.05323 | 0.05430 | +0.00107 |
 | 收益 / RoBERTa | 0.05427 | 0.06044 | +0.00617 | 0.04935 | 0.05394 | +0.00459 |
@@ -433,18 +476,18 @@ Ridge，只改变 `short → masked_short`。`prompt_mean` 是整个短 Prompt �
 | 超额收益 / BGE-M3 | 0.03205 | 0.03304 | +0.00099 | 0.03207 | 0.03720 | +0.00513 |
 | 亏损 / BGE-M3 | 0.03071 | 0.03241 | +0.00171 | 0.03227 | 0.03431 | +0.00204 |
 
-`prompt_mean` 为 8/8 改善，平均/中位 RankIC 增量分别为 **+0.00324/+0.00226**；目标 span
-为 7/8 改善，平均/中位分别为 **+0.00297/+0.00276**。RoBERTa“超额收益”目标 span 是
+`prompt_mean` 为 8/8 改善，平均/中位 RankIC 增量分别为 **+0.00324/+0.00226**；历史 span
+为 7/8 改善，平均/中位分别为 **+0.00297/+0.00276**。RoBERTa“超额收益”的“超额”span 是
 唯一线性反例，说明 mask 的平均收益不是机械地发生在每个 token 上。
 
 <div class="figure">
 <img src="figures/mask_rankic_deltas.png" alt="Paired mask RankIC deltas">
-<p>图 3. 同一模型和表示下 masked-short 减 short 的 RankIC；mask 对 Prompt mean 更一致，对目标 span 存在一个明确反例。</p>
+<p>图 3. 同一模型和表示下 masked-short 减 short 的 RankIC；mask 对 Prompt mean 更一致，对历史 direction span 存在一个明确反例。</p>
 </div>
 
 #### 5.6.2 成本后组合：排序改善不等于同样大小的净收益改善
 
-只看 RankIC 会漏掉 mask 对组合尾部的影响。四个目标 span、两个模型的线性/硬聚类
+只看 RankIC 会漏掉 mask 对组合尾部的影响。四个历史 direction span、两个模型的线性/硬聚类
 Top20% 模拟合计 16 个配对中，`masked-short - short` 的净收益平均为 **+3.21 bp/信号日**，
 13/16 胜；持仓数固定为 2.80，只是选中的股票发生变化。软聚类正式持仓的对应增量较小，
 为 **+0.43 bp/交易日**、9/16 胜，净 Sharpe 平均增加 0.069。
@@ -474,10 +517,10 @@ Top20% 仅 +0.03 bp，硬聚类反而 -0.22 bp。另一方面，`simple_states` 
 #### 5.7.1 已确认：不同目标词产生不同表示和股票排序
 
 四 Prompt 无聚类八配置平均 RankIC 从 0.04281 到 0.04480，跨度很小；最佳单配置却从
-0.05791 到 0.06044，且“超额收益”的最佳点来自未 mask 的目标 span。这说明 Prompt 效应
+0.05791 到 0.06044，且“超额收益”的最佳点来自未 mask 的“超额”span。这说明 Prompt 效应
 不是一个统一加成，而是 `词 × 模型 × 表示 × mask` 的交互。因子几何也支持这种差异：在
 30,946 个共同股票日上，RoBERTa 四 Prompt token 因子平均 Spearman 为 0.653，明显低于
-正文的 0.997；BGE-M3 为 0.892，对应正文 0.972。RoBERTa 更词敏感，BGE-M3 更平滑，
+`full_mean` 的 0.997；BGE-M3 为 0.892，对应 `full_mean` 0.972。RoBERTa 更词敏感，BGE-M3 更平滑，
 但这本身不能判定哪一种语义理解更正确。
 
 历史同滚动汇总还给出一个重要反例：`prompt_mean` 并没有自动胜过更宽的池化。
@@ -501,45 +544,71 @@ Top20% 仅 +0.03 bp，硬聚类反而 -0.22 bp。另一方面，`simple_states` 
 现有四词 embedding 都是在已加入 Prompt 后生成的；尚无正文 token 位置、截断预算和
 tokenizer 完全匹配的 `no-prompt body` 反事实。因此不能用这些表宣称“加入 Prompt 因果提高
 了多少 RankIC 或 bp”。`prompt_mean` 与目标 span 的比较是在“已经有 Prompt”的输入内选择
-不同池化位置；`body_mean` 跨 Prompt 高相关也只说明正文因子稳定，二者都不是 no-prompt
+不同池化位置；`full_mean` 跨 Prompt 高相关也只说明整段池化因子稳定，二者都不是 no-prompt
 对照。严格实验必须额外生成相同行、相同 mask、相同正文可见 token 数和相同 special-token
 结构的空 Prompt/无 Prompt 输入，并在每个滚动 fold 内配对 PCA 和 Ridge。完成之前，报告只
 写“Prompt token 提供可区分的任务视角”，不写“加入 Prompt 已被证明优于不加 Prompt”。
 
-## 6. Token、正文与模型几何
+## 6. Prompt Mean、Token、全文与模型几何
 
-### 6.1 两模型四 Prompt 横向结构
+### 6.1 RoBERTa/BGE-M3：Prompt Mean 与方向 Token
 
-现有比较使用新浪 30,946 个完全共同股票日上的滚动样本外因子，不是直接把 768 维和
-1,024 维原始向量放在同一坐标系计算距离。
+先使用旧新浪、`masked_short`、PCA128+Ridge、6+2+1 和 `next_day_return` 的历史汇总。
+每格是四 Prompt 的平均 RankIC；历史 direction span 使用盈利/收益/超额/亏损，其中
+“超额收益”只取“超额”。
+
+| 模型 | `prompt_mean` | 历史 direction span | Prompt - Span |
+|---|---:|---:|---:|
+| RoBERTa | **0.05731** | 0.05486 | **+0.00245** |
+| BGE-M3 | 0.03313 | **0.03630** | **-0.00317** |
+
+结论在模型间相反：RoBERTa 中混合“分析/股票/方向词”的整个 Prompt 平均优于只取方向词；
+BGE-M3 中只取方向词更好。因此 `prompt_mean` 不是天然更集中，目标 token 也不是天然更强。
+RoBERTa/BGE-M3 原始维度分别为 768/1,024，PCA 在各模型自身训练窗口拟合，不能把原始
+坐标或回归系数跨模型比较。
+
+<!-- PAGEBREAK -->
+
+#### 6.1.1 共同股票日上的 `full_mean` 与 Token
+
+另一张历史表强制使用新浪 30,946 个完全共同股票日，比较的是 `full_mean` 与 direction
+span。这里必须更正旧命名：`full_mean` 平均 Prompt+标题+正文，**不是 `body_mean`**。
 
 | 指标 | RoBERTa | BGE-M3 |
 |---|---:|---:|
-| 四 Prompt 正文因子平均 Spearman | 0.997 | 0.972 |
+| 四 Prompt `full_mean` 因子平均 Spearman | 0.997 | 0.972 |
 | 四 Prompt token 因子平均 Spearman | 0.653 | 0.892 |
-| token 与对应正文 Top20 重合 | 44% | 70% |
-| masked 正文平均 RankIC | 0.04391 | 0.03307 |
-| masked 目标 span 平均 RankIC | 0.04010 | 0.03154 |
+| token 与对应 `full_mean` Top20 重合 | 44% | 70% |
+| masked `full_mean` 平均 RankIC | 0.04391 | 0.03307 |
+| masked 历史 direction span 平均 RankIC | 0.04010 | 0.03154 |
 
 RoBERTa token 的 Prompt 间差异更大，BGE-M3 token 更接近共同方向。两种解释都可能
 成立：前者可能保留有用细粒度，也可能只是词形敏感；后者可能理解共同语义，也可能过度
-平滑。只有同新闻、同标签、同 PCA 的 token/body 增量和多 Prompt 融合才能区分。
+平滑。真正的 `body_mean` embedding 已经保存，但旧四 Prompt 研究没有完成同一新闻交集、
+同一 PCA 和同一滚动协议的 `body_mean` 回归，所以本报告不提供伪造的 body RankIC。后续
+公平表必须同时重跑 `prompt_mean / 完整目标 span / body_mean / full_mean`。
 
-### 6.2 Qwen 的当前反例
+### 6.2 Qwen：同一 PCA32 下的三种表示
 
-| 表示 | PCA32 RankIC | 成本后年化 |
-|---|---:|---:|
-| masked article mean | 0.05680 | 8.57% |
-| masked“收益”token | 0.05360 | 7.37% |
+Qwen 现有“收益”实验能在 30,946 个股票日上做更干净的同 reducer 比较。下表三行都固定
+`masked_short + PCA32 + Ridge`；`prompt_mean` 包含 `分析/股票/收益/。`，目标 token 只取
+“收益”，`article_mean` 只平均位于 Prompt 前的标题和正文。
+
+| 表示 | PCA32 RankIC | 相对 article mean | 成本后年化 |
+|---|---:|---:|---:|
+| masked `article_mean` | **0.05680** | 0 | **8.57%** |
+| masked `prompt_mean` | 0.05547 | -0.00133 | 未完成同协议成本表 |
+| masked“收益”token | 0.05360 | -0.00319 | 7.37% |
 
 <div class="figure">
 <img src="figures/token_body_rankic.png" alt="Token and body RankIC">
-<p>图 4. 三模型现有 token/body 结果。RoBERTa/BGE-M3 是四 Prompt 汇总，Qwen 是单一“收益”Prompt，不能当作完全公平的模型排名。</p>
+<p>图 4. 三模型现有 token 与宽池化结果。RoBERTa/BGE-M3 的蓝柱实际是 full_mean，Qwen 是 article_mean；不能标成统一 body_mean，也不能当作公平模型排名。</p>
 </div>
 
-Qwen 当前 token 没有整体超过正文。Qwen 是因果模型且 Prompt 位于正文之后，其
-`article_mean` 不受后置 Prompt 反向影响；RoBERTa/BGE-M3 为双向编码器，Prompt 可能
-改变正文位置的表示。公平比较必须记录这种模型结构差异。
+Qwen 当前 `prompt_mean` 和收益 token 都没有超过 article mean。因果注意力解释了三者的
+信息流：article token 不看后置 Prompt；Prompt token 可以看全文并逐步看此前 Prompt token；
+末尾句号也只进入 `prompt_mean`，不进入收益 token。RoBERTa/BGE-M3 为双向编码器，前置
+Prompt 会反向改变正文位置的 hidden state。这个结构差异不能通过统一 PCA 消除。
 
 ### 6.3 三模型公平比较的判定门槛
 
@@ -548,7 +617,7 @@ cosine 显著低于 BGE-M3；BGE-M3 因子相关和选股重合最高；Qwen 几
 但因子重合更低；Qwen 四 token 融合超过最佳单 token 和 Qwen 正文；融合增量至少
 三分之二测试年为正且区块 bootstrap 区间不跨 0；三模型融合继续超过最佳单模型。
 
-该比较尚未完成。当前只能报告两模型结构事实和 Qwen 单 Prompt token/body 结果。
+该比较尚未完成。当前只能报告两模型结构事实和 Qwen 单 Prompt token/article 结果。
 
 ## 7. 中性语义轴、估值与风险标签
 
@@ -675,8 +744,8 @@ RankIC 使用每天整个可评分横截面的排序；Top20% 组合只看尾部
 
 ### 9.2 Token 的价值可能集中在尾部
 
-旧比较中，RoBERTa token 与正文 Top20 重合只有约 44%，BGE-M3 约 70%。RoBERTa
-盈利、收益、亏损 token 相对对应正文的多空收益增量曾为正，而超额收益是反例。这提示
+旧比较中，RoBERTa token 与 `full_mean` Top20 重合只有约 44%，BGE-M3 约 70%。RoBERTa
+盈利、收益、亏损 token 相对对应 `full_mean` 的多空收益增量曾为正，而超额收益是反例。这提示
 token 可能主要改变尾部选股，而不是整体 RankIC；但该机制需要在新公平样本上复核。
 
 ### 9.3 成本和卖空限制
@@ -797,8 +866,8 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 |---|---|---|
 | 文本 embedding 含收益排序信息 | 新浪多个配置 9/9 年正；巨潮 pooled 多个配置跨年正 | 支持弱文本因子 |
 | Prompt token 提供可区分任务视角 | 四方向持仓/bp、因子相关、不同 span 排名 | 支持；加入 Prompt 的因果增量尚未识别 |
-| Token 普遍优于正文 | 两模型平均 RankIC token 略低；Qwen token 也低于正文 | 不支持 |
-| RoBERTa 与 BGE 的 Prompt 几何不同 | 因子相关 0.653 对 0.892，正文相关均很高 | 支持结构差异，不等于理解优劣 |
+| Token 普遍优于宽池化 | 两模型历史 token 略低于 `full_mean`；Qwen token 也低于 `article_mean` | 不支持 |
+| RoBERTa 与 BGE 的 Prompt 几何不同 | 因子相关 0.653 对 0.892，`full_mean` 相关均很高 | 支持结构差异，不等于理解优劣 |
 | 聚类稳定提高收益预测 | 硬聚类净 bp 平均 -0.49；软簇 gamma=1 净 -0.55；UMAP 只有单 Prompt 无成本正例 | 当前不支持 |
 | 收益语义比波动率语义更匹配三日收益 | 同一 2026 折中期限收益轴 4/4 方法高于波动率轴；PCA 仅高 0.00013 | 与假设一致，但只是单年探索证据 |
 | 估值 Prompt 预测高估/低估 | PE 有正点估计，PB/PS/EV 分化，单年小样本 | 探索性证据 |
@@ -866,6 +935,10 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 | 中性流动性 | 分析股票流动性 | masked-short | 流动性 | body_mean |
 | 中性风险 | 分析股票风险 | masked-short | 风险 | body_mean |
 
+上表是目标表示合同，不是已完成结果清单。四方向历史宽池化回归实际使用 `full_mean`；
+真正 `body_mean` 只完成 embedding 保存、尚无同口径 RankIC。历史“超额收益”word-span
+只取“超额”，新三模型公平合同才取完整“超额收益”。
+
 ## 附录 B：主要事实来源
 
 | 事实 | 可追溯产物 |
@@ -877,6 +950,7 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 | 全量面板行数、日期、股票数、标签覆盖 | `facts.json`；`scripts/audit_research_handoff.py`；相应 Parquet schema |
 | 四方向 Prompt、mask、成本和聚类结果 | 工作区 `REPORT_ALL_RESULTS.md`，SHA256 `23ade165...e4ff` |
 | short/masked-short 线性 RankIC 配对 | `audits/prompt_mask/rankic_pairs.csv`、`summary.json`；生成器 `scripts/audit_prompt_mask_rankic.py` |
+| Prompt mean、方向 span 与 Qwen 三表示 RankIC | `audits/prompt_representations/`；生成器 `scripts/audit_prompt_representation_rankic.py` |
 | 估值、波动率、价差配对结果 | `reports/aligned_extended_regression/token_body_selected.csv` |
 | 新语义轴聚类配对 | `reports/aligned_factor_clusters/token_minus_body_delta.csv` |
 | 中性 embedding 完成度 | `docs/status_snapshot_2026-08-26.json` 和 embedding shard `COMPLETED` |

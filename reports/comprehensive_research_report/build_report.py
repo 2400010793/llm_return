@@ -144,12 +144,12 @@ def generate_figures(facts: dict) -> None:
 
     rows = facts["token_body"]["models"]
     names = [row["model"].replace("Qwen3-Embedding-8B", "Qwen3") for row in rows]
-    body = [row["body_rankic"] for row in rows]
+    body = [row["whole_text_rankic"] for row in rows]
     token = [row["token_rankic"] for row in rows]
     x = np.arange(len(rows))
     width = 0.34
     fig, ax = plt.subplots(figsize=(6.8, 3.3), dpi=180)
-    ax.bar(x - width / 2, body, width, label="正文表示", color="#1f4e79")
+    ax.bar(x - width / 2, body, width, label="全文/Article 表示", color="#1f4e79")
     ax.bar(x + width / 2, token, width, label="目标 token", color="#c45a3c")
     ax.set_xticks(x, names)
     ax.set_ylabel("日均 RankIC")
@@ -328,7 +328,14 @@ tbody tr:last-child td { border-bottom: 0.7pt solid #315f7d; }
 
 
 def write_checksums() -> None:
-    files = [SOURCE, FACTS, Path(__file__), ROOT / "scripts/audit_prompt_mask_rankic.py", OUTPUT]
+    files = [
+        SOURCE,
+        FACTS,
+        Path(__file__),
+        ROOT / "scripts/audit_prompt_mask_rankic.py",
+        ROOT / "scripts/audit_prompt_representation_rankic.py",
+        OUTPUT,
+    ]
     files.extend(sorted(FIGURES.glob("*.png")))
     files.extend(sorted(path for path in AUDITS.rglob("*") if path.is_file()))
     CHECKSUMS.write_text(

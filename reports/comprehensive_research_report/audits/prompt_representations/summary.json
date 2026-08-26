@@ -1,0 +1,47 @@
+{
+  "four_prompt_protocol": "Sina legacy panel; masked_short; PCA128+Ridge; 6+2+1; next_day_return",
+  "historical_span_warning": "超额收益 uses the historical 超额 span, not the full 超额收益 target",
+  "four_prompt_model_averages": [
+    {
+      "model": "RoBERTa",
+      "prompt_mean_rankic": 0.05730965475588776,
+      "direction_span_rankic": 0.05486383220426541,
+      "prompt_minus_span": 0.0024458225516223453
+    },
+    {
+      "model": "BGE-M3",
+      "prompt_mean_rankic": 0.033126936371530656,
+      "direction_span_rankic": 0.03629836420984886,
+      "prompt_minus_span": -0.003171427838318204
+    }
+  ],
+  "qwen_protocol": "Sina; 分析股票收益。; masked_short; PCA32+Ridge; 6+2+1",
+  "qwen": [
+    {
+      "representation": "article_mean",
+      "rankic": 0.0567965396367604,
+      "positive_years": 8,
+      "test_stock_days": 30946,
+      "delta_vs_article_mean": 0.0
+    },
+    {
+      "representation": "prompt_mean",
+      "rankic": 0.05547051086295002,
+      "positive_years": 9,
+      "test_stock_days": 30946,
+      "delta_vs_article_mean": -0.0013260287738103838
+    },
+    {
+      "representation": "return_token",
+      "rankic": 0.05360264637121895,
+      "positive_years": 9,
+      "test_stock_days": 30946,
+      "delta_vs_article_mean": -0.003193893265541453
+    }
+  ],
+  "true_body_mean_status": "Saved in RoBERTa/BGE-M3 embedding outputs, but no completed same-sample historical four-prompt rolling regression; historical 0.04391/0.03307 values are full_mean.",
+  "sources": {
+    "positive_summary": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/summary",
+    "qwen_overall": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1/pca_ablation_v1/summary/overall_metrics.csv"
+  }
+}

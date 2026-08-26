@@ -1,0 +1,4 @@
+representation,rankic,positive_years,test_stock_days,delta_vs_article_mean
+article_mean,0.0567965396367604,8,30946,0.0
+prompt_mean,0.05547051086295002,9,30946,-0.0013260287738103838
+return_token,0.05360264637121895,9,30946,-0.003193893265541453

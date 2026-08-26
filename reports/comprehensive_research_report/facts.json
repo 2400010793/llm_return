@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "frozen_at": "2026-08-26T18:35:00+08:00",
+  "frozen_at": "2026-08-26T20:10:00+08:00",
   "report_scope": "Completed and traceable results only; pending fair-comparison tasks are design, not evidence.",
   "collection": {
     "sina": {
@@ -181,12 +181,51 @@
   ],
   "token_body": {
     "common_stock_days": 30946,
+    "historical_four_prompt_masked_pca128": [
+      {"model": "RoBERTa", "prompt_mean_rankic": 0.0573096548, "direction_span_rankic": 0.0548638322, "prompt_minus_span": 0.0024458226},
+      {"model": "BGE-M3", "prompt_mean_rankic": 0.0331269364, "direction_span_rankic": 0.0362983642, "prompt_minus_span": -0.0031714278}
+    ],
+    "historical_span_contract": "盈利/收益/亏损 use the matching full two-character direction; historical 超额收益 word_span uses 超额 only",
+    "qwen_masked_pca32": {
+      "prompt": "分析股票收益。",
+      "article_mean_rankic": 0.0567965396,
+      "prompt_mean_rankic": 0.0554705109,
+      "return_token_rankic": 0.0536026464,
+      "prompt_minus_article": -0.0013260288,
+      "token_minus_article": -0.0031938933,
+      "test_stock_days": 30946
+    },
+    "true_body_mean_rankic_status": "body_mean embeddings are saved for RoBERTa/BGE-M3, but the historical four-prompt study has no completed same-sample rolling body_mean regression; full_mean must not be relabeled as body_mean",
     "models": [
-      {"model": "RoBERTa", "body_rankic": 0.04391, "token_rankic": 0.04010, "cross_prompt_body_spearman": 0.997, "cross_prompt_token_spearman": 0.653, "token_body_top20_overlap": 0.44},
-      {"model": "BGE-M3", "body_rankic": 0.03307, "token_rankic": 0.03154, "cross_prompt_body_spearman": 0.972, "cross_prompt_token_spearman": 0.892, "token_body_top20_overlap": 0.70},
-      {"model": "Qwen3-Embedding-8B", "body_rankic": 0.05680, "token_rankic": 0.05360, "body_after_cost_annual": 0.0857, "token_after_cost_annual": 0.0737, "comparison": "Sina masked article mean versus masked 收益 token; not a four-prompt average"}
+      {"model": "RoBERTa", "whole_text_representation": "full_mean (prompt+title+body)", "whole_text_rankic": 0.04391, "token_rankic": 0.04010, "cross_prompt_whole_text_spearman": 0.997, "cross_prompt_token_spearman": 0.653, "token_whole_text_top20_overlap": 0.44},
+      {"model": "BGE-M3", "whole_text_representation": "full_mean (prompt+title+body)", "whole_text_rankic": 0.03307, "token_rankic": 0.03154, "cross_prompt_whole_text_spearman": 0.972, "cross_prompt_token_spearman": 0.892, "token_whole_text_top20_overlap": 0.70},
+      {"model": "Qwen3-Embedding-8B", "whole_text_representation": "article_mean (pre-prompt title+body)", "whole_text_rankic": 0.05680, "token_rankic": 0.05360, "whole_text_after_cost_annual": 0.0857, "token_after_cost_annual": 0.0737, "comparison": "Sina masked article mean versus masked 收益 token; not a four-prompt average"}
     ],
     "source": "REPORT_ALL_RESULTS.md sections 627-680 and 844-884"
+  },
+  "embedding_layouts": {
+    "roberta_bge_m3": {
+      "layout": "BOS + prompt + title + body + EOS, then tail truncation",
+      "model_visible_separator": "none between prompt/title/body",
+      "segment_ids": "internal pooling masks only; not passed as token_type_ids",
+      "attention": "bidirectional among all visible tokens",
+      "special_tokens_in_means": false,
+      "roberta_example_tokens": ["分", "析", "股", "票", "收", "益"],
+      "bge_m3_example_tokens": ["▁", "分析", "股票", "收益"],
+      "max_length": {"RoBERTa": 512, "BGE-M3": 1000},
+      "storage_dtype": "float32",
+      "hidden_size": {"RoBERTa": 768, "BGE-M3": 1024}
+    },
+    "qwen3_embedding_8b": {
+      "layout": "article(title+body) + double-newline separator + prompt + EOS",
+      "model_visible_separator": "double newline, one token in the audited GGUF run",
+      "attention": "causal; prompt sees article, article cannot see later prompt",
+      "prompt_example": "分析股票收益。",
+      "prompt_example_tokens": ["分析", "股票", "收益", "。"],
+      "max_length": 500,
+      "storage_dtype": "float16",
+      "hidden_size": 4096
+    }
   },
   "clustering": {
     "hard_kmeans_vs_ridge": {

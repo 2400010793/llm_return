@@ -53,7 +53,20 @@ def test_frozen_facts_match_report_contract() -> None:
     assert len(comparison) == 4
     assert all(row["horizon"] > row["volatility"] for row in comparison)
     assert new_axes["horizon_wins_methods"] == 4
-    assert facts["token_body"]["models"][2]["token_rankic"] < facts["token_body"]["models"][2]["body_rankic"]
+    assert (
+        facts["token_body"]["models"][2]["token_rankic"]
+        < facts["token_body"]["models"][2]["whole_text_rankic"]
+    )
+    representations = facts["token_body"]["historical_four_prompt_masked_pca128"]
+    roberta = next(row for row in representations if row["model"] == "RoBERTa")
+    bge = next(row for row in representations if row["model"] == "BGE-M3")
+    assert roberta["prompt_minus_span"] > 0
+    assert bge["prompt_minus_span"] < 0
+    qwen = facts["token_body"]["qwen_masked_pca32"]
+    assert qwen["article_mean_rankic"] > qwen["prompt_mean_rankic"] > qwen["return_token_rankic"]
+    layouts = facts["embedding_layouts"]
+    assert layouts["roberta_bge_m3"]["model_visible_separator"].startswith("none")
+    assert "double newline" in layouts["qwen3_embedding_8b"]["model_visible_separator"]
     hard = facts["clustering"]["hard_kmeans_vs_ridge"]
     assert hard["hard_net_daily_bp"] < hard["linear_net_daily_bp"]
     assert hard["net_daily_bp_wins"] == 7
@@ -98,6 +111,13 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "+0.00324/+0.00226" in source
     assert "-0.00207" in source
     assert "加入 Prompt 相对无 Prompt 的因果增量" in source
+    assert "Prompt 与正文如何隔断" in source
+    assert "没有额外 separator token" in source
+    assert "不能命名为 `body_mean`" in source
+    assert "0.05731" in source
+    assert "0.03630" in source
+    assert "0.05547" in source
+    assert "真正的 `body_mean` embedding 已经保存" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
 
 
@@ -118,6 +138,24 @@ def test_prompt_mask_rankic_audit_matches_frozen_facts() -> None:
         - frozen["target_span"]["mean_delta"]
     ) < 1e-10
     assert (audit_dir / "rankic_pairs.csv").stat().st_size > 0
+
+
+def test_prompt_representation_audit_matches_frozen_facts() -> None:
+    audit_dir = REPORT_DIR / "audits" / "prompt_representations"
+    audit = json.loads((audit_dir / "summary.json").read_text(encoding="utf-8"))
+    facts = load_builder().load_facts()["token_body"]
+    frozen_models = {row["model"]: row for row in facts["historical_four_prompt_masked_pca128"]}
+    for row in audit["four_prompt_model_averages"]:
+        frozen = frozen_models[row["model"]]
+        for key in ("prompt_mean_rankic", "direction_span_rankic", "prompt_minus_span"):
+            assert abs(row[key] - frozen[key]) < 1e-10
+    qwen = {row["representation"]: row for row in audit["qwen"]}
+    assert abs(qwen["article_mean"]["rankic"] - facts["qwen_masked_pca32"]["article_mean_rankic"]) < 1e-10
+    assert abs(qwen["prompt_mean"]["rankic"] - facts["qwen_masked_pca32"]["prompt_mean_rankic"]) < 1e-10
+    assert abs(qwen["return_token"]["rankic"] - facts["qwen_masked_pca32"]["return_token_rankic"]) < 1e-10
+    assert "full_mean" in audit["true_body_mean_status"]
+    for name in ("four_prompt_masked_rankic.csv", "qwen_masked_pca32_rankic.csv"):
+        assert (audit_dir / name).stat().st_size > 0
 
 
 def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:
