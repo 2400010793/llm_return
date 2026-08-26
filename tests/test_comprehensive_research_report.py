@@ -35,6 +35,15 @@ def test_frozen_facts_match_report_contract() -> None:
     assert sum(cninfo_collection["completed_by_exchange"].values()) == 816
     assert sum(cninfo_collection["completed_code_prefixes"].values()) == 816
     assert "not all A shares" in cninfo_collection["technical_scope"]
+    assert cninfo_collection["selection_regimes"]["2010-2017"].startswith("all announcements")
+    assert cninfo_collection["selection_regimes"]["2018-2026"].startswith("focus announcements")
+    assert cninfo_collection["clean_panel_rows_2010_2017_all_announcements"] == 553_088
+    assert cninfo_collection["clean_panel_rows_2018_2026_focus_announcements"] == 350_577
+    assert (
+        cninfo_collection["clean_panel_rows_2010_2017_all_announcements"]
+        + cninfo_collection["clean_panel_rows_2018_2026_focus_announcements"]
+        == facts["datasets"]["cninfo_full"]["rows"]
+    )
     original = facts["direction_prompt_results"]["masked_short_linear_ridge"]
     assert len(original) == 8
     assert {(row["model"], row["prompt"]) for row in original} == {
@@ -153,6 +162,11 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "六条单独中性 Prompt" in source
     assert "+14.48" in source
     assert "不能用 0.05623 和 0.05486 直接判断" in source
+    assert "2010--2017 抓取这 816 只股票的**全部公告**" in source
+    assert "2018--2026 使用这 816 只股票的" in source
+    assert "**重点公告**" in source
+    assert "2018 年筛选断点" in source
+    assert "`full` 文件名解释为全时期全公告" in source
 
 
 def test_pdf_builder_resolves_the_simplified_chinese_font_by_family() -> None:

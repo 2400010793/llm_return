@@ -19,6 +19,13 @@
       "source": "official visible listed-company disclosure pages, detail pages, and linked PDFs",
       "historical_collection_years": "2010-2017",
       "stocks": 816,
+      "selection_regimes": {
+        "2010-2017": "all announcements for the 816-stock research universe",
+        "2018-2026": "focus announcements for the same 816-stock research universe"
+      },
+      "clean_panel_rows_2010_2017_all_announcements": 553088,
+      "clean_panel_rows_2018_2026_focus_announcements": 350577,
+      "full_name_warning": "full means the complete combined 2010-2026 panel, not all announcement types in every year",
       "candidate_universe": "stock_universe_paper_1000.csv filtered by cleaned panel/return-label intersection",
       "candidate_universe_rows": 1000,
       "completed_universe_rows": 816,
@@ -72,6 +79,7 @@
       "next_day_labels": 895251,
       "event_3d_labels": 894851,
       "year_counts": {"2010": 49255, "2011": 50982, "2012": 56101, "2013": 59963, "2014": 71882, "2015": 86714, "2016": 90227, "2017": 87964, "2018": 39524, "2019": 38070, "2020": 39675, "2021": 41081, "2022": 42669, "2023": 45543, "2024": 39929, "2025": 42219, "2026": 21867},
+      "selection_break": "2010-2017 contains all announcements for 816 stocks; 2018-2026 contains focus announcements for the same stocks",
       "source": "data/processed/cninfo_full_classification_panel_2010_2026.parquet"
     },
     "sina_legacy_aligned": {
