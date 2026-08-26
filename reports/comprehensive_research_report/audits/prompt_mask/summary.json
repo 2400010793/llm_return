@@ -1,0 +1,153 @@
+{
+  "scope": "Sina legacy aligned panel; 6+2+1; test years 2018-2026; next_day_return; Ridge",
+  "treatment": "masked_short - short",
+  "source_directory": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/summary",
+  "rows": [
+    {
+      "prompt": "盈利",
+      "model": "RoBERTa",
+      "representation": "prompt_mean",
+      "short_rankic": 0.05509857450477393,
+      "masked_short_rankic": 0.05790542722553644,
+      "delta": 0.0028068527207625107
+    },
+    {
+      "prompt": "收益",
+      "model": "RoBERTa",
+      "representation": "prompt_mean",
+      "short_rankic": 0.05427191277970469,
+      "masked_short_rankic": 0.06044035000015138,
+      "delta": 0.0061684372204466945
+    },
+    {
+      "prompt": "超额收益",
+      "model": "RoBERTa",
+      "representation": "prompt_mean",
+      "short_rankic": 0.05015783702404496,
+      "masked_short_rankic": 0.05132250542601117,
+      "delta": 0.001164668401966211
+    },
+    {
+      "prompt": "亏损",
+      "model": "RoBERTa",
+      "representation": "prompt_mean",
+      "short_rankic": 0.051116146151961736,
+      "masked_short_rankic": 0.05957033637185202,
+      "delta": 0.008454190219890287
+    },
+    {
+      "prompt": "盈利",
+      "model": "RoBERTa",
+      "representation": "target_span",
+      "short_rankic": 0.053227470772465285,
+      "masked_short_rankic": 0.054295158549887396,
+      "delta": 0.0010676877774221105
+    },
+    {
+      "prompt": "收益",
+      "model": "RoBERTa",
+      "representation": "target_span",
+      "short_rankic": 0.049346801258984385,
+      "masked_short_rankic": 0.05393688979667312,
+      "delta": 0.004590088537688733
+    },
+    {
+      "prompt": "超额收益",
+      "model": "RoBERTa",
+      "representation": "target_span",
+      "short_rankic": 0.05850617443436563,
+      "masked_short_rankic": 0.05643639817494894,
+      "delta": -0.002069776259416685
+    },
+    {
+      "prompt": "亏损",
+      "model": "RoBERTa",
+      "representation": "target_span",
+      "short_rankic": 0.04729827260804729,
+      "masked_short_rankic": 0.05478688229555219,
+      "delta": 0.0074886096875049005
+    },
+    {
+      "prompt": "盈利",
+      "model": "BGE-M3",
+      "representation": "prompt_mean",
+      "short_rankic": 0.030719879571057034,
+      "masked_short_rankic": 0.03391836622649699,
+      "delta": 0.0031984866554399596
+    },
+    {
+      "prompt": "收益",
+      "model": "BGE-M3",
+      "representation": "prompt_mean",
+      "short_rankic": 0.03173192001030574,
+      "masked_short_rankic": 0.03313319196100565,
+      "delta": 0.0014012719506999102
+    },
+    {
+      "prompt": "超额收益",
+      "model": "BGE-M3",
+      "representation": "prompt_mean",
+      "short_rankic": 0.03205123839757678,
+      "masked_short_rankic": 0.033042370799105436,
+      "delta": 0.0009911324015286563
+    },
+    {
+      "prompt": "亏损",
+      "model": "BGE-M3",
+      "representation": "prompt_mean",
+      "short_rankic": 0.03070617016219273,
+      "masked_short_rankic": 0.03241381649951454,
+      "delta": 0.0017076463373218095
+    },
+    {
+      "prompt": "盈利",
+      "model": "BGE-M3",
+      "representation": "target_span",
+      "short_rankic": 0.035136027046807614,
+      "masked_short_rankic": 0.038116842510222605,
+      "delta": 0.0029808154634149917
+    },
+    {
+      "prompt": "收益",
+      "model": "BGE-M3",
+      "representation": "target_span",
+      "short_rankic": 0.03301390028377203,
+      "masked_short_rankic": 0.03556179117447754,
+      "delta": 0.0025478908907055065
+    },
+    {
+      "prompt": "超额收益",
+      "model": "BGE-M3",
+      "representation": "target_span",
+      "short_rankic": 0.032068608695448204,
+      "masked_short_rankic": 0.037203307793535055,
+      "delta": 0.005134699098086851
+    },
+    {
+      "prompt": "亏损",
+      "model": "BGE-M3",
+      "representation": "target_span",
+      "short_rankic": 0.03226818729417296,
+      "masked_short_rankic": 0.03431151536116025,
+      "delta": 0.0020433280669872877
+    }
+  ],
+  "summary": {
+    "prompt_mean": {
+      "pairs": 8,
+      "wins": 8,
+      "mean_delta": 0.003236585738507005,
+      "median_delta": 0.00225724952904216,
+      "min_delta": 0.0009911324015286563,
+      "max_delta": 0.008454190219890287
+    },
+    "target_span": {
+      "pairs": 8,
+      "wins": 7,
+      "mean_delta": 0.002972917907799212,
+      "median_delta": 0.002764353177060249,
+      "min_delta": -0.002069776259416685,
+      "max_delta": 0.0074886096875049005
+    }
+  }
+}

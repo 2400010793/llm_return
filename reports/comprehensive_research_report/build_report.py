@@ -120,6 +120,28 @@ def generate_figures(facts: dict) -> None:
     fig.savefig(FIGURES / "soft_gamma_sensitivity.png", bbox_inches="tight")
     plt.close(fig)
 
+    mask_rows = facts["direction_prompt_results"]["mask_linear_rankic_pairs"]
+    labels = [
+        f'{row["prompt"]}\n{row["model"].replace("RoBERTa", "RoB").replace("BGE-M3", "BGE")}'
+        for row in mask_rows
+    ]
+    prompt_delta = [row["prompt_mean_delta"] for row in mask_rows]
+    span_delta = [row["target_span_delta"] for row in mask_rows]
+    x = np.arange(len(mask_rows))
+    width = 0.36
+    fig, ax = plt.subplots(figsize=(7.4, 3.45), dpi=180)
+    ax.bar(x - width / 2, prompt_delta, width, label="Prompt mean", color="#1f4e79")
+    ax.bar(x + width / 2, span_delta, width, label="目标 span", color="#c45a3c")
+    ax.axhline(0, color="#687580", linewidth=0.7)
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("masked-short - short RankIC")
+    ax.set_title("同模型、同表示的 Mask 配对增量")
+    ax.legend(frameon=False, fontsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "mask_rankic_deltas.png", bbox_inches="tight")
+    plt.close(fig)
+
     rows = facts["token_body"]["models"]
     names = [row["model"].replace("Qwen3-Embedding-8B", "Qwen3") for row in rows]
     body = [row["body_rankic"] for row in rows]
@@ -306,7 +328,7 @@ tbody tr:last-child td { border-bottom: 0.7pt solid #315f7d; }
 
 
 def write_checksums() -> None:
-    files = [SOURCE, FACTS, Path(__file__), OUTPUT]
+    files = [SOURCE, FACTS, Path(__file__), ROOT / "scripts/audit_prompt_mask_rankic.py", OUTPUT]
     files.extend(sorted(FIGURES.glob("*.png")))
     files.extend(sorted(path for path in AUDITS.rglob("*") if path.is_file()))
     CHECKSUMS.write_text(

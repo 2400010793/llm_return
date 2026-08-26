@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "frozen_at": "2026-08-26T15:47:04+08:00",
+  "frozen_at": "2026-08-26T18:35:00+08:00",
   "report_scope": "Completed and traceable results only; pending fair-comparison tasks are design, not evidence.",
   "collection": {
     "sina": {
@@ -101,6 +101,33 @@
       {"prompt": "亏损", "model": "BGE-M3", "rankic": 0.0343115154}
     ],
     "masked_short_linear_source": "reports/prompt_cluster_token_comparison.json linear_and_hard; method_family=linear_ridge, variant=masked_short",
+    "no_cluster_prompt_summary": [
+      {"prompt": "盈利", "eight_config_mean_rankic": 0.04480, "best_configuration": "RoBERTa masked prompt_mean", "best_rankic": 0.0579054272, "best_positive_years": 9},
+      {"prompt": "收益", "eight_config_mean_rankic": 0.04393, "best_configuration": "RoBERTa masked prompt_mean", "best_rankic": 0.0604403500, "best_positive_years": 9},
+      {"prompt": "超额收益", "eight_config_mean_rankic": 0.04385, "best_configuration": "RoBERTa short target_span", "best_rankic": 0.0585061744, "best_positive_years": 9},
+      {"prompt": "亏损", "eight_config_mean_rankic": 0.04281, "best_configuration": "RoBERTa masked prompt_mean", "best_rankic": 0.0595703364, "best_positive_years": 9}
+    ],
+    "mask_linear_rankic_pairs": [
+      {"prompt": "盈利", "model": "RoBERTa", "prompt_mean_short": 0.0550985745, "prompt_mean_masked": 0.0579054272, "prompt_mean_delta": 0.0028068527, "target_span_short": 0.0532274708, "target_span_masked": 0.0542951585, "target_span_delta": 0.0010676878},
+      {"prompt": "收益", "model": "RoBERTa", "prompt_mean_short": 0.0542719128, "prompt_mean_masked": 0.0604403500, "prompt_mean_delta": 0.0061684372, "target_span_short": 0.0493468013, "target_span_masked": 0.0539368898, "target_span_delta": 0.0045900885},
+      {"prompt": "超额收益", "model": "RoBERTa", "prompt_mean_short": 0.0501578370, "prompt_mean_masked": 0.0513225054, "prompt_mean_delta": 0.0011646684, "target_span_short": 0.0585061744, "target_span_masked": 0.0564363982, "target_span_delta": -0.0020697763},
+      {"prompt": "亏损", "model": "RoBERTa", "prompt_mean_short": 0.0511161462, "prompt_mean_masked": 0.0595703364, "prompt_mean_delta": 0.0084541902, "target_span_short": 0.0472982726, "target_span_masked": 0.0547868823, "target_span_delta": 0.0074886097},
+      {"prompt": "盈利", "model": "BGE-M3", "prompt_mean_short": 0.0307198796, "prompt_mean_masked": 0.0339183662, "prompt_mean_delta": 0.0031984867, "target_span_short": 0.0351360270, "target_span_masked": 0.0381168425, "target_span_delta": 0.0029808155},
+      {"prompt": "收益", "model": "BGE-M3", "prompt_mean_short": 0.0317319200, "prompt_mean_masked": 0.0331331920, "prompt_mean_delta": 0.0014012720, "target_span_short": 0.0330139003, "target_span_masked": 0.0355617912, "target_span_delta": 0.0025478909},
+      {"prompt": "超额收益", "model": "BGE-M3", "prompt_mean_short": 0.0320512384, "prompt_mean_masked": 0.0330423708, "prompt_mean_delta": 0.0009911324, "target_span_short": 0.0320686087, "target_span_masked": 0.0372033078, "target_span_delta": 0.0051346991},
+      {"prompt": "亏损", "model": "BGE-M3", "prompt_mean_short": 0.0307061702, "prompt_mean_masked": 0.0324138165, "prompt_mean_delta": 0.0017076463, "target_span_short": 0.0322681873, "target_span_masked": 0.0343115154, "target_span_delta": 0.0020433281}
+    ],
+    "mask_linear_rankic_summary": {
+      "prompt_mean": {"pairs": 8, "wins": 8, "mean_delta": 0.0032365857, "median_delta": 0.0022572495},
+      "target_span": {"pairs": 8, "wins": 7, "mean_delta": 0.0029729179, "median_delta": 0.0027643532},
+      "source": "reports/comprehensive_research_report/audits/prompt_mask"
+    },
+    "historical_representation_average_rankic": [
+      {"representation": "full_mean", "rankic_approx": 0.04395},
+      {"representation": "prompt_mean", "rankic_approx": 0.04360},
+      {"representation": "return_span", "rankic_approx": 0.04414},
+      {"representation": "stock_span", "rankic_approx": 0.04649}
+    ],
     "rankic_leaders": [
       {"prompt": "超额收益", "model": "BGE-M3", "variant": "short", "rankic": 0.04439, "positive_years": 9},
       {"prompt": "收益", "model": "BGE-M3", "variant": "short", "rankic": 0.04327, "positive_years": 9},

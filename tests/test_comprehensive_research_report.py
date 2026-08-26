@@ -35,6 +35,19 @@ def test_frozen_facts_match_report_contract() -> None:
         for model in ("RoBERTa", "BGE-M3")
         for prompt in ("盈利", "收益", "超额收益", "亏损")
     }
+    mask_pairs = facts["direction_prompt_results"]["mask_linear_rankic_pairs"]
+    assert len(mask_pairs) == 8
+    assert sum(row["prompt_mean_delta"] > 0 for row in mask_pairs) == 8
+    assert sum(row["target_span_delta"] > 0 for row in mask_pairs) == 7
+    assert abs(
+        sum(row["prompt_mean_delta"] for row in mask_pairs) / len(mask_pairs) - 0.0032365857
+    ) < 1e-10
+    assert abs(
+        sum(row["target_span_delta"] for row in mask_pairs) / len(mask_pairs) - 0.0029729179
+    ) < 1e-10
+    assert next(
+        row for row in mask_pairs if row["prompt"] == "超额收益" and row["model"] == "RoBERTa"
+    )["target_span_delta"] < 0
     new_axes = facts["clustering"]["new_axes_single_2026"]
     comparison = new_axes["horizon_vs_volatility_token_rankic"]
     assert len(comparison) == 4
@@ -79,8 +92,32 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "权重有效持仓只有 13.9--15.1 只" in source
     assert "Gamma 敏感性" in source
     assert "成本后为 -0.55 bp" in source
-    assert "加入 Prompt 的证据边界" in source
+    assert "Prompt 的已确认作用与因果边界" in source
+    assert "Prompt mean short" in source
+    assert "8/8 改善" in source
+    assert "+0.00324/+0.00226" in source
+    assert "-0.00207" in source
+    assert "加入 Prompt 相对无 Prompt 的因果增量" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
+
+
+def test_prompt_mask_rankic_audit_matches_frozen_facts() -> None:
+    audit_dir = REPORT_DIR / "audits" / "prompt_mask"
+    audit = json.loads((audit_dir / "summary.json").read_text(encoding="utf-8"))
+    facts = load_builder().load_facts()
+    frozen = facts["direction_prompt_results"]["mask_linear_rankic_summary"]
+    assert len(audit["rows"]) == 16
+    assert audit["summary"]["prompt_mean"]["wins"] == frozen["prompt_mean"]["wins"] == 8
+    assert audit["summary"]["target_span"]["wins"] == frozen["target_span"]["wins"] == 7
+    assert abs(
+        audit["summary"]["prompt_mean"]["mean_delta"]
+        - frozen["prompt_mean"]["mean_delta"]
+    ) < 1e-10
+    assert abs(
+        audit["summary"]["target_span"]["mean_delta"]
+        - frozen["target_span"]["mean_delta"]
+    ) < 1e-10
+    assert (audit_dir / "rankic_pairs.csv").stat().st_size > 0
 
 
 def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:
