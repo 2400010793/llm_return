@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "frozen_at": "2026-08-26T20:10:00+08:00",
-  "report_scope": "Completed and traceable results only; pending fair-comparison tasks are design, not evidence.",
+  "frozen_at": "2026-08-27T12:19:05+08:00",
+  "report_scope": "Completed and traceable results only; the completed three-model four-prompt token comparison is evidence, while token/body and cross-model fusion remain pending.",
   "collection": {
     "sina": {
       "network_execution_policy": "local_machine_only",
@@ -398,6 +398,58 @@
       "source": "reports/aligned_factor_clusters/all_results.csv"
     }
   },
+  "fair_three_model_four_prompt_token_tree": {
+    "prompts": ["盈利", "收益", "超额收益", "亏损"],
+    "representation": "complete target-span token mean; PCA32-Ridge first-level OOS factor",
+    "no_raw_embedding_regression": true,
+    "no_cross_model_fusion": true,
+    "sina": {
+      "factor_years": "2018-2026",
+      "strict_tree_test_years": "2026",
+      "protocol": "2018-2023 fit, 2024-2025 validation, 2026 test",
+      "valid_rankic_days": 67,
+      "test_stock_days": 3930,
+      "average_valid_universe": 53.4,
+      "average_top20_holdings": 11.0,
+      "cross_prompt_spearman": {"RoBERTa": 0.6779, "BGE-M3": 0.8771, "Qwen3-Embedding-8B": 0.6630}
+    },
+    "cninfo": {
+      "factor_years": "2021-2026",
+      "strict_tree_test_years": "2024-2026",
+      "protocol": "rolling 2-year fit, 1-year validation, 1-year test",
+      "valid_rankic_days": 625,
+      "test_stock_days": 33403,
+      "average_valid_universe": 53.4,
+      "average_top20_holdings": 11.1,
+      "cross_prompt_spearman": {"RoBERTa": 0.6919, "BGE-M3": 0.8908, "Qwen3-Embedding-8B": 0.6573}
+    },
+    "selected_prompt_and_tree": {
+      "sina": {
+        "RoBERTa": {"2026": "盈利 / CatBoost"},
+        "BGE-M3": {"2026": "亏损 / CatBoost"},
+        "Qwen3-Embedding-8B": {"2026": "亏损 / CatBoost"}
+      },
+      "cninfo": {
+        "RoBERTa": {"2024": "亏损 / LightGBM", "2025": "盈利 / CatBoost", "2026": "盈利 / XGBoost"},
+        "BGE-M3": {"2024": "亏损 / CatBoost", "2025": "亏损 / CatBoost", "2026": "亏损 / CatBoost"},
+        "Qwen3-Embedding-8B": {"2024": "盈利 / XGBoost", "2025": "亏损 / CatBoost", "2026": "亏损 / CatBoost"}
+      }
+    },
+    "key_results": {
+      "cninfo": {
+        "RoBERTa": {"best_single_rankic": 0.0336847492, "tree_rankic": 0.0170320382, "best_single_long_short_bp": 85.7125277, "tree_long_short_bp": 68.3515913},
+        "BGE-M3": {"best_single_rankic": 0.0328894858, "equal_weight_rankic": 0.0299525974, "tree_rankic": 0.0266538109, "best_single_long_short_bp": 88.9436281, "tree_long_short_bp": 82.4660614},
+        "Qwen3-Embedding-8B": {"best_single_rankic": 0.0527416508, "equal_weight_rankic": 0.0467541127, "tree_rankic": 0.0527539464, "best_single_long_short_bp": 95.3166324, "equal_weight_long_short_bp": 92.3186364, "tree_long_short_bp": 90.6926855}
+      },
+      "sina": {
+        "RoBERTa": {"best_single_rankic": 0.0088385404, "equal_weight_rankic": -0.0188958566, "tree_rankic": -0.0117703090, "best_single_long_short_bp": 32.1387704, "tree_long_short_bp": 11.5175092},
+        "BGE-M3": {"best_single_rankic": 0.0184936909, "equal_weight_rankic": 0.0321776811, "tree_rankic": 0.0168452844, "best_single_long_short_bp": 15.5955014, "equal_weight_long_short_bp": 30.1372564, "tree_long_short_bp": 20.9468788},
+        "Qwen3-Embedding-8B": {"best_single_rankic": 0.0564922760, "equal_weight_rankic": 0.0527281460, "tree_rankic": 0.0545943805, "best_single_long_short_bp": 70.9458739, "equal_weight_long_short_bp": 90.9122539, "tree_long_short_bp": 74.4520259}
+      }
+    },
+    "interpretation": "Qwen is strongest on both sources. BGE-M3 has the highest cross-prompt factor correlation. Fixed validation-selected trees do not stably beat best-single or equal-weight baselines; no-cost daily bp are comparison statistics, not deployable performance.",
+    "source": "reports/comprehensive_research_report/audits/per_model_prompt_token_tree/summary.csv"
+  },
   "research_roadmap": {
     "prompt_factor": {
       "hypothesis": "在相同正文、mask、模型、PCA32、滚动折和标签下，不同目标 Prompt 会产生相关但不相同的可预测因子，而差异不是输入长度或位置伪影。",
@@ -460,12 +512,13 @@
   ],
   "provenance": {
     "master_report_path": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md",
-    "master_report_sha256": "23ade165d796cb77772360a113c26e9594b6decfecd6c2ab14b021a754d0e4ff",
-    "master_report_lines": 884,
+    "master_report_sha256": "2818055ca4c29cb09c740b82e57e7abd968d2cae33221f259335fe85f2f1049b",
+    "master_report_lines": 1001,
     "handoff_snapshot": "docs/status_snapshot_2026-08-26.json",
     "papers_manifest": "references/papers_manifest.tsv",
     "semantic_regression": "reports/aligned_extended_regression/token_body_selected.csv",
     "semantic_clustering": "reports/aligned_factor_clusters/token_minus_body_delta.csv",
-    "portfolio_audit": "reports/comprehensive_research_report/audits/prompt_cluster_portfolios/summary.json"
+    "portfolio_audit": "reports/comprehensive_research_report/audits/prompt_cluster_portfolios/summary.json",
+    "per_model_prompt_token_tree_audit": "reports/comprehensive_research_report/audits/per_model_prompt_token_tree/summary.csv"
   }
 }

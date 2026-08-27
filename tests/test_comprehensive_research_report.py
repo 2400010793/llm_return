@@ -125,6 +125,23 @@ def test_frozen_facts_match_report_contract() -> None:
     assert "paired 6+2+1 RankIC delta positive in at least 6/9 test years" in roadmap["prompt_factor"]["acceptance"]
     assert "Top20 overlap and late-fusion incremental RankIC" in roadmap["model_correlation"]["next_measurements"]
     assert "CSI 300" in roadmap["regime_expansion"]["macro_news"]
+    fair = facts["fair_three_model_four_prompt_token_tree"]
+    assert fair["no_raw_embedding_regression"] is True
+    assert fair["no_cross_model_fusion"] is True
+    assert fair["sina"]["valid_rankic_days"] == 67
+    assert fair["cninfo"]["valid_rankic_days"] == 625
+    assert fair["sina"]["cross_prompt_spearman"]["BGE-M3"] == 0.8771
+    assert fair["cninfo"]["cross_prompt_spearman"]["Qwen3-Embedding-8B"] == 0.6573
+    assert (
+        fair["cninfo"]["cross_prompt_spearman"]["BGE-M3"]
+        > fair["cninfo"]["cross_prompt_spearman"]["RoBERTa"]
+        > fair["cninfo"]["cross_prompt_spearman"]["Qwen3-Embedding-8B"]
+    )
+    cninfo_qwen = fair["key_results"]["cninfo"]["Qwen3-Embedding-8B"]
+    assert abs(cninfo_qwen["tree_rankic"] - 0.0527539464) < 1e-10
+    assert cninfo_qwen["tree_long_short_bp"] < cninfo_qwen["best_single_long_short_bp"]
+    sina_bge = fair["key_results"]["sina"]["BGE-M3"]
+    assert sina_bge["equal_weight_rankic"] > sina_bge["tree_rankic"]
     return_comparison = facts["prompt_return_comparison"]
     assert "no completed common-return regression" in return_comparison["standalone_neutral_status"]
     axes = {row["axis"]: row for row in return_comparison["semantic_axes_pca_ridge_token"]}
@@ -194,6 +211,11 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "不是全量完成时间" in source
     assert "单次 pooled pass" in source
     assert "71.7 小时" in source
+    assert "三模型四 Prompt Token 的公平比较" in source
+    assert "0.052754" in source
+    assert "0.8771" in source
+    assert "树模型没有稳定创造增量" in source
+    assert "新浪仅有 67 个有效 RankIC 日" in source
 
 
 def test_pdf_builder_resolves_the_simplified_chinese_font_by_family() -> None:
@@ -255,6 +277,25 @@ def test_prompt_return_display_audit_matches_frozen_facts() -> None:
     with (audit_dir / "four_direction_masked_next_day.csv").open(encoding="utf-8", newline="") as handle:
         four = list(csv.DictReader(handle))
     assert len(four) == 8
+
+
+def test_per_model_prompt_token_tree_audit_matches_frozen_facts() -> None:
+    audit_path = REPORT_DIR / "audits" / "per_model_prompt_token_tree" / "summary.csv"
+    with audit_path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == 18
+    lookup = {(row["dataset"], row["model"], row["method"]): row for row in rows}
+    facts = load_builder().load_facts()["fair_three_model_four_prompt_token_tree"]
+    qwen = lookup[("cninfo", "qwen3_embedding_8b", "tree_selected")]
+    assert abs(
+        float(qwen["rank_ic"])
+        - facts["key_results"]["cninfo"]["Qwen3-Embedding-8B"]["tree_rankic"]
+    ) < 1e-10
+    bge = lookup[("sina", "bge_m3", "equal_weight")]
+    assert abs(
+        float(bge["rank_ic"])
+        - facts["key_results"]["sina"]["BGE-M3"]["equal_weight_rankic"]
+    ) < 1e-10
 
 
 def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:

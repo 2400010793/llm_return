@@ -4,7 +4,8 @@
 
 报告覆盖新浪与巨潮数据来源、采集和清洗，RoBERTa/BGE-M3/Qwen 模型合同及实测表现，
 论文 benchmark，以及 mask/prompt、PCA、硬/软 KMeans、UMAP+HDBSCAN、GMM 和融合
-实验。未完成的三模型公平比较作为设计列出，不会混入已完成结果。
+实验。三模型各自四 Prompt token 因子和树模型比较已纳入冻结结果；尚未完成的
+token/body 配对与跨模型融合只作为设计列出，不会混入已完成结果。
 
 文件职责：
 
