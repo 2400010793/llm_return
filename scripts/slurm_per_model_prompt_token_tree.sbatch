@@ -24,7 +24,7 @@ else
 fi
 fair_root=${FAIR_ROOT}/${dataset}
 output=${TREE_ROOT}/${dataset}/${model}
-mkdir -p "${output}" logs/per_model_prompt_tree
+mkdir -p "$(dirname "${output}")" logs/per_model_prompt_tree
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}

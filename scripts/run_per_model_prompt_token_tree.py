@@ -185,8 +185,18 @@ def main() -> None:
     if (args.output / "COMPLETED").is_file():
         print(json.dumps({"resumed": True, "output": str(args.output)})); return
     root_manifest = json.loads((args.fair_root / "intersection" / "manifest.json").read_text(encoding="utf-8"))
-    years = [int(year) for year in root_manifest["test_years"]]
-    all_rows = pd.concat([load_year(args.fair_root, args.model, year) for year in years], ignore_index=True)
+    factor_years = [int(year) for year in root_manifest["test_years"]]
+    all_rows = pd.concat([load_year(args.fair_root, args.model, year) for year in factor_years], ignore_index=True)
+    available_years = set(factor_years)
+    years = [
+        year for year in factor_years
+        if set(range(year - args.history_years, year)).issubset(available_years)
+    ]
+    if not years:
+        raise ValueError(
+            f"no test year has {args.history_years} complete prior OOS factor years; "
+            f"available={factor_years}"
+        )
     outputs, audits, metric_rows = [], [], []
     for year in years:
         predictions, audit = run_outer(all_rows, args.model, year, args.history_years, args.validation_years, args.threads)
@@ -206,7 +216,7 @@ def main() -> None:
         "first_level": "fair rolling ridge_pca32 OOS factors", "raw_embedding_regression": False,
         "history_years": args.history_years, "validation_years": args.validation_years,
         "tree_parameters": "same fixed XGBoost/LightGBM/CatBoost settings across models",
-        "years": years, "rows": len(all_rows),
+        "factor_years": factor_years, "years": years, "rows": len(all_rows),
         "software": {"xgboost": xgboost.__version__, "lightgbm": lightgbm.__version__, "catboost": catboost.__version__},
     }
     (stage / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

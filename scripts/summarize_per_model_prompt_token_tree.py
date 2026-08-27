@@ -43,7 +43,25 @@ def main() -> None:
     (output / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.report:
         block = "<!-- PER_MODEL_PROMPT_TOKEN_TREE_V1_START -->\n## 独立模型内四 Prompt Token 树模型\n\n"
-        block += "本节每个模型单独使用盈利、收益、超额收益、亏损四个 token 因子；不包含其他模型因子，不做三模型融合。一级因子统一为 PCA32-Ridge 样本外预测，二级分别评估 XGBoost、LightGBM、CatBoost，参数和滚动窗口固定。\n\n"
+        block += (
+            "本节每个模型单独使用盈利、收益、超额收益、亏损四个 token 因子；不包含其他模型因子，不做三模型融合。"
+            "一级因子统一为 PCA32-Ridge 样本外预测，二级分别评估 XGBoost、LightGBM、CatBoost，参数和滚动窗口固定。"
+            "由于二级模型只能使用历史样本外一级因子，新浪严格评价年为 2026（2018--2023 训练、2024--2025 验证），"
+            "巨潮严格评价年为 2024--2026（逐年 2 年训练、1 年验证、1 年测试）。\n\n"
+        )
+        display = aggregate[aggregate["method"].isin(["best_single", "equal_weight", "tree_selected"])].copy()
+        display = display[[
+            "dataset", "model", "method", "rank_ic", "rank_ic_ir", "positive_years", "years",
+            "top20_mean_bp", "long_short_mean_bp",
+        ]]
+        block += display.to_markdown(index=False, floatfmt=".6f") + "\n\n"
+        block += (
+            "Top20 和多空列均为新闻覆盖股票池上的未扣成本日均 bp，不等同于可部署组合收益。"
+            "结果显示 Qwen 在新浪和巨潮均最强；但验证期选择的树模型没有稳定超过最佳单 Prompt 或等权组合。"
+            "巨潮 Qwen 的树模型平均 RankIC 与最佳单 Prompt 基本持平，但日均多空更低；"
+            "RoBERTa 和 BGE-M3 的树模型 RankIC 均下降。因此当前证据支持模型内 Prompt 因子存在互补性，"
+            "但不支持用固定树模型替代简单组合。\n\n"
+        )
         block += "详表见 `per_model_prompt_tree_metrics.csv` 和 `per_model_prompt_tree_summary.csv`。\n<!-- PER_MODEL_PROMPT_TOKEN_TREE_V1_END -->"
         current = args.report.read_text(encoding="utf-8") if args.report.exists() else ""
         start, end = "<!-- PER_MODEL_PROMPT_TOKEN_TREE_V1_START -->", "<!-- PER_MODEL_PROMPT_TOKEN_TREE_V1_END -->"
