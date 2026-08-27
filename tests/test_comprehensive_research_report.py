@@ -160,6 +160,11 @@ def test_frozen_facts_match_report_contract() -> None:
     assert body["pooling"]["RoBERTa"] == "body_mean"
     assert body["pooling"]["Qwen3-Embedding-8B"] == "article_mean"
     assert abs(next(row for row in body["rows"] if row["dataset"] == "新浪" and row["model"] == "RoBERTa")["rankic"] - 0.0594172720) < 1e-10
+    token_body = facts["fair_token_body_comparison"]
+    assert len(token_body["rows"]) == 6
+    sina_qwen = next(row for row in token_body["rows"] if row["dataset"] == "新浪" and row["model"].startswith("Qwen"))
+    assert abs(sina_qwen["rankic_delta"] + 0.0156430648) < 1e-10
+    assert len(token_body["sina_prompt_rows"]) == 8
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -201,6 +206,10 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "0.059417" in source
     assert "0.075959" in source
     assert "Prompt-conditioned body baseline" in source
+    assert "Prompt Token 相对正文基线的直接结果" in source
+    assert "0.060316" in source
+    assert "-0.015643" in source
+    assert "Prompt token RankIC" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
     assert "主线一：证明不同 Prompt 真的产生不同因子" in source
     assert "三模型相关性应该如何理解" in source

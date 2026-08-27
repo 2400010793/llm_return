@@ -460,6 +460,47 @@ Qwen 的 `article_mean` 最高，其次是 RoBERTa；巨潮由于可用交集和
 `three_model_four_prompt_fair_pca_v2/**/intersection/manifest.json` 和各年份
 `metrics.csv` 中。
 
+#### 4.1.3.1 Prompt Token 相对正文基线的直接结果
+
+Prompt token 的收益回归也已经完成，且可以和上面的正文基线逐折配对。下表使用同一份
+`three_model_four_prompt_fair_pca_v2` 的 `token` 与 `body` 行，先在四个 Prompt 内等权
+汇总，再计算 token 减正文的增量。它回答的是“目标 Prompt token 是否超过同一输入中的
+正文 pooled 表示”，不是无 Prompt 反事实。
+
+| 数据源 | 模型 | 正文 RankIC | Prompt token RankIC | RankIC 增量 | 正文 Top20 多空毛 bp | Token Top20 多空毛 bp | Token 增量 bp |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 新浪 | RoBERTa | 0.059417 | 0.056779 | -0.002638 | 61.69 | 58.98 | -2.70 |
+| 新浪 | BGE-M3 | 0.049992 | 0.043487 | -0.006505 | 46.11 | 46.38 | +0.27 |
+| 新浪 | Qwen3-Embedding-8B | 0.075959 | 0.060316 | -0.015643 | 68.95 | 58.82 | -10.14 |
+| 巨潮 | RoBERTa | 0.029133 | 0.023788 | -0.005345 | 68.95 | 65.53 | -3.42 |
+| 巨潮 | BGE-M3 | 0.022090 | 0.023024 | +0.000934 | 51.45 | 59.51 | +8.05 |
+| 巨潮 | Qwen3-Embedding-8B | 0.037298 | 0.041091 | **+0.003793** | 66.67 | 74.81 | **+8.15** |
+
+新浪的三模型 token RankIC 均低于正文：RoBERTa 低 0.002638，BGE-M3 低 0.006505，
+Qwen 低 0.015643；但 BGE-M3 的 Top20 多空毛 bp 基本持平。巨潮的共同折中，BGE-M3 和
+Qwen token RankIC 分别高于正文 0.000934 和 0.003793，RoBERTa 则低 0.005345。这里
+巨潮 Qwen 只在 2022--2026 有 body/token 共同折，不能把包含 2021 token 的不完整汇总拿来
+比较。
+
+为避免四 Prompt 平均掩盖词级差异，新浪逐 Prompt 的 RankIC 配对如下：
+
+| 模型 | Prompt | 正文 RankIC | Prompt token RankIC | 增量 |
+|---|---|---:|---:|---:|
+| RoBERTa | 盈利 | 0.059350 | **0.063757** | **+0.004407** |
+| RoBERTa | 收益 | 0.057507 | 0.053819 | -0.003687 |
+| RoBERTa | 超额收益 | 0.061019 | 0.055699 | -0.005320 |
+| RoBERTa | 亏损 | 0.059794 | 0.053842 | -0.005952 |
+| BGE-M3 | 盈利 | 0.044894 | 0.043393 | -0.001500 |
+| BGE-M3 | 收益 | 0.052410 | 0.043178 | -0.009232 |
+| BGE-M3 | 超额收益 | 0.052053 | 0.041720 | -0.010333 |
+| BGE-M3 | 亏损 | 0.050610 | 0.045658 | -0.004953 |
+
+因此“Prompt 的 RankIC 是否做了”的答案是：**做了，而且 token/body 已经可以公平比较**；
+当前结果并不支持“Prompt token 普遍超过正文”。新浪只有 RoBERTa 的“盈利”token 在词级
+上超过对应正文，其余新浪词级配对大多低于正文。正文基线和 token 明细的来源分别是
+`facts.json` 的 `body_mean_baseline`、`fair_token_body_comparison` 以及
+`three_model_four_prompt_fair_pca_v2/**/metrics.csv`。
+
 #### 4.1.4 Embedding 用时、并行资源和估算边界
 
 六个中性 Prompt 的正式 CPU 任务采用 256 shards、最大并行 256、每 task 8 CPU/

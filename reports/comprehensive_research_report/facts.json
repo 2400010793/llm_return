@@ -325,6 +325,29 @@
     ],
     "interpretation": "This is the first baseline table: body is the article/body segment pooled after the same Prompt-conditioned forward pass; Qwen uses its pre-prompt article_mean because it is causal. Values are descriptive gross Top20 long-short bp without transaction costs. A true no-prompt body counterfactual is not included."
   },
+  "fair_token_body_comparison": {
+    "source": "three_model_four_prompt_fair_pca_v2/**/rolling/*/*/{body,token}/*/metrics.csv",
+    "method": "PCA32 + Ridge (alpha=100), matched body/token folds; four Prompt rows averaged within dataset and model",
+    "rows": [
+      {"dataset": "新浪", "model": "RoBERTa", "body_rankic": 0.0594172720, "token_rankic": 0.0567792276, "rankic_delta": -0.0026380444, "body_top20_long_short_bp": 61.688807, "token_top20_long_short_bp": 58.983936, "top20_delta_bp": -2.704871, "token_positive_folds": "35/36", "common_folds": 36, "common_years": "2018-2026"},
+      {"dataset": "新浪", "model": "BGE-M3", "body_rankic": 0.0499917722, "token_rankic": 0.0434871271, "rankic_delta": -0.0065046451, "body_top20_long_short_bp": 46.111598, "token_top20_long_short_bp": 46.380285, "top20_delta_bp": 0.268688, "token_positive_folds": "29/36", "common_folds": 36, "common_years": "2018-2026"},
+      {"dataset": "新浪", "model": "Qwen3-Embedding-8B", "body_rankic": 0.0759592544, "token_rankic": 0.0603161896, "rankic_delta": -0.0156430648, "body_top20_long_short_bp": 68.953022, "token_top20_long_short_bp": 58.817014, "top20_delta_bp": -10.136008, "token_positive_folds": "35/36", "common_folds": 36, "common_years": "2018-2026"},
+      {"dataset": "巨潮", "model": "RoBERTa", "body_rankic": 0.0291326455, "token_rankic": 0.0237875212, "rankic_delta": -0.0053451243, "body_top20_long_short_bp": 68.946826, "token_top20_long_short_bp": 65.527685, "top20_delta_bp": -3.419141, "token_positive_folds": "24/24", "common_folds": 24, "common_years": "2021-2026"},
+      {"dataset": "巨潮", "model": "BGE-M3", "body_rankic": 0.0220895029, "token_rankic": 0.0230239818, "rankic_delta": 0.0009344789, "body_top20_long_short_bp": 51.453102, "token_top20_long_short_bp": 59.506283, "top20_delta_bp": 8.053181, "token_positive_folds": "23/24", "common_folds": 24, "common_years": "2021-2026"},
+      {"dataset": "巨潮", "model": "Qwen3-Embedding-8B", "body_rankic": 0.0372979526, "token_rankic": 0.0410911302, "rankic_delta": 0.0037931775, "body_top20_long_short_bp": 66.666783, "token_top20_long_short_bp": 74.812611, "top20_delta_bp": 8.145828, "token_positive_folds": "20/20", "common_folds": 20, "common_years": "2022-2026"}
+    ],
+    "sina_prompt_rows": [
+      {"model": "RoBERTa", "prompt": "盈利", "body_rankic": 0.05934950, "token_rankic": 0.06375670, "rankic_delta": 0.00440720},
+      {"model": "RoBERTa", "prompt": "收益", "body_rankic": 0.05750657, "token_rankic": 0.05381949, "rankic_delta": -0.00368708},
+      {"model": "RoBERTa", "prompt": "超额收益", "body_rankic": 0.06101924, "token_rankic": 0.05569891, "rankic_delta": -0.00532033},
+      {"model": "RoBERTa", "prompt": "亏损", "body_rankic": 0.05979378, "token_rankic": 0.05384180, "rankic_delta": -0.00595197},
+      {"model": "BGE-M3", "prompt": "盈利", "body_rankic": 0.04489370, "token_rankic": 0.04339321, "rankic_delta": -0.00150048},
+      {"model": "BGE-M3", "prompt": "收益", "body_rankic": 0.05240984, "token_rankic": 0.04317762, "rankic_delta": -0.00923222},
+      {"model": "BGE-M3", "prompt": "超额收益", "body_rankic": 0.05205316, "token_rankic": 0.04171985, "rankic_delta": -0.01033331},
+      {"model": "BGE-M3", "prompt": "亏损", "body_rankic": 0.05061040, "token_rankic": 0.04565782, "rankic_delta": -0.00495257}
+    ],
+    "interpretation": "Prompt token RankIC and body RankIC are already computed in the same fair experiment. The token is not uniformly stronger: on Sina its average RankIC is below body for all three models, while on CNINFO the matched Qwen and BGE-M3 token averages are above body."
+  },
   "embedding_layouts": {
     "roberta_bge_m3": {
       "layout": "BOS + prompt + title + body + EOS, then tail truncation",
