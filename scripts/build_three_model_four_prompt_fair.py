@@ -22,6 +22,15 @@ PROMPTS = {
 MODELS = ("roberta", "bge_m3", "qwen3_embedding_8b")
 
 
+def json_default(value):
+    """Serialize numpy scalars produced by pandas/numpy manifests."""
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, (pd.Timestamp, pd.Timedelta)):
+        return str(value)
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -226,7 +235,20 @@ def main() -> None:
     subset["entry_date"] = pd.to_datetime(subset["entry_date"], errors="raise").dt.normalize()
     output = args.output_root
     (output / "intersection").mkdir(parents=True, exist_ok=True)
-    subset.to_parquet(output / "intersection" / "panel.parquet", index=False)
+    panel_output = output / "intersection" / "panel.parquet"
+    # The frozen intersection is immutable. Reuse a valid existing panel so
+    # reruns do not rewrite hundreds of MB on Lustre unnecessarily.
+    if not panel_output.is_file():
+        # Rolling/geometry stages only need these scalar columns. Avoid
+        # serializing nested object columns (for example stock-id arrays)
+        # which are unnecessarily large and fragile on the shared filesystem.
+        panel_columns = [
+            column for column in (
+                "row_index", "document_id", "stock_id", "stock_name",
+                "entry_date", "next_day_return", "next_day_open_to_open_return",
+            ) if column in subset.columns
+        ]
+        subset[panel_columns].to_parquet(panel_output, index=False)
 
     full_dist = distribution(panel, "full")
     selected_dist = distribution(subset, "intersection")
@@ -297,7 +319,11 @@ def main() -> None:
 
     config = pd.DataFrame(config_rows)
     config.to_csv(output / "intersection" / "config_manifest.tsv", sep="\t", index=False)
-    available_years = set(subset.entry_date.dt.year.astype(int).unique())
+    # Keep the frozen row intersection intact, but do not let a small number
+    # of rows with missing dates create a NaN-to-int failure or a fake fold.
+    available_years = {
+        int(year) for year in subset.loc[subset.entry_date.notna(), "entry_date"].dt.year.unique()
+    }
     test_years = [
         year for year in sorted(available_years)
         if set(range(year - args.history_years, year + 1)).issubset(available_years)
@@ -351,9 +377,9 @@ def main() -> None:
         "body_pooling": {"roberta": "body_mean", "bge_m3": "body_mean", "qwen3_embedding_8b": "article_mean"},
     }
     (output / "intersection" / "manifest.json").write_text(
-        json.dumps(root_manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8",
+        json.dumps(root_manifest, ensure_ascii=False, indent=2, default=json_default) + "\n", encoding="utf-8",
     )
-    print(json.dumps(root_manifest, ensure_ascii=False))
+    print(json.dumps(root_manifest, ensure_ascii=False, default=json_default))
 
 
 if __name__ == "__main__":
