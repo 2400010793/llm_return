@@ -154,6 +154,12 @@ def test_frozen_facts_match_report_contract() -> None:
     assert stock_mask["aggregate"]["RoBERTa"]["positive_prompt_pairs"] == "3/4"
     assert stock_mask["aggregate"]["BGE-M3"]["positive_prompt_pairs"] == "1/4"
     assert abs(stock_mask["aggregate"]["all"]["delta"] - 0.0007011713) < 1e-10
+    body = facts["body_mean_baseline"]
+    assert body["prompt_conditioned"] is True
+    assert len(body["rows"]) == 6
+    assert body["pooling"]["RoBERTa"] == "body_mean"
+    assert body["pooling"]["Qwen3-Embedding-8B"] == "article_mean"
+    assert abs(next(row for row in body["rows"] if row["dataset"] == "新浪" and row["model"] == "RoBERTa")["rankic"] - 0.0594172720) < 1e-10
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -191,7 +197,10 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "0.05731" in source
     assert "0.03630" in source
     assert "0.05547" in source
-    assert "真正的 `body_mean` embedding 已经保存" in source
+    assert "正文 `body_mean` 基线（所有 Prompt 结果之前）" in source
+    assert "0.059417" in source
+    assert "0.075959" in source
+    assert "Prompt-conditioned body baseline" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
     assert "主线一：证明不同 Prompt 真的产生不同因子" in source
     assert "三模型相关性应该如何理解" in source

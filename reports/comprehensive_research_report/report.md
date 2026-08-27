@@ -107,9 +107,9 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 
 | 层次 | 本地问题 | 主要比较 | 当前状态 |
 |---|---|---|---|
-| 全文基线 | 新闻/公告全文是否预测未来收益 | `body_mean/full_mean` + Ridge/Huber/MLP | 新浪、巨潮已有 pooled 基线；新公平样本的 body 配对尚未完成 |
+| 全文基线 | 新闻/公告正文是否预测未来收益 | `body_mean/article_mean` + PCA32-Ridge | 三模型公平实验已完成 Prompt-conditioned body 基线；无 Prompt 反事实仍待完成 |
 | Prompt 条件 | 加入简短任务词是否改变表示 | short 与 masked-short、Prompt 间配对 | 历史四方向配对完成；无 Prompt 反事实仍待完成 |
-| Token 定位 | 精确目标 span 是否优于正文 | token 对 `body_mean/article_mean` | 三模型四 Prompt token 因子已完成；Qwen 仅“收益”有 article 对照，两 encoder 历史宽表示为 `full_mean`，公平 body 对照待完成 |
+| Token 定位 | 精确目标 span 是否优于正文 | token 对 `body_mean/article_mean` | 三模型四 Prompt 的 token/body 因子已完成；Qwen 正文表示为因果结构下的 `article_mean` |
 | 几何结构 | 模型是否把四个词表示为共同语义 | cross-Prompt 因子相关、cosine、CKA、ARI | 新公平结果已完成逐日四因子相关；统一 centered cosine/CKA/ARI 尚待完成 |
 | 语义因子 | 估值、波动率、流动性等是否预测匹配标签 | 三点轴与风险/估值目标 | RoBERTa 2026 单折探索完成；六条中性 Prompt 尚无共同收益回归 |
 | Prompt 因子聚合 | 同一模型的多 Prompt 是否产生非线性增量 | 四 token 等权、XGBoost/LightGBM/CatBoost | 三模型分别完成；树模型不混合模型，跨模型与 token/body late fusion 待完成 |
@@ -419,7 +419,48 @@ BGE-M3 的同一句审计为四个 Prompt token，对应 `N × 4 × 1,024`。选
 Qwen 的 `prompt_mean` 对历史四词任务平均全部 Prompt token，包括末尾句号；“收益”token
 只选 `收益`，排除“分析”“股票”和句号。
 
-#### 4.1.3 Embedding 用时、并行资源和估算边界
+#### 4.1.3 正文 `body_mean` 基线（所有 Prompt 结果之前）
+
+正文基线先于任何 Prompt/token 结果展示。这里的 `body_mean` 不是把 `full_mean` 改名：
+它只平均正文段的 hidden states；由于 RoBERTa/BGE-M3 是双向模型，正文 hidden state 仍会
+受到前置 Prompt 的上下文影响，因此这是 **Prompt-conditioned body baseline**。Qwen 为因果
+模型，正文位于后置 Prompt 之前，使用不受后置 Prompt 反向影响的 `article_mean` 作为对应
+正文基线。
+
+从文件层面看，正文向量已经随公平交集落盘：新浪交集 35,576 行、巨潮交集 254,544
+行，矩阵位于 `three_model_four_prompt_fair_pca_v2/{sina,cninfo}/matrices/{model}/{prompt}/body/`，
+并有对应的 `metadata.parquet`。RoBERTa 正文维度为 768，BGE-M3 为 1,024，Qwen 的
+`article_mean` 为 4,096；这些不是只保存了目标 token 的文件。
+
+下表来自已完成的 `three_model_four_prompt_fair_pca_v2`，固定 PCA32、Ridge alpha=100，
+对四个方向 Prompt 的正文表示在模型和数据源内等权汇总。RankIC、IR 和 Top20 多空均是
+滚动测试折的描述性平均；Top20 多空为未扣成本的毛 bp，不能与后文成本后组合直接混用。
+
+| 数据源 | 模型 | 正文池化 | 测试折/年份 | 日均 RankIC | RankIC IR | Top20 多空毛 bp/日 | 正 RankIC 折数 |
+|---|---|---|---|---:|---:|---:|---:|
+| 新浪 | RoBERTa | `body_mean` | 36 / 2018--2026 | **0.059417** | 0.155225 | 61.69 | 31/36 |
+| 新浪 | BGE-M3 | `body_mean` | 36 / 2018--2026 | 0.049992 | 0.131448 | 46.11 | 32/36 |
+| 新浪 | Qwen3-Embedding-8B | `article_mean` | 36 / 2018--2026 | **0.075959** | 0.191578 | 68.95 | 32/36 |
+| 巨潮 | RoBERTa | `body_mean` | 24 / 2021--2026 | 0.029133 | 0.188629 | 68.95 | 20/24 |
+| 巨潮 | BGE-M3 | `body_mean` | 24 / 2021--2026 | 0.022090 | 0.143780 | 51.45 | 24/24 |
+| 巨潮 | Qwen3-Embedding-8B | `article_mean` | 20 / 2022--2026 | 0.037298 | 0.241565 | 66.67 | 20/20 |
+
+这张表是后面所有 Prompt、目标 token、聚类和树模型结果的第一参照。新浪正文基线中，
+Qwen 的 `article_mean` 最高，其次是 RoBERTa；巨潮由于可用交集和年份较短，不能与新浪
+绝对值直接排名。巨潮的 2021--2026（Qwen 为 2022--2026）是当前共同 embedding 交集的
+实际覆盖，不代表 2010--2020 没有公告，只表示这些年份没有进入本次三模型共同样本。
+
+必须区分两件事：
+
+1. 上表已经是可用于 token 对照的正文 pooled embedding 基线，后文应报告 token 相对它的增量；
+2. “无 Prompt 的正文”反事实尚未生成，因此不能把上表解释为加入 Prompt 相对不加 Prompt
+   的因果增量。
+
+基线来源、池化定义和覆盖审计分别记录在 `facts.json` 的 `body_mean_baseline`、
+`three_model_four_prompt_fair_pca_v2/**/intersection/manifest.json` 和各年份
+`metrics.csv` 中。
+
+#### 4.1.4 Embedding 用时、并行资源和估算边界
 
 六个中性 Prompt 的正式 CPU 任务采用 256 shards、最大并行 256、每 task 8 CPU/
 32 GB、24 小时时限。每个 task 只加载一次模型，再连续编码 shard 内六个 Prompt；
@@ -796,9 +837,10 @@ span。这里必须更正旧命名：`full_mean` 平均 Prompt+标题+正文，*
 
 RoBERTa token 的 Prompt 间差异更大，BGE-M3 token 更接近共同方向。两种解释都可能
 成立：前者可能保留有用细粒度，也可能只是词形敏感；后者可能理解共同语义，也可能过度
-平滑。真正的 `body_mean` embedding 已经保存，但旧四 Prompt 研究没有完成同一新闻交集、
-同一 PCA 和同一滚动协议的 `body_mean` 回归，所以本报告不提供伪造的 body RankIC。后续
-公平表必须同时重跑 `prompt_mean / 完整目标 span / body_mean / full_mean`。
+平滑。需要注意，历史 `full_mean` 表不能替代正文基线；本报告已在 4.1.3 放置公平实验中
+真正的 `body_mean/article_mean` 结果，后续 token 增量必须相对那张表计算，而不是相对
+`full_mean`。无 Prompt 的正文反事实仍未生成，因此正文基线目前回答的是“Prompt 条件下
+正文表示有多少收益排序”，不是“加入 Prompt 的因果提升”。
 
 ### 6.2 Qwen：同一 PCA32 下的三种表示
 
@@ -1316,9 +1358,9 @@ Regime 的交互项。候选来源包括新浪本地抓取、巨潮公告、指�
 | 中性流动性 | 分析股票流动性 | masked-short | 流动性 | body_mean |
 | 中性风险 | 分析股票风险 | masked-short | 风险 | body_mean |
 
-上表是目标表示合同，不是已完成结果清单。四方向历史宽池化回归实际使用 `full_mean`；
-真正 `body_mean` 只完成 embedding 保存、尚无同口径 RankIC。历史“超额收益”word-span
-只取“超额”，新三模型公平合同才取完整“超额收益”。
+上表是目标表示合同，不是全量完成清单。公平三模型实验已经给出 `body_mean/article_mean`
+基线，见 4.1.3；旧的宽池化历史表仍使用 `full_mean`，不能反向改名。历史“超额收益”
+word-span 只取“超额”，新三模型公平合同才取完整“超额收益”。
 
 ## 附录 B：主要事实来源
 
@@ -1329,6 +1371,7 @@ Regime 的交互项。候选来源包括新浪本地抓取、巨潮公告、指�
 | 东方财富/雪球可见页面边界和批次 | `scripts/collect_browser_visible.py`、`scripts/run_100_stock_collection.py` |
 | 模型 ID、维度、最大长度和表示合同 | `references/data_sources_and_models.md`、embedding manifest/preflight |
 | 全量面板行数、日期、股票数、标签覆盖 | `facts.json`；`scripts/audit_research_handoff.py`；相应 Parquet schema |
+| 公平 `body_mean/article_mean` 正文基线 | `facts.json` 的 `body_mean_baseline`；`three_model_four_prompt_fair_pca_v2/**/rolling/*/*/body/*/metrics.csv` |
 | 四方向 Prompt、mask、成本和聚类结果 | 工作区 `REPORT_ALL_RESULTS.md`，SHA256 `23ade165...e4ff` |
 | short/masked-short 线性 RankIC 配对 | `audits/prompt_mask/rankic_pairs.csv`、`summary.json`；生成器 `scripts/audit_prompt_mask_rankic.py` |
 | 精确“股票”Token 的 short/masked-short 配对 | `audits/stock_token_mask/summary.csv`；底层 144 个逐年折记录为 `reports/sharpe_all_label_portfolio_fold_records_20260821.csv` |

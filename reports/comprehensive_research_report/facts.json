@@ -301,13 +301,29 @@
       "token_minus_article": -0.0031938933,
       "test_stock_days": 30946
     },
-    "true_body_mean_rankic_status": "body_mean embeddings are saved for RoBERTa/BGE-M3, but the historical four-prompt study has no completed same-sample rolling body_mean regression; full_mean must not be relabeled as body_mean",
+    "true_body_mean_rankic_status": "the fair three-model four-prompt PCA32 study has completed prompt-conditioned body baselines; older historical full_mean tables remain full_mean and must not be relabeled as body_mean",
     "models": [
       {"model": "RoBERTa", "whole_text_representation": "full_mean (prompt+title+body)", "whole_text_rankic": 0.04391, "token_rankic": 0.04010, "cross_prompt_whole_text_spearman": 0.997, "cross_prompt_token_spearman": 0.653, "token_whole_text_top20_overlap": 0.44},
       {"model": "BGE-M3", "whole_text_representation": "full_mean (prompt+title+body)", "whole_text_rankic": 0.03307, "token_rankic": 0.03154, "cross_prompt_whole_text_spearman": 0.972, "cross_prompt_token_spearman": 0.892, "token_whole_text_top20_overlap": 0.70},
       {"model": "Qwen3-Embedding-8B", "whole_text_representation": "article_mean (pre-prompt title+body)", "whole_text_rankic": 0.05680, "token_rankic": 0.05360, "whole_text_after_cost_annual": 0.0857, "token_after_cost_annual": 0.0737, "comparison": "Sina masked article mean versus masked 收益 token; not a four-prompt average"}
     ],
     "source": "REPORT_ALL_RESULTS.md sections 627-680 and 844-884"
+  },
+  "body_mean_baseline": {
+    "source": "three_model_four_prompt_fair_pca_v2/**/rolling/*/*/body/*/metrics.csv",
+    "representation": "body",
+    "method": "PCA32 + Ridge (alpha=100), four Prompt rows averaged within model and dataset",
+    "prompt_conditioned": true,
+    "pooling": {"RoBERTa": "body_mean", "BGE-M3": "body_mean", "Qwen3-Embedding-8B": "article_mean"},
+    "rows": [
+      {"dataset": "新浪", "model": "RoBERTa", "test_years": "2018-2026", "folds": 36, "rankic": 0.0594172720, "rankic_ir": 0.1552252694, "top20_long_short_bp": 61.688807, "positive_folds": "31/36"},
+      {"dataset": "新浪", "model": "BGE-M3", "test_years": "2018-2026", "folds": 36, "rankic": 0.0499917722, "rankic_ir": 0.1314480347, "top20_long_short_bp": 46.111598, "positive_folds": "32/36"},
+      {"dataset": "新浪", "model": "Qwen3-Embedding-8B", "test_years": "2018-2026", "folds": 36, "rankic": 0.0759592544, "rankic_ir": 0.1915782444, "top20_long_short_bp": 68.953022, "positive_folds": "32/36"},
+      {"dataset": "巨潮", "model": "RoBERTa", "test_years": "2021-2026", "folds": 24, "rankic": 0.0291326455, "rankic_ir": 0.1886294285, "top20_long_short_bp": 68.946826, "positive_folds": "20/24"},
+      {"dataset": "巨潮", "model": "BGE-M3", "test_years": "2021-2026", "folds": 24, "rankic": 0.0220895029, "rankic_ir": 0.1437797236, "top20_long_short_bp": 51.453102, "positive_folds": "24/24"},
+      {"dataset": "巨潮", "model": "Qwen3-Embedding-8B", "test_years": "2022-2026", "folds": 20, "rankic": 0.0372979526, "rankic_ir": 0.2415650897, "top20_long_short_bp": 66.666783, "positive_folds": "20/20"}
+    ],
+    "interpretation": "This is the first baseline table: body is the article/body segment pooled after the same Prompt-conditioned forward pass; Qwen uses its pre-prompt article_mean because it is causal. Values are descriptive gross Top20 long-short bp without transaction costs. A true no-prompt body counterfactual is not included."
   },
   "embedding_layouts": {
     "roberta_bge_m3": {
