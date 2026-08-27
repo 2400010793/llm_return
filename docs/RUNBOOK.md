@@ -113,8 +113,17 @@ soft shrinkage 500、temperature 0.5、UMAP8、HDBSCAN min cluster size 50。
 - 报告更新：`scripts/update_report_cninfo_tree_stacking.py`
 
 树模型使用 72 个已经样本外生成的一级预测因子，不拼接 768/1024 维原始 embedding。
-训练 2018--2023，验证 2024--2025，封存测试 2026。快照时 Job 5036181/5036182
-仍在排队，尚无巨潮树模型结果。
+训练 2018--2023，验证 2024--2025，封存测试 2026。Job 5036181/5036182 已完成，
+结果位于 `prompt_positive_v1/results/tree_stacking_cninfo_oos_v1/`，并已写入巨潮主报告。
+验证期选择 CatBoost Top-8；2026 封存测试 RankIC 为 0.023739，低于 Ridge 0.026031
+和最佳单因子 0.024172，因此当前不能宣称树聚合整体有效。多空毛收益为 29.725 bp/日，
+高于等权聚合 20.999 bp/日，但略低于 Ridge 30.116 bp/日。不要把这个结果与分类任务中
+历史的 ExtraTrees/RandomForest 文件混为一谈。
+
+正式重跑仍必须通过 `task_tracker.py` 和 Slurm。当前 shell 若落在 `DOWN+DRAIN` 节点，
+即使 `CPUAlloc=0` 也不能视为可用空闲节点；应使用健康的 `idle` CPU 节点（例如审计时的
+`c119-epyc9575f`），并保留 8 CPU/48G 的资源边界。禁止直接在集群节点后台启动未登记的
+长期任务。
 
 ## 5. 本地验证
 
