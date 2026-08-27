@@ -148,6 +148,12 @@ def test_frozen_facts_match_report_contract() -> None:
     assert set(axes) == {"确定性", "期限收益", "波动率", "流动性", "估值", "冲击"}
     assert abs(axes["波动率"]["rankic"] - 0.0429753126) < 1e-10
     assert abs(axes["波动率"]["top20_ls_bp"] - 14.4825706) < 1e-7
+    stock_mask = facts["stock_token_mask_results"]
+    assert stock_mask["representation"] == "stock_span"
+    assert len(stock_mask["rows"]) == 8
+    assert stock_mask["aggregate"]["RoBERTa"]["positive_prompt_pairs"] == "3/4"
+    assert stock_mask["aggregate"]["BGE-M3"]["positive_prompt_pairs"] == "1/4"
+    assert abs(stock_mask["aggregate"]["all"]["delta"] - 0.0007011713) < 1e-10
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -173,6 +179,11 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "8/8 改善" in source
     assert "+0.00324/+0.00226" in source
     assert "-0.00207" in source
+    assert "精确“股票”Token 的 Mask 前后结果" in source
+    assert "0.057157" in source
+    assert "0.040961" in source
+    assert "+0.000701" in source
+    assert "stock_token_mask_rankic_deltas.png" in source
     assert "加入 Prompt 相对无 Prompt 的因果增量" in source
     assert "Prompt 与正文如何隔断" in source
     assert "没有额外 separator token" in source
@@ -317,3 +328,15 @@ def test_portfolio_audit_is_frozen_and_matches_report_facts() -> None:
         "umap_hdbscan_daily.csv",
     ):
         assert (audit_dir / name).stat().st_size > 0
+
+
+def test_stock_token_mask_audit_matches_frozen_facts() -> None:
+    audit_path = REPORT_DIR / "audits" / "stock_token_mask" / "summary.csv"
+    with audit_path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    facts = load_builder().load_facts()["stock_token_mask_results"]
+    assert len(rows) == len(facts["rows"]) == 8
+    assert {(row["model"], row["prompt"]) for row in rows} == {
+        (row["model"], row["prompt"]) for row in facts["rows"]
+    }
+    assert sum(float(row["masked_minus_short_rankic"]) > 0 for row in rows) == 4

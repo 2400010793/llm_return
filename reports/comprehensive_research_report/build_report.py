@@ -144,6 +144,34 @@ def generate_figures(facts: dict) -> None:
     fig.savefig(FIGURES / "mask_rankic_deltas.png", bbox_inches="tight")
     plt.close(fig)
 
+    stock_rows = facts["stock_token_mask_results"]["rows"]
+    labels = [
+        f'{row["prompt"]}\n{row["model"].replace("BGE-M3", "BGE")}'
+        for row in stock_rows
+    ]
+    deltas = [row["delta"] for row in stock_rows]
+    colors = ["#1f4e79" if row["model"] == "RoBERTa" else "#2a9d8f" for row in stock_rows]
+    x = np.arange(len(stock_rows))
+    fig, ax = plt.subplots(figsize=(7.4, 3.45), dpi=180)
+    ax.bar(x, deltas, color=colors)
+    ax.axhline(0, color="#687580", linewidth=0.7)
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("masked-short - short RankIC")
+    ax.set_title("精确“股票”Token 的 Mask 前后配对结果")
+    ax.spines[["top", "right"]].set_visible(False)
+    for idx, value in enumerate(deltas):
+        ax.text(
+            idx,
+            value + (0.00035 if value >= 0 else -0.00075),
+            f"{value:+.4f}",
+            ha="center",
+            va="bottom" if value >= 0 else "top",
+            fontsize=7,
+        )
+    fig.tight_layout()
+    fig.savefig(FIGURES / "stock_token_mask_rankic_deltas.png", bbox_inches="tight")
+    plt.close(fig)
+
     rows = facts["token_body"]["models"]
     names = [row["model"].replace("Qwen3-Embedding-8B", "Qwen3") for row in rows]
     body = [row["whole_text_rankic"] for row in rows]

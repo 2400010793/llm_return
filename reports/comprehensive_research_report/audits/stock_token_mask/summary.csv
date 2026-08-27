@@ -1,0 +1,9 @@
+model,prompt,short_rankic,masked_short_rankic,masked_minus_short_rankic,short_positive_years,masked_positive_years,short_mean_yearly_sharpe,masked_mean_yearly_sharpe,test_years,representation,target,protocol,source
+BGE-M3,盈利,0.0361920588,0.0316967289,-0.0044953299,8,8,2.273502,2.016137,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+BGE-M3,收益,0.0358478472,0.0360283159,0.0001804687,7,9,1.989452,2.197415,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+BGE-M3,超额收益,0.0344089372,0.0342105038,-0.0001984334,8,9,2.029491,2.453019,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+BGE-M3,亏损,0.0358697560,0.0300159148,-0.0058538412,8,8,1.922108,2.012987,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+RoBERTa,盈利,0.0522695364,0.0516082261,-0.0006613103,9,9,2.634899,2.869770,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+RoBERTa,收益,0.0510289001,0.0571568055,0.0061279054,9,9,3.106314,3.362279,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+RoBERTa,超额收益,0.0448682039,0.0478735617,0.0030053579,9,9,2.390407,2.481769,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv
+RoBERTa,亏损,0.0334560862,0.0409606397,0.0075045535,8,9,2.473573,2.646391,2018-2026,stock_span,next_day_return,6+2+1 PCA128 Ridge,sharpe_all_label_portfolio_fold_records_20260821.csv

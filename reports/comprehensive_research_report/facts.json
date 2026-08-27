@@ -256,6 +256,28 @@
     ],
     "source": "REPORT_ALL_RESULTS.md sections 13-14"
   },
+  "stock_token_mask_results": {
+    "scope": "Sina legacy common panel; exact 股票 span; next_day_return; strict 6+2+1; test years 2018-2026; PCA128 + Ridge",
+    "representation": "stock_span",
+    "source": "reports/sharpe_all_label_portfolio_fold_records_20260821.csv",
+    "audit_csv": "reports/comprehensive_research_report/audits/stock_token_mask/summary.csv",
+    "rows": [
+      {"model": "BGE-M3", "prompt": "盈利", "short_rankic": 0.0361920588, "masked_short_rankic": 0.0316967289, "delta": -0.0044953299, "short_positive_years": 8, "masked_positive_years": 8, "short_mean_yearly_sharpe": 2.273502, "masked_mean_yearly_sharpe": 2.016137},
+      {"model": "BGE-M3", "prompt": "收益", "short_rankic": 0.0358478472, "masked_short_rankic": 0.0360283159, "delta": 0.0001804687, "short_positive_years": 7, "masked_positive_years": 9, "short_mean_yearly_sharpe": 1.989452, "masked_mean_yearly_sharpe": 2.197415},
+      {"model": "BGE-M3", "prompt": "超额收益", "short_rankic": 0.0344089372, "masked_short_rankic": 0.0342105038, "delta": -0.0001984334, "short_positive_years": 8, "masked_positive_years": 9, "short_mean_yearly_sharpe": 2.029491, "masked_mean_yearly_sharpe": 2.453019},
+      {"model": "BGE-M3", "prompt": "亏损", "short_rankic": 0.0358697560, "masked_short_rankic": 0.0300159148, "delta": -0.0058538412, "short_positive_years": 8, "masked_positive_years": 8, "short_mean_yearly_sharpe": 1.922108, "masked_mean_yearly_sharpe": 2.012987},
+      {"model": "RoBERTa", "prompt": "盈利", "short_rankic": 0.0522695364, "masked_short_rankic": 0.0516082261, "delta": -0.0006613103, "short_positive_years": 9, "masked_positive_years": 9, "short_mean_yearly_sharpe": 2.634899, "masked_mean_yearly_sharpe": 2.869770},
+      {"model": "RoBERTa", "prompt": "收益", "short_rankic": 0.0510289001, "masked_short_rankic": 0.0571568055, "delta": 0.0061279054, "short_positive_years": 9, "masked_positive_years": 9, "short_mean_yearly_sharpe": 3.106314, "masked_mean_yearly_sharpe": 3.362279},
+      {"model": "RoBERTa", "prompt": "超额收益", "short_rankic": 0.0448682039, "masked_short_rankic": 0.0478735617, "delta": 0.0030053579, "short_positive_years": 9, "masked_positive_years": 9, "short_mean_yearly_sharpe": 2.390407, "masked_mean_yearly_sharpe": 2.481769},
+      {"model": "RoBERTa", "prompt": "亏损", "short_rankic": 0.0334560862, "masked_short_rankic": 0.0409606397, "delta": 0.0075045535, "short_positive_years": 8, "masked_positive_years": 9, "short_mean_yearly_sharpe": 2.473573, "masked_mean_yearly_sharpe": 2.646391}
+    ],
+    "aggregate": {
+      "BGE-M3": {"short_rankic": 0.0355796498, "masked_short_rankic": 0.0329878659, "delta": -0.0025917840, "positive_prompt_pairs": "1/4"},
+      "RoBERTa": {"short_rankic": 0.0454056817, "masked_short_rankic": 0.0493998083, "delta": 0.0039941266, "positive_prompt_pairs": "3/4"},
+      "all": {"short_rankic": 0.0404926657, "masked_short_rankic": 0.0411938371, "delta": 0.0007011713, "positive_prompt_pairs": "4/8"}
+    },
+    "interpretation": "Mask is not uniformly beneficial for the exact 股票 span: it improves three of four RoBERTa prompts but only one of four BGE-M3 prompts. Mean yearly Sharpe is descriptive and is not a cost-adjusted deployment result."
+  },
   "supervised_leaders": [
     {"target": "Sina event_return_3d", "representation": "RoBERTa+BGE-M3 masked 收益 span", "method": "separate PCA64 then concatenate + Ridge", "rankic": 0.08945, "positive_years": 9},
     {"target": "Sina next_day_return", "representation": "RoBERTa masked 分析股票收益 prompt_mean", "method": "Ridge", "rankic": 0.06044, "positive_years": 9},

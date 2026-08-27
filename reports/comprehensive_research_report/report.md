@@ -690,6 +690,40 @@ Top20% 仅 +0.03 bp，硬聚类反而 -0.22 bp。另一方面，`simple_states` 
 移除身份/时间字段有益。它尚不能证明模型完全不使用公司身份，也不能证明任何 mask 规则
 都会改善未来数据。
 
+#### 5.6.4 精确“股票”Token 的 Mask 前后结果
+
+这里的 `stock_span` 只取 Prompt 中的“股票”token（不含“分析”、目标词、句号和 special
+token）。下表重新从 144 个已完成滚动折中抽取：新浪旧共同面板、`next_day_return`、严格
+6+2+1、测试年 2018--2026、训练期 PCA128、Ridge；唯一改变是输入从 `short` 变为
+`masked_short`。因此它与上一小节的“盈利/收益/超额收益/亏损 direction span”不是同一表示。
+
+| 模型 | Prompt | short RankIC | masked-short RankIC | 增量 | 正 RankIC 年数（short → masked） | 年度 Sharpe 均值（描述性） |
+|---|---|---:|---:|---:|---:|---:|
+| BGE-M3 | 盈利 | 0.036192 | 0.031697 | -0.004495 | 8 → 8 | 2.274 → 2.016 |
+| BGE-M3 | 收益 | 0.035848 | 0.036028 | +0.000180 | 7 → 9 | 1.989 → 2.197 |
+| BGE-M3 | 超额收益 | 0.034409 | 0.034211 | -0.000198 | 8 → 9 | 2.029 → 2.453 |
+| BGE-M3 | 亏损 | 0.035870 | 0.030016 | -0.005854 | 8 → 8 | 1.922 → 2.013 |
+| RoBERTa | 盈利 | 0.052270 | 0.051608 | -0.000661 | 9 → 9 | 2.635 → 2.870 |
+| RoBERTa | 收益 | 0.051029 | **0.057157** | **+0.006128** | 9 → 9 | 3.106 → 3.362 |
+| RoBERTa | 超额收益 | 0.044868 | 0.047874 | +0.003005 | 9 → 9 | 2.390 → 2.482 |
+| RoBERTa | 亏损 | 0.033456 | **0.040961** | **+0.007505** | 8 → 9 | 2.474 → 2.646 |
+
+模型内四 Prompt 的平均 RankIC 为：RoBERTa `0.045406 → 0.049400`（+0.003994，4 组中
+3 组改善），BGE-M3 `0.035580 → 0.032988`（-0.002592，4 组中仅 1 组改善）。全 8 组
+平均只增加 `+0.000701`，所以不能把“股票 token 的 mask”写成普遍增益。年度 Sharpe
+均值只用于补充稳定性描述，未扣交易成本，也没有替代逐日 RankIC。
+
+这组结果修正了报告中原先只给出 `“股票”span` 历史平均 RankIC `0.04649` 的不足：
+`0.04649` 是跨历史配置的聚合数，不包含 mask 配对；本表才是同模型、同 Prompt、同滚动
+窗口下的 before/after 证据。底层 144 行逐年记录仍保留在
+`reports/sharpe_all_label_portfolio_fold_records_20260821.csv`，本次汇总审计为
+`audits/stock_token_mask/summary.csv`。
+
+<div class="figure">
+<img src="figures/stock_token_mask_rankic_deltas.png" alt="Stock token mask paired RankIC deltas">
+<p>图 4. 精确“股票”Token 的 masked-short 减 short；颜色区分 RoBERTa 与 BGE-M3，正负方向并不一致。</p>
+</div>
+
 ### 5.7 Prompt 的已确认作用与因果边界
 
 #### 5.7.1 已确认：不同目标词产生不同表示和股票排序
@@ -1297,6 +1331,7 @@ Regime 的交互项。候选来源包括新浪本地抓取、巨潮公告、指�
 | 全量面板行数、日期、股票数、标签覆盖 | `facts.json`；`scripts/audit_research_handoff.py`；相应 Parquet schema |
 | 四方向 Prompt、mask、成本和聚类结果 | 工作区 `REPORT_ALL_RESULTS.md`，SHA256 `23ade165...e4ff` |
 | short/masked-short 线性 RankIC 配对 | `audits/prompt_mask/rankic_pairs.csv`、`summary.json`；生成器 `scripts/audit_prompt_mask_rankic.py` |
+| 精确“股票”Token 的 short/masked-short 配对 | `audits/stock_token_mask/summary.csv`；底层 144 个逐年折记录为 `reports/sharpe_all_label_portfolio_fold_records_20260821.csv` |
 | Prompt mean、方向 span 与 Qwen 三表示 RankIC | `audits/prompt_representations/`；生成器 `scripts/audit_prompt_representation_rankic.py` |
 | 四方向与新语义轴的收益回归展示 | `audits/prompt_return_regressions/`；生成器 `scripts/audit_prompt_return_regression_display.py` |
 | 三模型各自四 Prompt token 因子与树模型 | `audits/per_model_prompt_token_tree/summary.csv`；底层产物 `per_model_prompt_token_tree_v1/` |
