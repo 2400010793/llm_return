@@ -107,12 +107,12 @@ Chen、Kelly、Xiu 的第 20 页明确使用 6 年训练、2 年验证、1 年�
 
 | 层次 | 本地问题 | 主要比较 | 当前状态 |
 |---|---|---|---|
-| 全文基线 | 新闻/公告全文是否预测未来收益 | `body_mean/full_mean` + Ridge/Huber/MLP | 新浪、巨潮均已有结果 |
-| Prompt 条件 | 加入简短任务词是否改变表示 | short 与 masked-short、Prompt 间配对 | 历史四方向完成 |
-| Token 定位 | 精确目标 span 是否优于正文 | token 对 `body_mean/article_mean` | Qwen article 对照完成；两 encoder 的历史表实际为 `full_mean`，true body 待完成 |
-| 几何结构 | 模型是否把四个词表示为共同语义 | cosine、centered cosine、CKA、ARI | 部分完成，统一三模型待完成 |
-| 语义因子 | 估值、波动率、流动性等是否预测匹配标签 | 三点轴与风险/估值目标 | 2026 单折探索完成 |
-| 模型融合 | 多 Prompt、多模型是否产生非线性增量 | 等权与模型内 XGBoost/LightGBM/CatBoost | 三模型各自四 token 已完成；跨模型和 token/body 融合待完成 |
+| 全文基线 | 新闻/公告全文是否预测未来收益 | `body_mean/full_mean` + Ridge/Huber/MLP | 新浪、巨潮已有 pooled 基线；新公平样本的 body 配对尚未完成 |
+| Prompt 条件 | 加入简短任务词是否改变表示 | short 与 masked-short、Prompt 间配对 | 历史四方向配对完成；无 Prompt 反事实仍待完成 |
+| Token 定位 | 精确目标 span 是否优于正文 | token 对 `body_mean/article_mean` | 三模型四 Prompt token 因子已完成；Qwen 仅“收益”有 article 对照，两 encoder 历史宽表示为 `full_mean`，公平 body 对照待完成 |
+| 几何结构 | 模型是否把四个词表示为共同语义 | cross-Prompt 因子相关、cosine、CKA、ARI | 新公平结果已完成逐日四因子相关；统一 centered cosine/CKA/ARI 尚待完成 |
+| 语义因子 | 估值、波动率、流动性等是否预测匹配标签 | 三点轴与风险/估值目标 | RoBERTa 2026 单折探索完成；六条中性 Prompt 尚无共同收益回归 |
+| Prompt 因子聚合 | 同一模型的多 Prompt 是否产生非线性增量 | 四 token 等权、XGBoost/LightGBM/CatBoost | 三模型分别完成；树模型不混合模型，跨模型与 token/body late fusion 待完成 |
 
 ### 2.3 本地创新不是机械复刻
 
@@ -510,8 +510,10 @@ manifest 中保存 input IDs、tokens、offset mapping、目标 token 索引和 
 
 ### 4.5 时间切分与固定参数
 
-新浪主结果使用严格 6+2+1，测试年 2018--2026。巨潮三模型公平比较因历史 embedding
-交集限制，基础预测采用 3 年历史加 1 年测试，并在历史窗口内保留 1 年 OOS 供二级融合。
+新浪一级因子使用严格 6+2+1，测试年 2018--2026；二级 Prompt 聚合因子只有在已有一级
+OOS 历史足够时才测试，因此实际二级测试年为 2026。巨潮按用户指定的 3+1 外层口径报告
+2024--2026；每个外层测试年内部使用 2 年一级 OOS 因子拟合、1 年验证、1 年测试，不能
+用一级样本内预测补齐更早年份。
 语义轴与高频标签的现有探索使用 2018--2023 训练、2024--2025 验证、2026 测试；高频
 标签 2018--2020 为空，因此实际有效训练年为 2021--2023。
 
@@ -1089,10 +1091,11 @@ PCA+Ridge 配对的 OOS RankIC、组合和跨年稳定性。
 
 ### 10.4 多因子融合的严格方案
 
-公平比较先生成 24 个完全样本外基础因子：3 模型 × 4 Prompt × token/body。融合分为
-单模型四 token、单 Prompt 三模型、12 token、12 body 和全部 24 因子。输入先逐日
-横截面标准化，再比较等权、Ridge、ElasticNet 和 HistGradientBoosting。二级权重只能
-使用历史 OOS/验证数据，测试年冻结。
+公平比较目前已生成 12 个完全样本外基础 token 因子：3 模型 × 4 Prompt。每个模型的
+四 token 已分别完成等权、最佳单 Prompt 和验证期选择树模型；这不是三模型融合。尚未
+完成的部分是 12 个 body 因子、token/body 配对、单 Prompt 三模型融合以及全部跨模型
+late fusion。后续输入先逐日横截面标准化，再比较等权、Ridge、ElasticNet 和
+HistGradientBoosting；二级权重只能使用历史 OOS/验证数据，测试年冻结。
 
 ### 10.5 当前不能写出的结论
 
