@@ -501,6 +501,32 @@ Qwen token RankIC 分别高于正文 0.000934 和 0.003793，RoBERTa 则低 0.00
 `facts.json` 的 `body_mean_baseline`、`fair_token_body_comparison` 以及
 `three_model_four_prompt_fair_pca_v2/**/metrics.csv`。
 
+#### 4.1.3.2 `prompt_mean` 是否有效：已完成的对比与缺失的反事实
+
+如果“加入 Prompt 的平均池化”指的是 `prompt_mean`，已有回归结果，但必须看清比较口径：
+`prompt_mean` 只平均 Prompt 槽位的上下文化 hidden state，不是正文池化，也不是无 Prompt
+输入的反事实。现有最接近的同口径比较如下：
+
+| 模型 | `prompt_mean` RankIC | 同口径比较对象 | 比较对象 RankIC | 差值 |
+|---|---:|---|---:|---:|
+| RoBERTa | **0.057310** | direction span | 0.054864 | **+0.002446** |
+| BGE-M3 | 0.033127 | direction span | **0.036298** | -0.003171 |
+| Qwen3-Embedding-8B | 0.055471 | `article_mean` | **0.056797** | -0.001326 |
+
+RoBERTa 的 Prompt 槽位平均在这组历史四 Prompt 汇总中略高于方向 span；BGE-M3 的
+`prompt_mean` 反而低于方向 span；Qwen 的 `prompt_mean` 低于其因果结构下的正文
+`article_mean`。因此可以说 `prompt_mean` 有收益排序信息，但不能说加入 Prompt 后平均池化
+一定有效或一定优于正文。
+
+另一个已完成的对比是同模型、同表示的 `short → masked_short`：8 个 Prompt/模型配对
+全部改善，平均 RankIC 增量 `+0.003237`，中位数 `+0.002257`。这验证的是移除公司身份、
+代码和日期后的变化，不是“加入 Prompt”本身的增量。
+
+目前缺少的关键实验是 `no-prompt body` 反事实：同一新闻、同一 mask、相同正文可见 token
+预算、相同截断位置和 special-token 结构，只删除任务 Prompt，再与 `prompt_mean` 或
+Prompt-conditioned `body_mean` 在每个滚动折内配对。该实验完成前，报告只能给出上面的
+表示间比较，不能给出“加入 Prompt 提高了多少 RankIC”的因果结论。
+
 #### 4.1.4 Embedding 用时、并行资源和估算边界
 
 六个中性 Prompt 的正式 CPU 任务采用 256 shards、最大并行 256、每 task 8 CPU/

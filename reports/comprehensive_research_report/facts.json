@@ -348,6 +348,17 @@
     ],
     "interpretation": "Prompt token RankIC and body RankIC are already computed in the same fair experiment. The token is not uniformly stronger: on Sina its average RankIC is below body for all three models, while on CNINFO the matched Qwen and BGE-M3 token averages are above body."
   },
+  "prompt_mean_comparison": {
+    "source": "reports/comprehensive_research_report/audits/prompt_representations/summary.json and audits/prompt_mask/summary.json",
+    "completed_comparisons": [
+      {"model": "RoBERTa", "prompt_mean_rankic": 0.0573096548, "local_comparator": "direction span", "comparator_rankic": 0.0548638322, "delta": 0.0024458226, "protocol": "Sina historical four-prompt masked PCA128 + Ridge"},
+      {"model": "BGE-M3", "prompt_mean_rankic": 0.0331269364, "local_comparator": "direction span", "comparator_rankic": 0.0362983642, "delta": -0.0031714278, "protocol": "Sina historical four-prompt masked PCA128 + Ridge"},
+      {"model": "Qwen3-Embedding-8B", "prompt_mean_rankic": 0.0554705109, "local_comparator": "article_mean", "comparator_rankic": 0.0567965396, "delta": -0.0013260288, "protocol": "Sina masked 收益 prompt, same PCA32 + Ridge"}
+    ],
+    "mask_pair": {"pairs": 8, "wins": 8, "mean_delta": 0.0032365857, "median_delta": 0.0022572495, "interpretation": "masked_short - short for prompt_mean; this tests identity/date masking, not adding Prompt versus no Prompt"},
+    "no_prompt_counterfactual": "not completed: no-prompt body must preserve rows, mask, visible body-token budget, truncation and special-token structure before a causal comparison",
+    "conclusion": "Prompt mean has predictive signal, but no universal advantage over its local comparator; there is no completed causal estimate of the effect of adding a Prompt."
+  },
   "embedding_layouts": {
     "roberta_bge_m3": {
       "layout": "BOS + prompt + title + body + EOS, then tail truncation",

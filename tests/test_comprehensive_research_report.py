@@ -165,6 +165,10 @@ def test_frozen_facts_match_report_contract() -> None:
     sina_qwen = next(row for row in token_body["rows"] if row["dataset"] == "新浪" and row["model"].startswith("Qwen"))
     assert abs(sina_qwen["rankic_delta"] + 0.0156430648) < 1e-10
     assert len(token_body["sina_prompt_rows"]) == 8
+    prompt_mean = facts["prompt_mean_comparison"]
+    assert len(prompt_mean["completed_comparisons"]) == 3
+    assert prompt_mean["mask_pair"]["wins"] == 8
+    assert "not completed" in prompt_mean["no_prompt_counterfactual"]
 
 
 def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
@@ -210,6 +214,10 @@ def test_report_has_aligned_sections_and_no_unresolved_placeholders() -> None:
     assert "0.060316" in source
     assert "-0.015643" in source
     assert "Prompt token RankIC" in source
+    assert "`prompt_mean` 是否有效" in source
+    assert "0.057310" in source
+    assert "0.055471" in source
+    assert "no-prompt body" in source
     assert "尚无同一收益标签上的公平 RankIC 横表" in source
     assert "主线一：证明不同 Prompt 真的产生不同因子" in source
     assert "三模型相关性应该如何理解" in source
