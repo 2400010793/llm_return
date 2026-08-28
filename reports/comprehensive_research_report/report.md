@@ -1391,6 +1391,74 @@ Regime 的交互项。候选来源包括新浪本地抓取、巨潮公告、指�
 <p>图 7. 中性六 Prompt embedding 分片完成度。未完成 BGE-M3 不能冒充全量结果。</p>
 </div>
 
+### 11.8 长 Prompt 的探索性研究
+
+项目已经生成并审计过 `short`、`long`、`masked_short` 和 `masked_long` 四类输入。新浪的
+`long` 模板在短模板之外加入股票身份、标题/正文分隔、业绩与现金流、订单与投资、融资与
+股权变动、监管与诉讼、经营风险、行业变化和公司治理等分析要求；巨潮模板还加入公告重大
+事项、法律模板过滤和未来信息约束。具体模板见 `scripts/build_sina_prompt_variants.py` 和
+`scripts/build_cninfo_prompt_inputs.py`。
+
+长模板的输入开销并不小。已有分片的 RoBERTa Prompt 区域为 180 token，短模板为 28 token；
+BGE-M3 长模板为 110 token，短模板为 18 token。RoBERTa 长模板分片的形状为
+`[10956, 180, 768]`，BGE-M3 为 `[10956, 110, 1024]`。因此长 Prompt 同时改变了指令
+语义、正文相对位置和可能的正文截断预算，不能把长/短差异直接当作纯 Prompt 因果效应。
+
+#### 11.8.1 已有预测证据
+
+现有长 Prompt 结果来自新浪 2023--2026 验证期的配对分类审计，共 693 条新闻，读取已有
+预测文件，没有重新生成 embedding，也没有重新训练模型。`plain` 是自然无 Prompt 对照，
+不是与长模板占用相同位置的 position-matched no-Prompt。下面列出 AUC 代表性结果：
+
+| 分类器 | 表示 | plain | short | long | masked-short | masked-long |
+|---|---|---:|---:|---:|---:|---:|
+| HistGradientBoosting | BGE-M3 | 0.4910 | 0.5049 | **0.5451** | **0.5507** | 0.5096 |
+| HistGradientBoosting | RoBERTa | 0.5676 | **0.5853** | 0.5523 | 0.5437 | 0.5412 |
+| HistGradientBoosting | Chinese BERT | 0.5525 | 0.5060 | **0.5748** | 0.5218 | 0.5555 |
+| Logistic | BGE-M3 | 0.4670 | **0.5253** | 0.5007 | **0.5379** | 0.4963 |
+| Logistic | RoBERTa | 0.5091 | 0.4838 | 0.5077 | 0.4764 | **0.5557** |
+
+结果没有形成统一方向：
+
+- BGE-M3 + HistGradientBoosting 的 `long - short` AUC 为 `+0.0402`，但日期区块 bootstrap
+  区间为 `[-0.0017, 0.0803]`，不能认为稳定显著；
+- RoBERTa + HistGradientBoosting 的长模板低于短模板，差值为 `-0.0330`；
+- Chinese BERT + HistGradientBoosting 的长模板高于短模板，差值为 `+0.0688`；
+- mask 后的方向也依赖模型。例如 BGE-M3 + HistGradientBoosting 的
+  `masked-long - masked-short = -0.0411`，而 RoBERTa + Logistic 为 `+0.0793`。
+
+所以当前可写的结论是：长 Prompt 会改变表示和预测结果，但效果依赖模型、分类器以及是否
+mask，尚不能写成“长 Prompt 普遍优于短 Prompt”。这组结果也不是正式的 6+2+1 收益率
+RankIC 结果；目前没有一张严格统一的长 Prompt `next_day_return` 主表。完整配对结果见
+`reports/sina_prompt_mask_paired_audit_20260812.md`、`*.variants.csv` 和 `*.comparisons.csv`。
+
+#### 11.8.2 与外部研究的对应关系
+
+长输入研究普遍提示位置和注意力竞争是重要混杂因素。*Lost in the Middle* 发现相关信息位于
+长上下文中间时性能会下降，开头和结尾通常更容易被利用；后续工作进一步观察到 U 型位置
+注意力偏差。Prompt sensitivity 研究则显示，单一固定指令可能高估或低估 embedding 模型
+能力，应报告多个合理模板的敏感性。PromptBERT 的结果说明 Prompt 能改善句向量，但关键
+是模板和去噪设计，并不支持“越长越好”。这些结论与本项目中长 Prompt 的模型依赖性结果
+是一致的，但不能替代本项目的样本外收益检验。
+
+#### 11.8.3 下一步严格实验
+
+长 Prompt 后续只作为受控敏感性实验，主线仍使用干净的短 Prompt。实验应在新浪和巨潮的
+同一新闻交集上采用严格 6+2+1 滚动，并只运行 PCA 后的 Ridge、Huber 和 ElasticNet：
+
+1. 保留现有短 Prompt 和长 Prompt embedding；
+2. 新增与长 Prompt token 数、正文起始位置和截断预算完全匹配的 no-Prompt 控制；
+3. 同时比较 Prompt token、body_mean/article_mean 和全文池化，统一使用 `next_day_return`；
+4. 每个测试年报告 RankIC、RankIC IR、Top20% 超额、日均 BP、持仓数、换手和成本后收益；
+5. 用日期区块 bootstrap 检验 `long - short` 以及 `long - matched-no-prompt`，不使用单一 AUC
+   或单年结果作结论；
+6. 若长 Prompt 只提升分类 AUC、不能提升收益率和组合指标，则结论应限定为“任务识别改善”，
+   不能称为可交易因子增量。
+
+当前研究边界是：长 Prompt 的 embedding 产物完整可追溯，分类验证已有明确结果，但严格位置
+匹配和 6+2+1 收益率验证尚未完成。因此，报告将长 Prompt 定位为“有机制依据、结果不稳定、
+需要严格对照才能继续判断”的后续方向。
+
 ## 12. 研究边界
 
 - 新浪与巨潮虽然都覆盖 2010--2026，但年度分布、股票覆盖、文本类型和标签可用率不同。
@@ -1488,5 +1556,9 @@ word-span 只取“超额”，新三模型公平合同才取完整“超额收�
 3. Jiang, F., Liu, Y., Meng, L., and Zhang, H. *Deep learning, textual sentiment, and financial market*. 2024.
 4. Zhang, C. *Deep learning based Chinese text sentiment mining and stock market correlation research*. 2022.
 5. Wang, X. *Topic Modeling in Finance: A Review of Methods, Applications, and Challenges*. 2026.
+6. Liu, N. F., et al. *Lost in the Middle: How Language Models Use Long Contexts*. 2023. https://arxiv.org/abs/2307.03172
+7. Hsieh, C.-Y., et al. *Found in the Middle: Calibrating Positional Attention Bias Improves Long Context Utilization*. 2024. https://arxiv.org/abs/2406.16008
+8. Kostiuk, Y. and Enevoldsen, K. *One prompt is not enough: Instruction Sensitivity Undermines Embedding Model Evaluation*. 2026. https://arxiv.org/abs/2605.22544
+9. Jiang, T., et al. *PromptBERT: Improving BERT Sentence Embeddings with Prompts*. 2022. https://arxiv.org/abs/2201.04337
 
 </div>

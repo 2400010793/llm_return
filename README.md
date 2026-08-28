@@ -295,6 +295,18 @@ reports/      可追溯结果、表格和综合报告源码
 tests/        单元测试、时间泄漏和采集器测试
 ```
 
+服务器大型数据统一从以下共享入口访问：
+
+```text
+/data/alpha_team2/shares/llm_return/
+```
+
+其中 `datasets/repository_data`、`datasets/sina_cninfo_full_2010_2026`、
+`datasets/news_content_quality_20260812` 分别对应仓库数据、全量新浪/巨潮主目录和历史清洗
+产物；`external/intraday_valuation_260825` 对应高频波动率、价差和估值数据。完整映射和权限
+说明见共享目录的 `README.md`、`SOURCE_PATHS.tsv` 和 `SHARE_AUDIT.md`。大型文件通过同一
+Lustre 文件系统的共享链接提供，不重复进入 Git 或复制数 TB 数据块。
+
 常用入口：
 
 ```bash

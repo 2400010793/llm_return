@@ -582,6 +582,21 @@
     {"dataset": "新浪", "model": "BGE-M3", "complete": 189, "expected": 256, "status": "remaining tasks canceled; completed outputs retained"},
     {"dataset": "巨潮", "model": "BGE-M3", "complete": 78, "expected": 256, "status": "remaining tasks canceled; completed outputs retained"}
   ],
+  "long_prompt_validation_audit": {
+    "source": "reports/sina_prompt_mask_paired_audit_20260812.md",
+    "scope": "Sina validation-only paired classification audit; existing predictions, no new embedding or retraining",
+    "years": [2023, 2024, 2025, 2026],
+    "n_per_variant": 693,
+    "metrics": "AUC, accuracy, balanced_accuracy, MCC",
+    "selected_auc": [
+      {"classifier": "hist_gradient_boosting", "embedding": "bge_m3", "plain": 0.4910, "prompt_short": 0.5049, "prompt_long": 0.5451, "masked_short": 0.5507, "masked_long": 0.5096},
+      {"classifier": "hist_gradient_boosting", "embedding": "chinese_roberta", "plain": 0.5676, "prompt_short": 0.5853, "prompt_long": 0.5523, "masked_short": 0.5437, "masked_long": 0.5412},
+      {"classifier": "hist_gradient_boosting", "embedding": "chinese_bert", "plain": 0.5525, "prompt_short": 0.5060, "prompt_long": 0.5748, "masked_short": 0.5218, "masked_long": 0.5555},
+      {"classifier": "logistic", "embedding": "bge_m3", "plain": 0.4670, "prompt_short": 0.5253, "prompt_long": 0.5007, "masked_short": 0.5379, "masked_long": 0.4963},
+      {"classifier": "logistic", "embedding": "chinese_roberta", "plain": 0.5091, "prompt_short": 0.4838, "prompt_long": 0.5077, "masked_short": 0.4764, "masked_long": 0.5557}
+    ],
+    "caveat": "plain is a natural no-prompt baseline, not a position-matched no-prompt control; no strict long-prompt 6+2+1 return RankIC table is available"
+  },
   "provenance": {
     "master_report_path": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md",
     "master_report_sha256": "2818055ca4c29cb09c740b82e57e7abd968d2cae33221f259335fe85f2f1049b",
