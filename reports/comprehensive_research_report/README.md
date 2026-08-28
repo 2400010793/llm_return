@@ -19,10 +19,8 @@ token/body 配对与跨模型融合只作为设计列出，不会混入已完成
 构建命令：
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-report.txt
-python reports/comprehensive_research_report/build_report.py
+uv sync --extra report
+uv run python reports/comprehensive_research_report/build_report.py
 ```
 
 需要从原实验目录重新生成聚类持仓审计时运行：

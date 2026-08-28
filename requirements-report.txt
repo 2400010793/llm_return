@@ -2,3 +2,4 @@ Markdown>=3.9
 matplotlib>=3.9
 WeasyPrint>=65
 pypdf>=5.0
+plotly>=5.20

@@ -4,8 +4,23 @@
 
 ```bash
 cd /mnt/lustre3/home/gaozh/llm_return
-python -m venv .venv
-.venv/bin/pip install -r requirements-research.txt
+uv python install 3.9
+uv sync
+uv sync --extra research --extra report --extra transformers --extra boosting --extra browser
+```
+
+项目环境由 `pyproject.toml` 和 `uv.lock` 管理。默认 `uv sync` 安装基础数据处理和测试依赖；
+按任务启用 extra，避免在只做审计或 PDF 构建时安装 Torch 等大型包。所有 Python 命令使用
+`uv run ...`，不直接调用 `.venv/bin/python` 或 `.venv/bin/pip`。服务器大文件统一从
+`/data/alpha_team2/shares/llm_return` 访问；可通过 `LLM_RETURN_SHARED_ROOT` 记录该入口。
+
+更新依赖时：
+
+```bash
+uv add pandas                  # 修改项目主依赖并更新 uv.lock
+uv add --optional research <package>
+uv lock
+uv sync
 ```
 
 2026-08-26 实际环境的关键版本为：Python 环境中的 NumPy 2.0.2、Pandas
@@ -60,7 +75,7 @@ python scripts/run_social_collection_batches.py --help
 ## 3. 只读状态审计
 
 ```bash
-.venv/bin/python scripts/audit_research_handoff.py --include-slurm
+uv run python scripts/audit_research_handoff.py --include-slurm
 ```
 
 该命令检查：新浪/巨潮面板行数、全量中性输入 manifest、四组 RoBERTa/BGE-M3
@@ -128,15 +143,16 @@ soft shrinkage 500、temperature 0.5、UMAP8、HDBSCAN min cluster size 50。
 ## 5. 本地验证
 
 ```bash
-.venv/bin/python -m compileall -q src scripts
-.venv/bin/pytest -q
-.venv/bin/python scripts/audit_research_handoff.py
+uv run python -m compileall -q src scripts
+uv sync --all-extras
+uv run pytest -q
+uv run python scripts/audit_research_handoff.py
 ```
 
 对主线做快速聚焦测试：
 
 ```bash
-.venv/bin/pytest -q \
+uv run pytest -q \
   tests/test_audit_research_handoff.py \
   tests/test_three_model_four_prompt_fair.py \
   tests/test_bge_embedding_recovery.py \

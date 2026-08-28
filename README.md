@@ -295,6 +295,46 @@ reports/      可追溯结果、表格和综合报告源码
 tests/        单元测试、时间泄漏和采集器测试
 ```
 
+### Python 环境与路径
+
+项目使用 `uv` 管理 Python 版本、依赖和锁文件。首次使用只需安装 `uv`，随后在仓库根目录执行：
+
+```bash
+uv python install 3.9
+uv sync                         # 基础数据处理 + pytest
+uv sync --extra research       # PCA/聚类/行情研究依赖
+uv sync --extra report         # Markdown/Matplotlib/WeasyPrint/PDF
+uv sync --extra transformers   # Torch/Transformers/句向量模型
+uv sync --extra boosting       # XGBoost/LightGBM/CatBoost
+uv sync --extra browser        # Playwright 浏览器采集
+uv sync --all-extras            # 完整研究/模型/浏览器/报告环境
+```
+
+`uv.lock` 是唯一的解析锁定文件；修改 `pyproject.toml` 后必须重新运行 `uv lock`。不再手动
+创建 `.venv` 或直接使用 `.venv/bin/pip`。`uv run` 会自动使用项目环境：
+
+```bash
+uv run pytest -q               # 基础测试（完整测试见下）
+uv run python scripts/audit_research_handoff.py
+uv run python reports/comprehensive_research_report/build_report.py
+```
+
+包含 Torch、图模型和采集器测试的完整测试收集需要所有可选依赖：
+
+```bash
+uv sync --all-extras
+uv run pytest -q
+```
+
+大规模数据不放入仓库。服务器上统一使用共享入口：
+
+```bash
+export LLM_RETURN_SHARED_ROOT=/data/alpha_team2/shares/llm_return
+```
+
+共享目录映射、源文件和权限见该目录的 `README.md`、`SOURCE_PATHS.tsv` 和 `SHARE_AUDIT.md`。
+模型权重和授权行情仍通过命令行参数、`configs/paths.yaml` 或共享目录指定，不写入锁文件。
+
 服务器大型数据统一从以下共享入口访问：
 
 ```text
@@ -311,7 +351,8 @@ Lustre 文件系统的共享链接提供，不重复进入 Git 或复制数 TB �
 
 ```bash
 # 环境与测试
-python -m pip install -e '.[dev]'
+uv sync
+uv run pytest -q
 pytest -q
 
 # 只读状态审计
