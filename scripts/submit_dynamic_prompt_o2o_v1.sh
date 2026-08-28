@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \

@@ -7,17 +7,17 @@
 #SBATCH --time=24:00:00
 #SBATCH --requeue
 #SBATCH --array=0-255%16
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/sina_single_stock_cninfo_v1/%A_%a_embed.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/sina_single_stock_cninfo_v1/%A_%a_embed.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/sina_single_stock_cninfo_v1/%A_%a_embed.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/sina_single_stock_cninfo_v1/%A_%a_embed.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${SLURM_ARRAY_TASK_ID:?run as array 0..255}"
 
 models=(roberta bge_m3 ckip_bert xlm_roberta_large)
 model=${models[$((SLURM_ARRAY_TASK_ID / 64))]}
 shard=$((SLURM_ARRAY_TASK_ID % 64))
-root=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1
+root=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1
 input=${root}/inputs/shard-${shard}
 destination=${root}/embeddings/shard-${shard}/${model}
 stage=${SLURM_TMPDIR:-/tmp}/sina1-cninfo-${SLURM_JOB_ID}-${SLURM_ARRAY_TASK_ID}
@@ -27,7 +27,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1
-export PYTHONPATH=/mnt/lustre3/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/data/alpha_team2/shares/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 complete=1
 for variant in plain short masked_short long masked_long; do

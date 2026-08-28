@@ -6,11 +6,11 @@
 #SBATCH --mem=8G
 #SBATCH --time=00:30:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_prompt_audit_split/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_prompt_audit_split/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_prompt_audit_split/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_prompt_audit_split/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?parallel prompt audit must use scripts/task_tracker.py}"
 

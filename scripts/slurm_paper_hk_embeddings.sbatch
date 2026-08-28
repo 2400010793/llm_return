@@ -5,11 +5,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=3-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_paper_hk/%A_%a_embed.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_paper_hk/%A_%a_embed.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_paper_hk/%A_%a_embed.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_paper_hk/%A_%a_embed.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${MODEL:?export MODEL=ckip_bert or xlm_roberta_large}"
 : "${SLURM_ARRAY_TASK_ID:?run as an array over shards 0..31}"
 case "${MODEL}" in
@@ -29,8 +29,8 @@ fi
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
-export PAPER_HK_MODEL_ROOT=${PAPER_HK_MODEL_ROOT:-/home/gaozh/.cache/huggingface/paper_hk_models}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PAPER_HK_MODEL_ROOT=${PAPER_HK_MODEL_ROOT:-/home/team/.cache/huggingface/paper_hk_models}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 /usr/bin/python3 scripts/run_short_pooled_embeddings.py \
   "${input}" --output-dir "${output}" \

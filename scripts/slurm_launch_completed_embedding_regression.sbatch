@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_pooled_regression_launcher/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_pooled_regression_launcher/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_pooled_regression_launcher/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_pooled_regression_launcher/%j.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${MODEL:?export MODEL}"
 : "${VARIANT_GROUP:?export VARIANT_GROUP}"
 : "${TASK_RECORD_ID:?launcher must be submitted through scripts/task_tracker.py}"
@@ -29,7 +29,7 @@ REGRESSORS=${REGRESSORS:-ridge}
 REDUCERS=${REDUCERS:-none,pca:128}
 manifest="configs/generated/regression_${MODEL}_${VARIANT_GROUP}_triple_concat.tsv"
 mkdir -p configs/generated logs/slurm_pooled_regression logs/slurm_pooled_regression_launcher
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 /usr/bin/python3 scripts/build_pooled_regression_manifest.py \
   --model "${MODEL}" --variants "${VARIANTS}" \

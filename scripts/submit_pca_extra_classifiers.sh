@@ -1,7 +1,7 @@
 #!/bin/bash
 # Submit only mathematically compatible missing PCA classifiers.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name pca-extra-classifiers \
@@ -19,7 +19,7 @@ LONG_EMBED_JOB=${LONG_EMBED_JOB:-3847506}
 PROMPT_PCA_JOB=${PROMPT_PCA_JOB:-3847792}
 mkdir -p logs/slurm_triple_pca_extra logs/slurm_prompt_pca_extra_v5
 
-/home/gaozh/llm_return/.venv/bin/python -m py_compile \
+/home/team/llm_return/.venv/bin/python -m py_compile \
   scripts/run_pooled_embedding_classification.py scripts/run_reduced_prompt_classification.py
 bash -n scripts/slurm_old_triple_pca_extra_classifiers.sbatch scripts/slurm_prompt_token_pca_extra_classifiers_v5.sbatch
 

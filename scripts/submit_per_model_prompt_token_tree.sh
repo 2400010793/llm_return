@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
-FAIR_ROOT=${FAIR_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/three_model_four_prompt_fair_pca_v2}
-TREE_ROOT=${TREE_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/per_model_prompt_token_tree_v1}
-REPORT=${REPORT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md}
+FAIR_ROOT=${FAIR_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/three_model_four_prompt_fair_pca_v2}
+TREE_ROOT=${TREE_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/per_model_prompt_token_tree_v1}
+REPORT=${REPORT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md}
 BUILD_SINA_JOB=${BUILD_SINA_JOB:-5107846}
 BUILD_CNINFO_JOB=${BUILD_CNINFO_JOB:-5107847}
 CPU_EXCLUDE=${CPU_EXCLUDE:-c001-epyc9755,c003-epyc9755,c005-epyc9755,c006-epyc9755,c010-epyc9755,c011-epyc9755,c012-epyc9755,c118-epyc9575f,v123-epyc9575f,v126-epyc9575f,v127-epyc9575f,v128-epyc9575f,v129-epyc9575f,v130-epyc9575f,v131-epyc9575f,v132-epyc9575f,v133-epyc9575f,v134-epyc9575f,v135-epyc9575f,v136-epyc9575f,v139-epyc9575f}

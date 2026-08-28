@@ -139,7 +139,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-dir", default="data/interim/cninfo_paper_1000_focus")
     parser.add_argument("--universe", default="data/stock_universe_paper_100.csv")
-    parser.add_argument("--returns", default="/home/gaozh/ret.parquet")
+    parser.add_argument("--returns", default="/home/team/ret.parquet")
     parser.add_argument("--output", default="data/processed/cninfo_100_classification_panel.parquet")
     parser.add_argument("--min-text-length", type=int, default=500)
     parser.add_argument("--max-text-length", type=int, default=50000)

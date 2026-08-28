@@ -9,11 +9,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=01:30:00
 #SBATCH --array=0-9%1
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_prompt_o2o_gate/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_prompt_o2o_gate/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_prompt_o2o_gate/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_prompt_o2o_gate/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?run as a Slurm array over 0..9}"

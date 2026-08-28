@@ -4,15 +4,15 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=04:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/sina_single_stock_cninfo_v1/%j_prepare.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/sina_single_stock_cninfo_v1/%j_prepare.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/sina_single_stock_cninfo_v1/%j_prepare.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/sina_single_stock_cninfo_v1/%j_prepare.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
-root=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1
-clean_full=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/cleaned_full_2010_2026/sina_all_news_clean_expanded.parquet
-panel_full=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/classification/sina_full_classification_panel.parquet
+root=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1
+clean_full=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/cleaned_full_2010_2026/sina_all_news_clean_expanded.parquet
+panel_full=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/classification/sina_full_classification_panel.parquet
 clean=${root}/clean/sina_single_stock_clean.parquet
 panel=${root}/classification/sina_single_stock_classification_panel.parquet
 

@@ -12,11 +12,11 @@ from statistics import mean
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_POSITIVE = Path(
-    "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/"
+    "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/"
     "single_stock_cninfo_v1/prompt_positive_v1/summary"
 )
 DEFAULT_QWEN = Path(
-    "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/"
+    "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/"
     "single_stock_cninfo_v1/qwen3_prompt_return_regression_v1/"
     "pca_ablation_v1/summary/overall_metrics.csv"
 )

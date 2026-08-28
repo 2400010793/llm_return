@@ -6,11 +6,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=08:00:00
 #SBATCH --array=0-2%2
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_dynamic_prompt/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_dynamic_prompt/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?dynamic prompt matrix must be submitted through scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?run this entrypoint as a Slurm array}"

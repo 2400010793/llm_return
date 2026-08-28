@@ -4,12 +4,12 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/three_model_prompt_fair/%j_build.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/three_model_prompt_fair/%j_build.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/three_model_prompt_fair/%j_build.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/three_model_prompt_fair/%j_build.err
 set -euo pipefail
 : "${OUTPUT_ROOT:?}" "${PANEL:?}" "${ENCODER_ROOT:?}" "${QWEN_ROOT:?}"
 : "${DATASET:?}" "${ENCODER_SHARDS:?}" "${ROW_INDEX_OFFSET:?}" "${EXPECTED_ROWS:?}" "${HISTORY_YEARS:?}" "${VALIDATION_YEARS:?}"
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}

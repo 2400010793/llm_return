@@ -598,7 +598,7 @@
     "caveat": "plain is a natural no-prompt baseline, not a position-matched no-prompt control; no strict long-prompt 6+2+1 return RankIC table is available"
   },
   "provenance": {
-    "master_report_path": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md",
+    "master_report_path": "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/REPORT_ALL_RESULTS.md",
     "master_report_sha256": "2818055ca4c29cb09c740b82e57e7abd968d2cae33221f259335fe85f2f1049b",
     "master_report_lines": 1001,
     "handoff_snapshot": "docs/status_snapshot_2026-08-26.json",

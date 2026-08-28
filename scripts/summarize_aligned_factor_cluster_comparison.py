@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def main() -> None:
-    root = Path("/mnt/lustre3/home/gaozh/llm_return/reports/aligned_factor_clusters")
+    root = Path("/data/alpha_team2/shares/llm_return/reports/aligned_factor_clusters")
     files = sorted(root.glob("*_return3d.csv"))
     data = pd.concat([pd.read_csv(path) for path in files], ignore_index=True)
     wide = data.pivot_table(

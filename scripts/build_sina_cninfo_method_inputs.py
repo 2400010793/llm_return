@@ -107,15 +107,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--clean", type=Path,
-        default=Path("/home/gaozh/news_content_quality_20260812/cleaned/sina_single_stock_clean.parquet"),
+        default=Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cleaned/sina_single_stock_clean.parquet"),
     )
     parser.add_argument(
         "--panel", type=Path,
-        default=Path("/home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet"),
+        default=Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet"),
     )
     parser.add_argument(
         "--output-dir", type=Path,
-        default=Path("/home/gaozh/news_content_quality_20260812/cninfo_method_v1/inputs"),
+        default=Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/inputs"),
     )
     parser.add_argument("--shards", type=int, default=4)
     args = parser.parse_args()

@@ -8,11 +8,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_o2o_2010_2026/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_o2o_2010_2026/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_o2o_2010_2026/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_o2o_2010_2026/%j.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?O2O preparation must be submitted through task_tracker.py}"
 SOURCE_PANEL=${SOURCE_PANEL:-data/processed/cninfo_full_classification_panel_2010_2026.parquet}

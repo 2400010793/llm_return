@@ -1,10 +1,10 @@
 #!/bin/bash
 # Submit the audited 75,894-row Sina panel under two non-mixed target protocols.
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
 cd "${REPO_ROOT}"
 
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 PANEL=${PANEL:-${SINA_ROOT}/classification/sina_single_stock_classification_panel.parquet}
 EMBEDDING_ROOT=${EMBEDDING_ROOT:-${SINA_ROOT}/embeddings}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${SINA_ROOT}/classification_results_v1}

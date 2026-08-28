@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
 cd "${REPO_ROOT}"
 
 OUTPUT_ROOT=${OUTPUT_ROOT:-data/processed/prompt_token_embeddings_2010_2026_clean_v1}

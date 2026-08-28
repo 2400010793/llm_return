@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
 #SBATCH --time=01:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_o2o_ewct/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_o2o_ewct/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_o2o_ewct/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_o2o_ewct/%j.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?selection job must be tracked}"
 : "${MANIFEST:?export MANIFEST}"

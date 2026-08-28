@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
-QWEN_ROOT=${QWEN_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean/cninfo}
-PANEL=${PANEL:-/mnt/lustre3/home/gaozh/llm_return/data/processed/cninfo_full_o2o_panel_2010_2026_hfq.parquet}
-OUTPUT_ROOT=${OUTPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen_cninfo_strict_min_intersection_v1}
+QWEN_ROOT=${QWEN_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean/cninfo}
+PANEL=${PANEL:-/data/alpha_team2/shares/llm_return/data/processed/cninfo_full_o2o_panel_2010_2026_hfq.parquet}
+OUTPUT_ROOT=${OUTPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen_cninfo_strict_min_intersection_v1}
 INTERSECTION_ROOT=${INTERSECTION_ROOT:-${OUTPUT_ROOT}/intersection}
 MATRIX_ROOT=${MATRIX_ROOT:-${OUTPUT_ROOT}/matrices}
 GEOMETRY_ROOT=${GEOMETRY_ROOT:-${OUTPUT_ROOT}/geometry}

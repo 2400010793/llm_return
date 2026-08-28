@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 PROMPT_SPEC=${PROMPT_SPEC:-${REPO_ROOT}/configs/prompts/minimal_v2.json}
 CONCURRENCY=${CONCURRENCY:-64}
 DATASET=${DATASET:-sina}

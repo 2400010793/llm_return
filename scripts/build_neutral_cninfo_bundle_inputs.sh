@@ -4,7 +4,7 @@
 set -euo pipefail
 
 OUTPUT=${1:?output directory required}
-ROOT=/mnt/lustre3/home/gaozh/llm_return/data/processed/cleaned
+ROOT=/data/alpha_team2/shares/llm_return/data/processed/cleaned
 PERIOD_ROOTS=(
   "${ROOT}/cninfo_prompt_bundle_existing_2018_2026_clean_v1/prompt_v3_fixed_parts"
   "${ROOT}/cninfo_prompt_bundle_increment_2010_2017_clean_v1/prompt_v3_fixed_parts"

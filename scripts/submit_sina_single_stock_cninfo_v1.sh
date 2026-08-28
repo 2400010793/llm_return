@@ -1,14 +1,14 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name sina-single-stock-cninfo-v1 \
     --purpose "Rebuild Sina single-stock embeddings with the audited CNINFO prompt, mask, token, and pooling protocol" \
-    --input /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/cleaned_full_2010_2026/sina_all_news_clean_expanded.parquet \
-    --input /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/classification/sina_full_classification_panel.parquet \
-    --output /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1 \
+    --input /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/cleaned_full_2010_2026/sina_all_news_clean_expanded.parquet \
+    --input /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/classification/sina_full_classification_panel.parquet \
+    --output /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1 \
     --related-file scripts/build_sina_single_stock_cninfo_dataset.py \
     --related-file scripts/build_sina_cninfo_method_inputs.py \
     --related-file scripts/run_sina_cninfo_method_embeddings.py \

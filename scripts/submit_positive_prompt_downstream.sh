@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
-REPO=/mnt/lustre3/home/gaozh/llm_return
+ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
+REPO=/data/alpha_team2/shares/llm_return
 DATASET=${DATASET:-sina}; PANEL=${PANEL:-$ROOT/../classification/sina_single_stock_classification_panel.parquet}
 MATRIX_ROOT=${MATRIX_ROOT:-$ROOT/matrices}; OUTPUT_ROOT=${OUTPUT_ROOT:-$ROOT/results}; EXPECTED_ROWS=${EXPECTED_ROWS:-75894}; REPRESENTATIONS=${REPRESENTATIONS:-prompt_mean,return_span}
 MANIFEST=${MANIFEST:-$ROOT/downstream_manifest_${DATASET}.tsv}

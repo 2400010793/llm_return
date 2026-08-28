@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=08:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/sina_semantic_span/%A_%a_reg.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/sina_semantic_span/%A_%a_reg.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/sina_semantic_span/%A_%a_reg.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/sina_semantic_span/%A_%a_reg.err
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=/data/alpha_team2/shares/llm_return
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 MANIFEST=${MANIFEST:-${REPO_ROOT}/configs/generated/sina_semantic_span_regression.tsv}
 STUDY_ROOT=${STUDY_ROOT:-${SINA_ROOT}/prompt_minimal_v2/semantic_span_v1}
 CACHE_ROOT=${CACHE_ROOT:-${STUDY_ROOT}}

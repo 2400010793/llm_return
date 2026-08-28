@@ -5,11 +5,11 @@
 #SBATCH --mem=96G
 #SBATCH --time=08:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_prompt_pca_fusion/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_prompt_pca_fusion/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_prompt_pca_fusion/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_prompt_pca_fusion/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?this script must run as an array job}"

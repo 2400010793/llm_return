@@ -5,25 +5,25 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=01:00:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_embeddings/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_embeddings/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_embeddings/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_embeddings/%j.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
-input=/home/gaozh/news_content_quality_20260812/validation_100/random_100.parquet
-output=/home/gaozh/news_content_quality_20260812/validation_100/embeddings/qwen3_embedding_8b
+input=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/validation_100/random_100.parquet
+output=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/validation_100/embeddings/qwen3_embedding_8b
 host=127.0.0.1:11447
 
 mkdir -p logs/slurm_sina_embeddings "$output"
 export CUDA_VISIBLE_DEVICES=1
 export OLLAMA_HOST="$host"
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=10m
 
-ollama=/home/gaozh/ollama-new/bin/ollama
+ollama=/home/team/ollama-new/bin/ollama
 cleanup() {
   if [[ -n "${OLLAMA_PID:-}" ]]; then
     kill "$OLLAMA_PID" 2>/dev/null || true

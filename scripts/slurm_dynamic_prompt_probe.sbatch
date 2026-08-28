@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=08:00:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_dynamic_prompt/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_dynamic_prompt/%j.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?dynamic prompt probe must be submitted through scripts/task_tracker.py}"
 

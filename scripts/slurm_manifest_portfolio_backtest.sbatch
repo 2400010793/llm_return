@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=02:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_manifest_portfolio/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_manifest_portfolio/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_manifest_portfolio/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_manifest_portfolio/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?portfolio array must use scripts/task_tracker.py}"
 : "${MANIFEST:?export MANIFEST}"

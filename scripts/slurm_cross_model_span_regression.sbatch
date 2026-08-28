@@ -4,12 +4,12 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/cross_model_span/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/cross_model_span/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/cross_model_span/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/cross_model_span/%A_%a.err
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?array task required}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 SPAN_ROOT=${SPAN_ROOT:-${SINA_ROOT}/prompt_minimal_v2/semantic_span_v1}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${SINA_ROOT}/prompt_minimal_v2/cross_model_span_v3}
 MANIFEST=${MANIFEST:-${REPO_ROOT}/configs/generated/cross_model_span_manifest.tsv}

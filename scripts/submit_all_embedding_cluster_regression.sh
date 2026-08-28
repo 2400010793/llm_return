@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
-ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
+cd /data/alpha_team2/shares/llm_return
+ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
 MODE=${1:-fixed}
 MANIFEST="$ROOT/results_all_embedding_cluster_regression/manifest_${MODE}.tsv"
 .venv/bin/python scripts/build_all_embedding_cluster_manifest.py --mode "$MODE" --output "$MANIFEST"

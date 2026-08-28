@@ -5,11 +5,11 @@
 #SBATCH --mem=128G
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_lr_anneal/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_lr_anneal/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_lr_anneal/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_lr_anneal/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?annealing array must be submitted through scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?this script must run as an array job}"

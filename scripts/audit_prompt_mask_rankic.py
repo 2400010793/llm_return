@@ -12,7 +12,7 @@ from statistics import mean, median
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = Path(
-    "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/"
+    "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/"
     "single_stock_cninfo_v1/prompt_positive_v1/summary"
 )
 DEFAULT_OUTPUT = ROOT / "reports/comprehensive_research_report/audits/prompt_mask"

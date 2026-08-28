@@ -8,15 +8,15 @@
 #SBATCH --mem=64G
 #SBATCH --time=02:00:00
 #SBATCH --array=0-3%2
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_short_token_probe/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_short_token_probe/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_short_token_probe/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_short_token_probe/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_short_token_probe data/processed/token_embeddings_probe_v3
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 case "$SLURM_ARRAY_TASK_ID" in
   0) model=roberta; variant=short; max_length=512; name=roberta_short ;;
   1) model=roberta; variant=masked_short; max_length=512; name=roberta_masked_short ;;

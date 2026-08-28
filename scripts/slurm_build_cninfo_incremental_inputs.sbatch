@@ -8,11 +8,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=08:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_increment_inputs/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_increment_inputs/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_increment_inputs/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_increment_inputs/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?incremental input construction must use scripts/task_tracker.py}"
 

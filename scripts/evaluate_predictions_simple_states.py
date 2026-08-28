@@ -189,7 +189,7 @@ def main() -> None:
     parser.add_argument(
         "--simple-states-root",
         type=Path,
-        default=Path("/mnt/lustre3/home/gaozh/alpha_team2_zengl"),
+        default=Path("/mnt/lustre3/home/team/alpha_team2_zengl"),
     )
     parser.add_argument("--without-amount", action="store_true")
     parser.add_argument("--skip-run", action="store_true")

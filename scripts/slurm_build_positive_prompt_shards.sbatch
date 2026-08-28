@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=24:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_embeddings/%j_shards.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_embeddings/%j_shards.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/positive_prompt_embeddings/%j_shards.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/positive_prompt_embeddings/%j_shards.err
 set -euo pipefail
 : "${TASK_RECORD_ID:?child task must be recorded}"
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 SOURCE=${SOURCE:?SOURCE required}
 OUTPUT=${OUTPUT:?OUTPUT required}
 cd "${REPO_ROOT}"

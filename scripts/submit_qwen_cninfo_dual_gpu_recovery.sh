@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
@@ -9,19 +9,19 @@ if [[ -z "${TASK_RECORD_ID:-}" ]]; then
     --name qwen-cninfo-dual-gpu-recovery \
     --purpose "Resume Qwen CNINFO prompt embeddings on c014/c018/c019 with fixed GPU sequences and disjoint shard arrays" \
     --snapshot-from-task 20260824T024110Z-qwen-cninfo-dual-gpu-recovery-57979 \
-    --input /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000 \
-    --output /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean \
+    --input /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000 \
+    --output /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean \
     --related-file scripts/slurm_qwen3_gguf_prompt_mean.sbatch \
     --related-file scripts/submit_qwen_cninfo_dual_gpu_recovery.sh \
     --tag qwen --tag cninfo --tag dual-gpu --tag memory-safe --seed 42 \
     -- bash "$0" "$@"
 fi
 
-PYTHON=/home/gaozh/llm_return/.venv/bin/python
+PYTHON=/home/team/llm_return/.venv/bin/python
 TRACKER=("${PYTHON}" scripts/task_tracker.py child-submit --task-id "${TASK_RECORD_ID}" --)
 SCRIPT=scripts/slurm_qwen3_gguf_prompt_mean.sbatch
-INPUT_ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000
-OUTPUT_ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean
+INPUT_ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000
+OUTPUT_ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean
 
 missing_for_mod() {
   local prompt_id=$1 variant=$2 mod=$3

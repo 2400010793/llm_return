@@ -48,7 +48,7 @@ def main() -> None:
         type=Path,
         default=Path("data/processed/cleaned/cninfo_announcements_final.jsonl"),
     )
-    parser.add_argument("--returns", type=Path, default=Path("/home/gaozh/ret.parquet"))
+    parser.add_argument("--returns", type=Path, default=Path("/home/team/ret.parquet"))
     parser.add_argument(
         "--output",
         type=Path,

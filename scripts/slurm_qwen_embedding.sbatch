@@ -6,20 +6,20 @@
 #SBATCH --mem=64G
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_qwen_embedding/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_qwen_embedding/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_qwen_embedding/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_qwen_embedding/%j.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_qwen_embedding data/processed/embeddings/qwen3_embedding_8b
 export CUDA_VISIBLE_DEVICES=0
 export OLLAMA_HOST=127.0.0.1:11435
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=30m
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
-OLLAMA=/home/gaozh/ollama-new/bin/ollama
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+OLLAMA=/home/team/ollama-new/bin/ollama
 
 cleanup() {
   if [[ -n "${OLLAMA_PID:-}" ]]; then kill "${OLLAMA_PID}" 2>/dev/null || true; fi

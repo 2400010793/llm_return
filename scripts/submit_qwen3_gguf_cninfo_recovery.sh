@@ -4,9 +4,9 @@ set -euo pipefail
 : "${TASK_RECORD_ID:?run through scripts/task_tracker.py}"
 : "${START_DEPENDENCY:?set to the current Sina Qwen array dependency}"
 
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-INPUT_ROOT=${INPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000}
-OUTPUT_ROOT=${OUTPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+INPUT_ROOT=${INPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000}
+OUTPUT_ROOT=${OUTPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean}
 GPU_NODES=${GPU_NODES:-c014-epyc7763:c018-10gpu}
 GPU_CANDIDATES=${GPU_CANDIDATES:-0:1:2:3:4:5:6:7:8:9}
 ARRAY_THROTTLE=${ARRAY_THROTTLE:-2}

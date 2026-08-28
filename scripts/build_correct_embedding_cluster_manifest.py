@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 import pandas as pd
 
-PROMPT_ROOT = Path("/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1")
+PROMPT_ROOT = Path("/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1")
 POOLED_ROOT = Path("data/processed/pooled_embeddings_2010_2026_clean_v1")
 CNINFO_FEATURES = ("prompt_mean", "full_mean", "title_body_mean", "title_body_full_concat")
 

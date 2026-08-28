@@ -34,7 +34,7 @@ def daily_metrics(path: Path) -> dict[str, object]:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--root", type=Path, default=Path("/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/results_all_embedding_cluster_regression/cninfo"))
+    p.add_argument("--root", type=Path, default=Path("/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/results_all_embedding_cluster_regression/cninfo"))
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
     rows = [daily_metrics(path) for path in sorted(args.root.rglob("*_predictions.parquet"))]

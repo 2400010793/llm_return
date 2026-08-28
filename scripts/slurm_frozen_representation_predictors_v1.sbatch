@@ -5,11 +5,11 @@
 #SBATCH --mem=96G
 #SBATCH --time=1-12:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_two_stage_v1/predict_%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_two_stage_v1/predict_%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_two_stage_v1/predict_%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_two_stage_v1/predict_%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 : "${MANIFEST:?export MANIFEST}"

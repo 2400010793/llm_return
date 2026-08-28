@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 SUMMARY_ROOT=${SUMMARY_ROOT:-${SINA_ROOT}/prompt_minimal_v2/cross_model_span_v3/summary}
 cd "${REPO_ROOT}"
 test -s "${SUMMARY_ROOT}/simple_states_manifest.tsv"

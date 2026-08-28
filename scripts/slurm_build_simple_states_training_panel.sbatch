@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 #SBATCH --time=02:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_simple_states/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_simple_states/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_simple_states/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_simple_states/%j.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?training-panel build must use scripts/task_tracker.py}"
 SOURCE_PANEL=${SOURCE_PANEL:-data/processed/cninfo_full_o2o_panel_2010_2026_hfq.parquet}

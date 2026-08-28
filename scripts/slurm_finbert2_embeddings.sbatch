@@ -5,11 +5,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=3-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_finbert2/%A_%a_embed.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_finbert2/%A_%a_embed.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_finbert2/%A_%a_embed.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_finbert2/%A_%a_embed.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?run as a Slurm array}"
 : "${VARIANT_GROUP:?export VARIANT_GROUP=plain or prompted}"
@@ -51,8 +51,8 @@ export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
-export FINBERT_MODEL_ROOT=/mnt/lustre3/home/gaozh/llm_return/models
-export PYTHONPATH=/mnt/lustre3/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export FINBERT_MODEL_ROOT=/data/alpha_team2/shares/llm_return/models
+export PYTHONPATH=/data/alpha_team2/shares/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 extra=()
 if [[ "${variant}" == plain ]]; then
   extra+=(--prompt-condition no_prompt_natural)

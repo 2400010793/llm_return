@@ -41,7 +41,7 @@
   ],
   "true_body_mean_status": "Saved in RoBERTa/BGE-M3 embedding outputs, but no completed same-sample historical four-prompt rolling regression; historical 0.04391/0.03307 values are full_mean.",
   "sources": {
-    "positive_summary": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/summary",
-    "qwen_overall": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1/pca_ablation_v1/summary/overall_metrics.csv"
+    "positive_summary": "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/summary",
+    "qwen_overall": "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1/pca_ablation_v1/summary/overall_metrics.csv"
   }
 }

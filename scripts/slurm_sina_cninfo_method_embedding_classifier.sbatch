@@ -7,16 +7,16 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-0%16
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_embedding_classifier/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_embedding_classifier/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_embedding_classifier/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_embedding_classifier/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?model array must be submitted through scripts/task_tracker.py}"
 : "${MANIFEST:?export MANIFEST}"
 : "${SLURM_ARRAY_TASK_ID:?run as an array}"
-PANEL=${PANEL:-/home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet}
+PANEL=${PANEL:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet}
 EXPECTED_ROWS=${EXPECTED_ROWS:-4928}
 MAX_MATRIX_GIB=${MAX_MATRIX_GIB:-12}
 

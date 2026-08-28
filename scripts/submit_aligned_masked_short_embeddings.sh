@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 : "${TASK_RECORD_ID:?run through scripts/task_tracker.py}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 CONFIG=${CONFIG:-${REPO_ROOT}/configs/prompts/aligned_masked_short_v1.json}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${SINA_ROOT}/aligned_masked_short_v1}
 PREFLIGHT=${PREFLIGHT:-${REPO_ROOT}/reports/aligned_masked_short_roberta_preflight.json}

@@ -8,15 +8,15 @@
 #SBATCH --mem=64G
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_cninfo_method/%A_%a_token_cls.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_cninfo_method/%A_%a_token_cls.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_cninfo_method/%A_%a_token_cls.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_cninfo_method/%A_%a_token_cls.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${TASK_RECORD_ID:?model array must be submitted through scripts/task_tracker.py}"
 : "${MANIFEST:?export MANIFEST}"
 : "${SLURM_ARRAY_TASK_ID:?run as an array}"
-PANEL=${PANEL:-/home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet}
+PANEL=${PANEL:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet}
 
 line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 2))p" "${MANIFEST}")
 line=${line%$'\r'}
@@ -36,7 +36,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 .venv/bin/python scripts/run_pooled_embedding_classification.py \
   "${PANEL}" \

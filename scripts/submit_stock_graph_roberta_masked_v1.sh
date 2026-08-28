@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel_2010_2026.parquet}
 DATASET_ROOT=${DATASET_ROOT:-data/processed/stock_graph_features_roberta_masked_v1}

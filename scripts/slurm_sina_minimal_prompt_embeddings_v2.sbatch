@@ -4,13 +4,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=08:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/minimal_prompt_v2/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/minimal_prompt_v2/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/minimal_prompt_v2/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/minimal_prompt_v2/%A_%a.err
 
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?run as an array}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 DATASET=${DATASET:-sina}
 CNINFO_EXISTING_INPUT=${CNINFO_EXISTING_INPUT:-${REPO_ROOT}/data/processed/cleaned/cninfo_prompt_bundle_existing_2018_2026_clean_v1/prompt_v3_fixed_parts}
 CNINFO_INCREMENT_INPUT=${CNINFO_INCREMENT_INPUT:-${REPO_ROOT}/data/processed/cleaned/cninfo_prompt_bundle_increment_2010_2017_clean_v1/prompt_v3_fixed_parts}

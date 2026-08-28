@@ -4,13 +4,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/prompt_mechanism/%A_%a_control_cls.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/prompt_mechanism/%A_%a_control_cls.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/prompt_mechanism/%A_%a_control_cls.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/prompt_mechanism/%A_%a_control_cls.err
 
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?run as array}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 STUDY_ROOT=${STUDY_ROOT:-${SINA_ROOT}/prompt_mechanism_v1}
 MANIFEST=${CONTROL_CLASS_MANIFEST:-${STUDY_ROOT}/controls/classification_manifest.tsv}
 SELECTION=${CONTROL_SELECTION:-${STUDY_ROOT}/controls/selection.json}

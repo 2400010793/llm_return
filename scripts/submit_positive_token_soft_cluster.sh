@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euo pipefail
-REPO=/mnt/lustre3/home/gaozh/llm_return
-ROOT=${ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1}
+REPO=/data/alpha_team2/shares/llm_return
+ROOT=${ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1}
 DATASET=${DATASET:-sina}
 SHARDS=${SHARDS:-64}
 if [[ "${DATASET}" == "cninfo" ]]; then
   DEFAULT_PANEL=${REPO}/data/processed/cninfo_full_classification_panel.parquet
 else
-  DEFAULT_PANEL=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet
+  DEFAULT_PANEL=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet
 fi
 PANEL=${PANEL:-${DEFAULT_PANEL}}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${ROOT}/soft_direction_tokens_${DATASET}_v1}

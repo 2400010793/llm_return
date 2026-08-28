@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--classification-root",
         type=Path,
-        default=Path("/home/gaozh/news_content_quality_20260812/classification"),
+        default=Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification"),
     )
     parser.add_argument(
         "--output",

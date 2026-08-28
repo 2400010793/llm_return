@@ -2,15 +2,15 @@
 # Record and submit the fair 4-model x 5-prompt x 5-feature x 5-classifier study.
 # It reuses existing pooled embeddings and does not generate new embeddings.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name sina-cninfo-method-embedding-classifier-matrix-v1 \
     --purpose "Compare 4 existing embedding models across 5 prompt variants, 5 common pooled representations, and 5 classifiers on the aligned Sina panel" \
-    --input /home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet \
-    --input /home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings \
-      --output /home/gaozh/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification \
+    --input /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet \
+    --input /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/embeddings \
+      --output /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification \
     --output configs/generated/sina_cninfo_method_embedding_classifier_v1.tsv \
     --related-file scripts/build_sina_cninfo_method_embedding_classifier_manifest.py \
     --related-file scripts/slurm_sina_cninfo_method_embedding_classifier.sbatch \
@@ -29,9 +29,9 @@ tracked_sbatch() {
     --task-id "${TASK_RECORD_ID}" -- sbatch "$@"
 }
 
-EMBEDDING_ROOT=${EMBEDDING_ROOT:-/home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings}
-OUTPUT_ROOT=${OUTPUT_ROOT:-/home/gaozh/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification}
-PANEL=${PANEL:-/home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet}
+EMBEDDING_ROOT=${EMBEDDING_ROOT:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/embeddings}
+OUTPUT_ROOT=${OUTPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification}
+PANEL=${PANEL:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet}
 MANIFEST=${MANIFEST:-configs/generated/sina_cninfo_method_embedding_classifier_v1.tsv}
 EXPECTED_ROWS=${EXPECTED_ROWS:-4928}
 EXPECTED_SHARDS=${EXPECTED_SHARDS:-4}
@@ -56,8 +56,8 @@ bash -n scripts/slurm_sina_cninfo_method_embedding_classifier.sbatch
   --manifest "${MANIFEST}" \
   --expected-shards "${EXPECTED_SHARDS}" \
   --expected-rows "${EXPECTED_ROWS}" \
-  --reuse-output-root /home/gaozh/news_content_quality_20260812/cninfo_method_v1 \
-  --reuse-output-root /home/gaozh/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification
+  --reuse-output-root /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1 \
+  --reuse-output-root /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification
 
 tasks=$(($(wc -l < "${MANIFEST}") - 1))
 if (( tasks < 1 || tasks > 500 )); then

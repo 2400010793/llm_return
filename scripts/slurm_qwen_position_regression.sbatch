@@ -4,10 +4,10 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=96G
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_position/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_position/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/qwen_position/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/qwen_position/%j.err
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${MATRIX:?}"; : "${META:?}"; : "${PANEL:?}"; : "${OUTPUT:?}"; : "${FACTOR_ID:?}"
 TOP_N=${TOP_N:-100}
 mkdir -p "$(dirname "${OUTPUT}")" "${OUTPUT}.simple_states" logs/qwen_position

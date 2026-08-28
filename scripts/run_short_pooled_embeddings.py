@@ -20,15 +20,15 @@ import numpy as np
 
 PAPER_HK_MODEL_ROOT = Path(os.environ.get(
     "PAPER_HK_MODEL_ROOT",
-    "/home/gaozh/.cache/huggingface/paper_hk_models",
+    "/home/team/.cache/huggingface/paper_hk_models",
 ))
 FINBERT_MODEL_ROOT = Path(os.environ.get(
     "FINBERT_MODEL_ROOT",
-    "/mnt/lustre3/home/gaozh/llm_return/models",
+    "/data/alpha_team2/shares/llm_return/models",
 ))
 MODEL_PATHS = {
-    "roberta": "/home/gaozh/llm_return/models/chinese-roberta-wwm-ext",
-    "bge_m3": "/home/gaozh/llm_return/models/bge-m3",
+    "roberta": "/home/team/llm_return/models/chinese-roberta-wwm-ext",
+    "bge_m3": "/home/team/llm_return/models/bge-m3",
     # Paper-faithful China (HK) encoders from Table IA11 of Chen, Kelly,
     # and Xiu.  They are downloaded explicitly before Slurm arrays start so
     # that one transient network error cannot stall every embedding task.

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 SOURCE_PANEL=${SOURCE_PANEL:-data/processed/cninfo_full_classification_panel_2010_2026.parquet}
 MARKET_OUTPUT=${MARKET_OUTPUT:-data/processed/cninfo_full_o2o_market_2010_2026_hfq.parquet}
 O2O_PANEL=${O2O_PANEL:-data/processed/cninfo_full_o2o_panel_2010_2026_hfq.parquet}

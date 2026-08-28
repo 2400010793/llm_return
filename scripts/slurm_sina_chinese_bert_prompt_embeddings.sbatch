@@ -12,15 +12,15 @@
 #SBATCH --time=04:00:00
 #SBATCH --requeue
 #SBATCH --array=0-4%1
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_sina_ckip_bert/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_sina_ckip_bert/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_sina_ckip_bert/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_sina_ckip_bert/%A_%a.err
 
 set -euo pipefail
 
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
-DATA_ROOT=/home/gaozh/news_content_quality_20260812
+REPO_ROOT=/data/alpha_team2/shares/llm_return
+DATA_ROOT=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812
 INPUT=${DATA_ROOT}/prompts/sina_single_stock_prompt_variants.parquet
-MODEL=/home/gaozh/.cache/huggingface/paper_hk_models/ckiplab-bert-base-chinese
+MODEL=/home/team/.cache/huggingface/paper_hk_models/ckiplab-bert-base-chinese
 RELEASE_ROOT=${DATA_ROOT}/embeddings/single_stock/chinese_bert_prompt
 STAGE=/tmp/sina-ckip-bert-${SLURM_JOB_ID}-${SLURM_ARRAY_TASK_ID}
 
@@ -34,9 +34,9 @@ export TOKENIZERS_PARALLELISM=false
 export HF_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
-export HF_HOME=${HF_HOME:-/home/gaozh/.cache/huggingface}
+export HF_HOME=${HF_HOME:-/home/team/.cache/huggingface}
 export TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-${HF_HOME}/transformers}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 variants=(text_plain text_prompt_short text_prompt_long text_masked_short text_masked_long)
 names=(plain prompt_short prompt_long masked_short masked_long)

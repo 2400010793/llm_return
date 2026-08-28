@@ -1,7 +1,7 @@
 {
   "scope": "Sina legacy aligned panel; 6+2+1; test years 2018-2026; next_day_return; Ridge",
   "treatment": "masked_short - short",
-  "source_directory": "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/summary",
+  "source_directory": "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/summary",
   "rows": [
     {
       "prompt": "盈利",

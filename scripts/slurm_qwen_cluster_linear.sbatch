@@ -5,11 +5,11 @@
 #SBATCH --mem=256G
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_qwen_linear/%j_cluster.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_qwen_linear/%j_cluster.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_qwen_linear/%j_cluster.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_qwen_linear/%j_cluster.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${TASK_RECORD_ID:?submit through task_tracker.py}"
 FIT_WINDOW_YEARS=${FIT_WINDOW_YEARS:-6}
 VALIDATION_WINDOW_YEARS=${VALIDATION_WINDOW_YEARS:-2}

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 MANIFEST=${MANIFEST:-configs/generated/o2o_ewct_validation.tsv}
 SELECTION_OUTPUT=${SELECTION_OUTPUT:-reports/strategy/o2o_ewct_validation/selection.json}

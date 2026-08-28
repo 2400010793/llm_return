@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 
-BASE = Path("/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/aligned_masked_short_v1")
+BASE = Path("/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/aligned_masked_short_v1")
 TARGETS = {
     "valuation": ["next_pe_log_dev", "next_pb_log_dev", "next_ps_log_dev", "next_evtoebitda_log_dev"],
     "volatility": ["volatility_jump_log_v2", "next_intraday_rvol_log_change", "next_intraday_rvol_close"],

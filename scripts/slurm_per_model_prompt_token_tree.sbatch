@@ -5,11 +5,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/per_model_prompt_tree/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/per_model_prompt_tree/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/per_model_prompt_tree/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/per_model_prompt_tree/%A_%a.err
 set -euo pipefail
 : "${FAIR_ROOT:?}" "${TREE_ROOT:?}" "${TASK_RECORD_ID:?}"
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 datasets=(sina cninfo)
 models=(roberta bge_m3 qwen3_embedding_8b)
 index=${SLURM_ARRAY_TASK_ID}

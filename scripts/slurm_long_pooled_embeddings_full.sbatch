@@ -5,14 +5,14 @@
 #SBATCH --mem=64G
 #SBATCH --time=3-00:00:00
 #SBATCH --array=0-63%8
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_long_pool_full/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_long_pool_full/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_long_pool_full/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_long_pool_full/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_long_pool_full data/processed/pooled_long_embeddings_v4
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK} MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 shard=$((SLURM_ARRAY_TASK_ID / 2))
 model_id=$((SLURM_ARRAY_TASK_ID % 2))
 case "$model_id" in

@@ -99,14 +99,14 @@ def main() -> None:
     parser.add_argument(
         "--input", type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/cleaned/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cleaned/"
             "sina_single_stock_clean.parquet"
         ),
     )
     parser.add_argument(
         "--output", type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/prompts/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/prompts/"
             "sina_single_stock_prompt_variants.parquet"
         ),
     )

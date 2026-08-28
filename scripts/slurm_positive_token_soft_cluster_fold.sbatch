@@ -4,14 +4,14 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=12:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/positive_token_soft_cluster/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/positive_token_soft_cluster/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/positive_token_soft_cluster/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/positive_token_soft_cluster/%A_%a.err
 
 set -euo pipefail
 : "${MANIFEST:?MANIFEST required}"
 : "${OUTPUT_ROOT:?OUTPUT_ROOT required}"
 : "${SLURM_ARRAY_TASK_ID:?array task required}"
-REPO=/mnt/lustre3/home/gaozh/llm_return
+REPO=/data/alpha_team2/shares/llm_return
 line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 2))p" "${MANIFEST}")
 IFS=$'\t' read -r task_id prompt span model variant test_year panel matrix metadata representation projection_mode <<< "${line%$'\r'}"
 [[ "${task_id}" == "${SLURM_ARRAY_TASK_ID}" ]]

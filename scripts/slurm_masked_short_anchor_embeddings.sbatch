@@ -6,14 +6,14 @@
 #SBATCH --mem=32G
 #SBATCH --time=12:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/masked_short_anchor/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/masked_short_anchor/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/masked_short_anchor/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/masked_short_anchor/%A_%a.err
 
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?array task required}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-INPUT_ROOT=${INPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/inputs}
-OUTPUT_ROOT=${OUTPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/masked_short_anchor_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+INPUT_ROOT=${INPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/inputs}
+OUTPUT_ROOT=${OUTPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/masked_short_anchor_v1}
 CONFIG=${CONFIG:-${REPO_ROOT}/configs/prompts/masked_short_anchor_v1.json}
 TASK_ID=${SLURM_ARRAY_TASK_ID}
 SHARD=$((TASK_ID % 64))
@@ -24,7 +24,7 @@ DEST=${OUTPUT_ROOT}/roberta/shard-${SHARD}/group-${GROUP_ID}
 [[ -d "${INPUT}" ]] || { echo "missing input ${INPUT}" >&2; exit 2; }
 if [[ -s "${DEST}/COMPLETED" && -s "${DEST}/manifest.json" ]]; then exit 0; fi
 [[ ! -e "${DEST}" ]] || { echo "refusing incomplete destination ${DEST}" >&2; exit 2; }
-mkdir -p "$(dirname "${DEST}")" /mnt/lustre3/home/gaozh/llm_return/logs/masked_short_anchor
+mkdir -p "$(dirname "${DEST}")" /data/alpha_team2/shares/llm_return/logs/masked_short_anchor
 stage_parent=${SLURM_TMPDIR:-/tmp}
 stage=$(mktemp -d "${stage_parent}/ms-anchor.XXXXXX")
 incoming=${DEST}.incoming.${SLURM_JOB_ID}

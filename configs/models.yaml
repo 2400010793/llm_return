@@ -52,7 +52,7 @@ chat_models:
     api_key_env: null
 model_versions:
   chinese_roberta_embedding: hfl/chinese-roberta-wwm-ext
-  llama2_13b_hidden_state_embedding: /mnt/lustre3/home/gaozh/models/Llama-2-13b-hf
+  llama2_13b_hidden_state_embedding: /mnt/lustre3/home/team/models/Llama-2-13b-hf
   chinese_bert_embedding: hfl/chinese-bert-wwm-ext
   bge_m3_embedding: BAAI/bge-m3
   # Retired after the 2026 OOS audit; retained only to resolve archived runs.

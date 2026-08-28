@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH --time=00:30:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_stock_graph/%j_summary.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_stock_graph/%j_summary.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_stock_graph/%j_summary.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_stock_graph/%j_summary.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 REPORT_ROOT=${REPORT_ROOT:-reports/classification/stock_graph_roberta_masked_v1}

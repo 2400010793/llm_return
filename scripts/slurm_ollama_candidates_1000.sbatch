@@ -7,11 +7,11 @@
 #SBATCH --time=12:00:00
 #SBATCH --requeue
 #SBATCH --array=0-70%5
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_ollama_candidates_1000/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_ollama_candidates_1000/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_ollama_candidates_1000/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_ollama_candidates_1000/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 mkdir -p logs/slurm_ollama_candidates_1000 data/processed/embeddings/qwen3_embedding_8b_candidates_1000
 
@@ -21,7 +21,7 @@ mkdir -p logs/slurm_ollama_candidates_1000 data/processed/embeddings/qwen3_embed
 GPU_ID=
 GPU_LOCK_FD=
 for candidate_gpu in 1 2 4 5 6; do
-  exec {lock_fd}>"/tmp/gaozh_qwen_candidate_gpu_${candidate_gpu}.lock"
+  exec {lock_fd}>"/tmp/llm_return_qwen_candidate_gpu_${candidate_gpu}.lock"
   if flock -n "${lock_fd}"; then
     GPU_ID=${candidate_gpu}
     GPU_LOCK_FD=${lock_fd}
@@ -36,13 +36,13 @@ fi
 PORT=$((11435 + GPU_ID))
 export CUDA_VISIBLE_DEVICES=${GPU_ID}
 export OLLAMA_HOST=127.0.0.1:${PORT}
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=30m
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 
-OLLAMA=/home/gaozh/ollama-new/bin/ollama
+OLLAMA=/home/team/ollama-new/bin/ollama
 cleanup(){ [[ -n "${OLLAMA_PID:-}" ]] && kill "${OLLAMA_PID}" 2>/dev/null || true; }
 trap cleanup EXIT
 "${OLLAMA}" serve >"logs/slurm_ollama_candidates_1000/${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}.ollama.log" 2>&1 &

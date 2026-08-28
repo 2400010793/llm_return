@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_cninfo_incremental_audit/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_cninfo_incremental_audit/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_cninfo_incremental_audit/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_cninfo_incremental_audit/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?incremental CNINFO audit must use scripts/task_tracker.py}"
 : "${START_DATE:?START_DATE is required}"

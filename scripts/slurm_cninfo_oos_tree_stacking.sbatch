@@ -5,11 +5,11 @@
 #SBATCH --mem=48G
 #SBATCH --time=08:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/cninfo_tree_stacking/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/cninfo_tree_stacking/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/cninfo_tree_stacking/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/cninfo_tree_stacking/%j.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${TASK_RECORD_ID:?submit through task_tracker.py}"
 : "${INPUT_ROOT:?export INPUT_ROOT}"
 : "${OUTPUT_ROOT:?export OUTPUT_ROOT}"

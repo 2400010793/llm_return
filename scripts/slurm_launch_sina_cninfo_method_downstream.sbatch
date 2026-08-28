@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_cninfo_method/%j_launch.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_cninfo_method/%j_launch.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_cninfo_method/%j_launch.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_cninfo_method/%j_launch.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${TASK_RECORD_ID:?launcher must be tracked}"
 classification_manifest=configs/generated/sina_cninfo_method_classification_v1.tsv
 regression_manifest=configs/generated/sina_cninfo_method_regression_v1.tsv

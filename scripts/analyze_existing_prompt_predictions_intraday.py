@@ -17,11 +17,11 @@ from scipy.stats import spearmanr
 
 
 PRED_ROOT = Path(
-    "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026"
+    "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026"
     "/single_stock_cninfo_v1"
 )
 SHARE_ROOT = Path("/data/alpha_team2/shares/260825")
-OUT = Path("/mnt/lustre3/home/gaozh/llm_return/reports/intraday_token_correspondence")
+OUT = Path("/data/alpha_team2/shares/llm_return/reports/intraday_token_correspondence")
 
 
 def selected_specs() -> list[dict]:

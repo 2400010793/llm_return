@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/aligned_factor_cluster/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/aligned_factor_cluster/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/aligned_factor_cluster/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/aligned_factor_cluster/%A_%a.err
 set -euo pipefail
-REPO=/mnt/lustre3/home/gaozh/llm_return
-BASE=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/aligned_masked_short_v1
+REPO=/data/alpha_team2/shares/llm_return
+BASE=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/aligned_masked_short_v1
 PANEL=${REPO}/data/processed/prompt_factor_labels/prompt_factor_label_panel_v2.parquet
 AXES=(horizon valuation certainty volatility impact liquidity)
 REPS=(token body)

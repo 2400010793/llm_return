@@ -2,7 +2,7 @@
 # Submit corrected prompt-token extraction after current pooled jobs, without
 # changing or interrupting those jobs.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name prompt-token-embeddings-v5 \
@@ -18,7 +18,7 @@ SHORT_EMBED_JOB=${SHORT_EMBED_JOB:-3847458}
 LONG_EMBED_JOB=${LONG_EMBED_JOB:-3847506}
 mkdir -p logs/slurm_prompt_token_v5 data/processed/prompt_token_embeddings_v5
 
-/home/gaozh/llm_return/.venv/bin/python -m py_compile scripts/run_prompt_token_embeddings_v5.py
+/home/team/llm_return/.venv/bin/python -m py_compile scripts/run_prompt_token_embeddings_v5.py
 bash -n scripts/slurm_prompt_token_embeddings_v5.sbatch
 
 short_job=$(tracked_sbatch --parsable \

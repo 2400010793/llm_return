@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_qwen_linear/%j_select.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_qwen_linear/%j_select.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_qwen_linear/%j_select.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_qwen_linear/%j_select.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${TASK_RECORD_ID:?submit through task_tracker.py}"
 : "${SCREEN_MANIFEST:?export SCREEN_MANIFEST}"
 ROOT=reports/regression/qwen_2018_2026_linear_v1

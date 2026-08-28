@@ -6,11 +6,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_all_pool_cls_launcher/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_all_pool_cls_launcher/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_all_pool_cls_launcher/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_all_pool_cls_launcher/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?classification launcher must use scripts/task_tracker.py}"
 

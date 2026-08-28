@@ -7,29 +7,29 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-1%2
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_zh_embedding/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_zh_embedding/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_zh_embedding/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_zh_embedding/%A_%a.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_zh_embedding data/processed/embeddings
 export CUDA_VISIBLE_DEVICES=0
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false
-export HF_HOME=${HF_HOME:-/home/gaozh/.cache/huggingface}
+export HF_HOME=${HF_HOME:-/home/team/.cache/huggingface}
 export TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-$HF_HOME/transformers}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 models=(roberta bge_m3)
 names=(chinese_roberta bge_m3)
 model=${models[$SLURM_ARRAY_TASK_ID]}
 name=${names[$SLURM_ARRAY_TASK_ID]}
 if [[ "$model" == "roberta" ]]; then
-  model_name=/home/gaozh/llm_return/models/chinese-roberta-wwm-ext
+  model_name=/home/team/llm_return/models/chinese-roberta-wwm-ext
   model_arg=--roberta-model
   model_flag=--roberta
 else
-  model_name=/home/gaozh/llm_return/models/bge-m3
+  model_name=/home/team/llm_return/models/bge-m3
   model_arg=--bge-m3-model
   model_flag=--bge-m3
 fi

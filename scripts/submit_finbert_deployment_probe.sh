@@ -1,7 +1,7 @@
 #!/bin/bash
 # Download and smoke-test candidate FinBERT checkpoints; this does not generate embeddings.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 MODELS=${MODELS:-yiyanghkust/finbert-tone-chinese,hw2942/bert-base-chinese-finetuning-financial-news-sentiment-v2,ProsusAI/finbert}
 MAX_LENGTH=${MAX_LENGTH:-256}

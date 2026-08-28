@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 : "${TASK_RECORD_ID:?submit through task_tracker.py}"
-ROOT=/home/gaozh/llm_return
-SINA_INPUT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/inputs
-CNINFO_INPUT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000
-OUTPUT_ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean
+ROOT=/home/team/llm_return
+SINA_INPUT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/inputs
+CNINFO_INPUT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1/cninfo_shards_1000
+OUTPUT_ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_gguf_prompt_mean
 GPU_NODELIST=${GPU_NODELIST:-c018-10gpu,c019-10gpu}
 GPU_CANDIDATES=${GPU_CANDIDATES:-0,2,3}
 

@@ -18,12 +18,12 @@ from src.text.embeddings import encode_local_transformer_poolings
 
 
 PAPER_MODEL_ROOT = Path(os.environ.get(
-    "PAPER_HK_MODEL_ROOT", "/home/gaozh/.cache/huggingface/paper_hk_models"
+    "PAPER_HK_MODEL_ROOT", "/home/team/.cache/huggingface/paper_hk_models"
 ))
 MODELS = {
     "chinese_bert": PAPER_MODEL_ROOT / "ckiplab-bert-base-chinese",
-    "chinese_roberta": Path("/home/gaozh/llm_return/models/chinese-roberta-wwm-ext"),
-    "bge_m3": Path("/home/gaozh/llm_return/models/bge-m3"),
+    "chinese_roberta": Path("/home/team/llm_return/models/chinese-roberta-wwm-ext"),
+    "bge_m3": Path("/home/team/llm_return/models/bge-m3"),
     "xlm_roberta_large": PAPER_MODEL_ROOT / "xlm-roberta-large",
 }
 DEFAULT_BATCH_SIZES = {

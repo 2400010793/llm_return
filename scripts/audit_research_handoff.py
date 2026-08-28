@@ -13,10 +13,10 @@ from typing import Any
 
 
 DEFAULT_DATA_ROOT = Path(
-    "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026"
+    "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026"
 )
 DEFAULT_CNINFO_PANEL = Path(
-    "/mnt/lustre3/home/gaozh/llm_return/data/processed/"
+    "/data/alpha_team2/shares/llm_return/data/processed/"
     "cninfo_full_classification_panel_2010_2026.parquet"
 )
 DEFAULT_REPORT = DEFAULT_DATA_ROOT / (
@@ -159,7 +159,7 @@ def main() -> None:
     parser.add_argument("--cninfo-panel", type=Path, default=DEFAULT_CNINFO_PANEL)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--include-slurm", action="store_true")
-    parser.add_argument("--slurm-user", default="gaozh")
+    parser.add_argument("--slurm-user", default="team")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     status = build_status(

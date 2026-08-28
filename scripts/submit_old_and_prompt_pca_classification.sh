@@ -1,7 +1,7 @@
 #!/bin/bash
 # Attach additional old triple-concat classifiers and v5 prompt-token PCA jobs.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name old-and-prompt-pca-classification \
@@ -21,7 +21,7 @@ PROMPT_V5_AUDIT_JOB=${PROMPT_V5_AUDIT_JOB:-3847787}
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel.parquet}
 mkdir -p logs/slurm_prompt_pca_v5 logs/slurm_prompt_pca_cls_v5
 
-/home/gaozh/llm_return/.venv/bin/python -m py_compile \
+/home/team/llm_return/.venv/bin/python -m py_compile \
   scripts/run_prompt_token_pca_v5.py scripts/run_reduced_prompt_classification.py
 bash -n scripts/slurm_prompt_token_pca_v5.sbatch scripts/slurm_prompt_token_pca_classification_v5.sbatch
 

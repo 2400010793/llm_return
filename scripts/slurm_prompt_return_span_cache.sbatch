@@ -4,13 +4,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=16G
 #SBATCH --time=04:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/return_span_cluster/%A_%a_cache.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/return_span_cluster/%A_%a_cache.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/return_span_cluster/%A_%a_cache.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/return_span_cluster/%A_%a_cache.err
 
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?run as array}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 STUDY_ROOT=${STUDY_ROOT:-${SINA_ROOT}/prompt_minimal_v2/return_span_cluster_v1}
 EMBEDDING_ROOT=${EMBEDDING_ROOT:-${SINA_ROOT}/prompt_minimal_v2/embeddings}
 EXPECTED_ROWS=${EXPECTED_ROWS:-75894}

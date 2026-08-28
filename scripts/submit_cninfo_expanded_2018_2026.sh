@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
 cd "${REPO_ROOT}"
 
 STOCKS_FILE=${STOCKS_FILE:-data/stock_universe_cninfo_current_with_returns.csv}

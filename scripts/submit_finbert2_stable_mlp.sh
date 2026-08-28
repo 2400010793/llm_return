@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 MANIFEST=${MANIFEST:-configs/generated/finbert2_stable_mlp.tsv}
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel_2010_2026.parquet}

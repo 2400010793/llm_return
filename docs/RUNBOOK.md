@@ -3,7 +3,7 @@
 ## 1. 环境
 
 ```bash
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 uv python install 3.9
 uv sync
 uv sync --extra research --extra report --extra transformers --extra boosting --extra browser

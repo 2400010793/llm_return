@@ -7,17 +7,17 @@
 #SBATCH --mem=64G
 #SBATCH --time=08:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_all_labels/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_all_labels/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_all_labels/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_all_labels/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?label-panel construction must use scripts/task_tracker.py}"
 
 PYTHON=${PYTHON:-${REPO_ROOT}/.venv/bin/python}
 INPUT=${INPUT:-data/processed/cleaned/cninfo_announcements_2010_2026_final.jsonl}
-RETURNS=${RETURNS:-/home/gaozh/ret.parquet}
+RETURNS=${RETURNS:-/home/team/ret.parquet}
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel_2010_2026.parquet}
 
 mkdir -p logs/slurm_cninfo_all_labels "$(dirname "${PANEL}")"

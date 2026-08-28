@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=96G
 #SBATCH --time=08:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_paper_filters/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_paper_filters/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_paper_filters/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_paper_filters/%j.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?filter build must be tracked}"
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}

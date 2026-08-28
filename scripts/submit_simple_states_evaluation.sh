@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 MANIFEST=${MANIFEST:-configs/generated/simple_states_finbert2_all_v1.tsv}
 OUTPUT_ROOT=${OUTPUT_ROOT:-reports/simple_states/finbert2_all_v1}
@@ -11,7 +11,7 @@ TOP_N=${TOP_N:-100}
 MIN_COUNT=${MIN_COUNT:-20}
 MIN_AMOUNT=${MIN_AMOUNT:-20000000}
 DATA_ROOT=${DATA_ROOT:-/data/alpha_team2/shares/simple_states_data}
-SIMPLE_STATES_ROOT=${SIMPLE_STATES_ROOT:-/mnt/lustre3/home/gaozh/alpha_team2_zengl}
+SIMPLE_STATES_ROOT=${SIMPLE_STATES_ROOT:-/mnt/lustre3/home/team/alpha_team2_zengl}
 EXPECTED_SIMPLE_STATES_COMMIT=${EXPECTED_SIMPLE_STATES_COMMIT:-d8ebaa0}
 PARTITION=${PARTITION:-${SLURM_JOB_PARTITION:-cpu}}
 

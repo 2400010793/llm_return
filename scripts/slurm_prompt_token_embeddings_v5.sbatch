@@ -7,17 +7,17 @@
 #SBATCH --time=3-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-63%4
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_prompt_token_v5/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_prompt_token_v5/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_prompt_token_v5/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_prompt_token_v5/%A_%a.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${LENGTH_GROUP:?export LENGTH_GROUP=short or long}"
 mkdir -p logs/slurm_prompt_token_v5 data/processed/prompt_token_embeddings_v5
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 shard=$((SLURM_ARRAY_TASK_ID / 2))
 model_id=$((SLURM_ARRAY_TASK_ID % 2))

@@ -7,11 +7,11 @@
 #SBATCH --time=02:00:00
 #SBATCH --requeue
 #SBATCH --array=0-31%32
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_prompt_audit/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_prompt_audit/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_prompt_audit/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_prompt_audit/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?parallel prompt audit must use scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?parallel prompt audit requires an array task}"

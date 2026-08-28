@@ -1,7 +1,7 @@
 #!/bin/bash
 # Prepare historical O2O labels and submit validation-only regression screening.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 SOURCE_PANEL=${SOURCE_PANEL:-data/processed/cninfo_full_classification_panel.parquet}
 MARKET_OUTPUT=${MARKET_OUTPUT:-data/processed/cninfo_full_o2o_market.parquet}

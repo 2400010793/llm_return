@@ -9,16 +9,16 @@
 #SBATCH --time=24:00:00
 #SBATCH --requeue
 #SBATCH --array=0-255%256
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/neutral_masked_short/%x_%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/neutral_masked_short/%x_%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/neutral_masked_short/%x_%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/neutral_masked_short/%x_%A_%a.err
 
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?array task required}"
 : "${DATASET:?DATASET must be sina or cninfo}"
 : "${MODEL:?MODEL must be roberta or bge_m3}"
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-INPUT_ROOT=${INPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/neutral_masked_short_v1/inputs}
-OUTPUT_ROOT=${OUTPUT_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/neutral_masked_short_v1/embeddings}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+INPUT_ROOT=${INPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/neutral_masked_short_v1/inputs}
+OUTPUT_ROOT=${OUTPUT_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/neutral_masked_short_v1/embeddings}
 CONFIG=${CONFIG:-${REPO_ROOT}/configs/prompts/neutral_masked_short_v1.json}
 SHARD=${SLURM_ARRAY_TASK_ID}
 INPUT=${INPUT_ROOT}/${DATASET}/shard-${SHARD}

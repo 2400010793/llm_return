@@ -5,18 +5,18 @@
 #SBATCH --mem=24G
 #SBATCH --time=02:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_simple_states/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_simple_states/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_simple_states/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_simple_states/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?simple_states array must use scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?run as an array job}"
 : "${MANIFEST:?export MANIFEST}"
 
 DATA_ROOT=${DATA_ROOT:-/data/alpha_team2/shares/simple_states_data}
-SIMPLE_STATES_ROOT=${SIMPLE_STATES_ROOT:-/mnt/lustre3/home/gaozh/alpha_team2_zengl}
+SIMPLE_STATES_ROOT=${SIMPLE_STATES_ROOT:-/mnt/lustre3/home/team/alpha_team2_zengl}
 EXPECTED_SIMPLE_STATES_COMMIT=${EXPECTED_SIMPLE_STATES_COMMIT:-d8ebaa0}
 TOP_N=${TOP_N:-100}
 MIN_COUNT=${MIN_COUNT:-20}

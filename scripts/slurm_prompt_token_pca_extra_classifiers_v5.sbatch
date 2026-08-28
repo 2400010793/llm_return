@@ -8,14 +8,14 @@
 #SBATCH --time=3-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-15%2
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_prompt_pca_extra_v5/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_prompt_pca_extra_v5/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_prompt_pca_extra_v5/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_prompt_pca_extra_v5/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_prompt_pca_extra_v5 reports/classification/prompt_tokens_v5
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK} MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK} NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 models=(roberta bge_m3)
 variants=(short masked_short long masked_long)
 classifiers=(random_forest knn)

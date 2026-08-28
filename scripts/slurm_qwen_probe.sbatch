@@ -5,19 +5,19 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_qwen_probe/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_qwen_probe/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_qwen_probe/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_qwen_probe/%j.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_qwen_probe
 export CUDA_VISIBLE_DEVICES=0
 export OLLAMA_HOST=127.0.0.1:11435
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=30m
-OLLAMA=/home/gaozh/ollama-new/bin/ollama
+OLLAMA=/home/team/ollama-new/bin/ollama
 
 cleanup() {
   if [[ -n "${OLLAMA_PID:-}" ]]; then kill "${OLLAMA_PID}" 2>/dev/null || true; fi

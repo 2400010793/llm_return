@@ -7,11 +7,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_short_mask_pipeline/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_short_mask_pipeline/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_short_mask_pipeline/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_short_mask_pipeline/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?pipeline must use scripts/task_tracker.py}"
 

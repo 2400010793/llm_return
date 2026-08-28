@@ -9,13 +9,13 @@
 #SBATCH --time=04:00:00
 #SBATCH --requeue
 #SBATCH --array=0-9%1
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_sina_transformer_prompt/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_sina_transformer_prompt/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_sina_transformer_prompt/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_sina_transformer_prompt/%A_%a.err
 
 set -euo pipefail
 
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
-DATA_ROOT=/home/gaozh/news_content_quality_20260812
+REPO_ROOT=/data/alpha_team2/shares/llm_return
+DATA_ROOT=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812
 INPUT=${DATA_ROOT}/prompts/sina_single_stock_prompt_variants.parquet
 RELEASE_ROOT=${DATA_ROOT}/embeddings/single_stock
 STAGE=/tmp/sina-transformer-prompt-${SLURM_JOB_ID}-${SLURM_ARRAY_TASK_ID}
@@ -30,9 +30,9 @@ export TOKENIZERS_PARALLELISM=false
 export HF_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
-export HF_HOME=${HF_HOME:-/home/gaozh/.cache/huggingface}
+export HF_HOME=${HF_HOME:-/home/team/.cache/huggingface}
 export TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-${HF_HOME}/transformers}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 models=(chinese_roberta bge_m3)
 variants=(text_plain text_prompt_short text_prompt_long text_masked_short text_masked_long)
@@ -48,14 +48,14 @@ case "${model}" in
   chinese_roberta)
     model_flag=--roberta
     model_arg=--roberta-model
-    model_path=/home/gaozh/llm_return/models/chinese-roberta-wwm-ext
+    model_path=/home/team/llm_return/models/chinese-roberta-wwm-ext
     matrix_name=chinese_roberta.npy
     expected_dimensions=768
     ;;
   bge_m3)
     model_flag=--bge-m3
     model_arg=--bge-m3-model
-    model_path=/home/gaozh/llm_return/models/bge-m3
+    model_path=/home/team/llm_return/models/bge-m3
     matrix_name=bge_m3.npy
     expected_dimensions=1024
     ;;

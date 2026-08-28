@@ -44,7 +44,7 @@ def code_with_exchange(code: object) -> str | None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("panel")
-    parser.add_argument("--returns", default="/home/gaozh/ret.parquet")
+    parser.add_argument("--returns", default="/home/team/ret.parquet")
     parser.add_argument("--output", default="data/processed/stock_text_panel_100_labeled.parquet")
     parser.add_argument("--horizons", default="1,5,20")
     args = parser.parse_args()

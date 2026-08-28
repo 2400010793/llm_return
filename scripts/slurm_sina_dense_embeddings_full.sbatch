@@ -5,17 +5,17 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=04:00:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_embeddings/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_embeddings/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_embeddings/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_embeddings/%j.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
-input=${INPUT:-/home/gaozh/news_content_quality_20260812/cleaned/sina_single_stock_clean.parquet}
-release=${RELEASE:-/home/gaozh/news_content_quality_20260812/embeddings/single_stock}
+input=${INPUT:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cleaned/sina_single_stock_clean.parquet}
+release=${RELEASE:-/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/embeddings/single_stock}
 stage=/tmp/sina-embed-full-${SLURM_JOB_ID}
 host=127.0.0.1:11447
-ollama=/home/gaozh/ollama-new/bin/ollama
+ollama=/home/team/ollama-new/bin/ollama
 
 mkdir -p logs/slurm_sina_embeddings "$stage" "$release"
 export CUDA_VISIBLE_DEVICES=1
@@ -36,7 +36,7 @@ install_model() {
 
 .venv/bin/python scripts/run_text_representations.py "$input" \
   --output-dir "$stage/chinese_roberta" --text-column text --max-input-chars 12000 \
-  --roberta --roberta-model /home/gaozh/llm_return/models/chinese-roberta-wwm-ext \
+  --roberta --roberta-model /home/team/llm_return/models/chinese-roberta-wwm-ext \
   --transformer-batch-size 32 --max-length 512
 .venv/bin/python scripts/audit_embedding_matrix.py \
   --input "$input" --matrix "$stage/chinese_roberta/chinese_roberta.npy" \
@@ -47,7 +47,7 @@ install_model chinese_roberta
 
 .venv/bin/python scripts/run_text_representations.py "$input" \
   --output-dir "$stage/bge_m3" --text-column text --max-input-chars 12000 \
-  --bge-m3 --bge-m3-model /home/gaozh/llm_return/models/bge-m3 \
+  --bge-m3 --bge-m3-model /home/team/llm_return/models/bge-m3 \
   --transformer-batch-size 16 --max-length 512
 .venv/bin/python scripts/audit_embedding_matrix.py \
   --input "$input" --matrix "$stage/bge_m3/bge_m3.npy" \
@@ -57,7 +57,7 @@ install_model chinese_roberta
 install_model bge_m3
 
 export OLLAMA_HOST="$host"
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=10m

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 # CKIP-BERT is an archived negative baseline. Prevent accidental future compute
 # while keeping an explicit reproduction path for audits.

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 MODE=${1:-fixed}
-ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
+ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
 MANIFEST="$ROOT/results_all_embedding_cluster_regression/correct_manifest_${MODE}.tsv"
 .venv/bin/python scripts/build_correct_embedding_cluster_manifest.py --mode "$MODE" --output "$MANIFEST"
 N=$(( $(wc -l < "$MANIFEST") - 1 ))

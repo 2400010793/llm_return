@@ -15,10 +15,10 @@ import pandas as pd
 
 
 BASE = Path(
-    "/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026"
+    "/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026"
     "/single_stock_cninfo_v1/prompt_positive_v1"
 )
-OUT = Path("/mnt/lustre3/home/gaozh/llm_return/reports")
+OUT = Path("/data/alpha_team2/shares/llm_return/reports")
 PROMPTS = ["profit", "excess_return", "return", "loss"]
 PROMPT_ZH = {
     "profit": "盈利",

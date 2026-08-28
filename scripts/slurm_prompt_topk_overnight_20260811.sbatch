@@ -6,11 +6,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=04:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_prompt_topk_20260811/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_prompt_topk_20260811/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_prompt_topk_20260811/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_prompt_topk_20260811/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 : "${MANIFEST:?export the prompt top-k manifest}"
@@ -21,7 +21,7 @@ cd "${REPO_ROOT}"
 # other on a node where Slurm does not expose GPU GRES.
 GPU_ID=
 for candidate_gpu in 2 4 5 6; do
-  exec {lock_fd}>"/tmp/gaozh_prompt_topk_gpu_${candidate_gpu}.lock"
+  exec {lock_fd}>"/tmp/llm_return_prompt_topk_gpu_${candidate_gpu}.lock"
   if flock -n "${lock_fd}"; then
     GPU_ID=${candidate_gpu}
     GPU_LOCK_FD=${lock_fd}

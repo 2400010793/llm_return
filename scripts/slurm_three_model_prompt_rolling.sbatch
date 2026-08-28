@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/three_model_prompt_fair/%A_%a_rolling.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/three_model_prompt_fair/%A_%a_rolling.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/three_model_prompt_fair/%A_%a_rolling.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/three_model_prompt_fair/%A_%a_rolling.err
 set -euo pipefail
 : "${OUTPUT_ROOT:?}"
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 manifest=${OUTPUT_ROOT}/intersection/fold_manifest.tsv
 line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 2))p" "${manifest}")
 IFS=$'\t' read -r ignored config_id model prompt phrase representation matrix metadata test_year history_years <<< "${line%$'\r'}"

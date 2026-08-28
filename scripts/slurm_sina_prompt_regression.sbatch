@@ -8,13 +8,13 @@
 #SBATCH --time=04:00:00
 #SBATCH --requeue
 #SBATCH --array=0-19%16
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_sina_prompt_regression/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_sina_prompt_regression/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_sina_prompt_regression/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_sina_prompt_regression/%A_%a.err
 
 set -euo pipefail
 
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
-DATA_ROOT=/home/gaozh/news_content_quality_20260812
+REPO_ROOT=/data/alpha_team2/shares/llm_return
+DATA_ROOT=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812
 PANEL=${PANEL:-${DATA_ROOT}/classification/sina_single_stock_classification_panel.parquet}
 EMBEDDING_ROOT=${EMBEDDING_ROOT:-${DATA_ROOT}/embeddings/single_stock}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${DATA_ROOT}/regression/results_prompt_nonqwen}

@@ -1,16 +1,16 @@
 #!/bin/bash
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name sina-pooling-ablation-v1 \
     --purpose "Compare mean, CLS/BOS, and max pooling on aligned Sina news, including XLM-R" \
-    --input /home/gaozh/news_content_quality_20260812/prompts/sina_single_stock_prompt_variants.parquet \
-    --input /home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet \
-    --output /home/gaozh/news_content_quality_20260812/embeddings/single_stock/pooling_ablation_v1 \
-    --output /home/gaozh/news_content_quality_20260812/classification/results_pooling_ablation_v1 \
-    --output /home/gaozh/news_content_quality_20260812/regression/results_pooling_ablation_v1 \
+    --input /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/prompts/sina_single_stock_prompt_variants.parquet \
+    --input /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet \
+    --output /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/embeddings/single_stock/pooling_ablation_v1 \
+    --output /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/results_pooling_ablation_v1 \
+    --output /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/regression/results_pooling_ablation_v1 \
     --related-file scripts/run_sina_pooling_embeddings.py \
     --related-file scripts/slurm_sina_pooling_embeddings.sbatch \
     --related-file scripts/slurm_sina_pooling_classification.sbatch \

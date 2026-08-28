@@ -4,14 +4,14 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=1-00:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_downstream/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_downstream/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/positive_prompt_downstream/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/positive_prompt_downstream/%A_%a.err
 set -euo pipefail
 : "${MANIFEST:?MANIFEST required}"
 EXPECTED_ROWS=${EXPECTED_ROWS:-75894}
 line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 2))p" "$MANIFEST")
 IFS=$'\t' read -r kind dataset prompt model variant representation target panel matrix metadata embed_model output <<< "${line%$'\r'}"
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 mkdir -p "$output"
 if [[ "$kind" == classification ]]; then
   .venv/bin/python scripts/run_precomputed_embedding_classification.py "$panel" \

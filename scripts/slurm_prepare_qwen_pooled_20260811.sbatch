@@ -5,11 +5,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=04:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_qwen_overnight_20260811/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_qwen_overnight_20260811/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_qwen_overnight_20260811/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_qwen_overnight_20260811/%j.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 mkdir -p logs/slurm_qwen_overnight_20260811 \

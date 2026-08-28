@@ -33,11 +33,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--embedding-root", type=Path,
-        default=Path("/home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings"),
+        default=Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/embeddings"),
     )
     parser.add_argument(
         "--output-root", type=Path,
-        default=Path("/home/gaozh/news_content_quality_20260812/cninfo_method_v1"),
+        default=Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1"),
     )
     parser.add_argument("--expected-shards", type=int, default=4)
     parser.add_argument("--classification-manifest", type=Path, required=True)

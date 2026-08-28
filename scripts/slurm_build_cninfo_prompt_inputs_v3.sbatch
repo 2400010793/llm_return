@@ -8,10 +8,10 @@
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
 #SBATCH --array=0-31%32
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_prompt_v3/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_prompt_v3/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_prompt_v3/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_prompt_v3/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_prompt_v3 data/processed/cleaned/prompt_v3_fixed_parts
 export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 TOKENIZERS_PARALLELISM=false
 

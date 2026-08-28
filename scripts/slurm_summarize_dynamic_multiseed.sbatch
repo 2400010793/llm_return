@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_dynamic_prompt/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_dynamic_prompt/%j.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?summary must be submitted through scripts/task_tracker.py}"
 

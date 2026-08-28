@@ -9,11 +9,11 @@
 #SBATCH --time=3-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-63%16
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_short_pool_2010_2026/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_short_pool_2010_2026/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_short_pool_2010_2026/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_short_pool_2010_2026/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?embedding generation must use scripts/task_tracker.py}"
 : "${SLURM_ARRAY_TASK_ID:?this script must run as an array}"

@@ -70,16 +70,16 @@ def main() -> None:
         "--news",
         type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/cleaned/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cleaned/"
             "sina_single_stock_clean.parquet"
         ),
     )
-    parser.add_argument("--returns", type=Path, default=Path("/home/gaozh/ret.parquet"))
+    parser.add_argument("--returns", type=Path, default=Path("/home/team/ret.parquet"))
     parser.add_argument(
         "--output",
         type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/classification/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/"
             "sina_single_stock_classification_panel.parquet"
         ),
     )

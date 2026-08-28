@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 MANIFEST=${MANIFEST:-configs/generated/pooled_o2o_classification_seed42.tsv}
 PANEL=${PANEL:-data/processed/cninfo_full_o2o_panel.parquet}

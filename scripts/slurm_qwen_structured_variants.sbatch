@@ -8,10 +8,10 @@
 #SBATCH --requeue
 # One Qwen process encodes all variants in one pass over the model.
 #SBATCH --array=0-0
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_qwen_struct/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_qwen_struct/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_qwen_struct/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_qwen_struct/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_qwen_struct data/processed/embeddings/qwen3_embedding_8b_structured
 
 # The existing Qwen array uses physical GPUs 0-4. This follow-up uses GPU 5.
@@ -20,12 +20,12 @@ export CUDA_VISIBLE_DEVICES=${GPU_ID}
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false
 export OLLAMA_HOST=127.0.0.1:11436
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=30m
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
-OLLAMA=/home/gaozh/ollama-new/bin/ollama
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+OLLAMA=/home/team/ollama-new/bin/ollama
 out=data/processed/embeddings/qwen3_embedding_8b_structured
 mkdir -p "$out"
 cleanup(){ [[ -n "${OLLAMA_PID:-}" ]] && kill "$OLLAMA_PID" 2>/dev/null || true; }

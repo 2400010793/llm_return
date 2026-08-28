@@ -5,12 +5,12 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=16G
 #SBATCH --time=12:00:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_clean_cninfo/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_clean_cninfo/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_clean_cninfo/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_clean_cninfo/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_clean_cninfo data/processed/cleaned/cninfo_by_file
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 mapfile -t files < <(find data/interim/cninfo_paper_1000_focus -maxdepth 1 -type f -name '*.json' -printf '%p\n' | sort)
 input="${files[$SLURM_ARRAY_TASK_ID]}"
 if [[ -z "${input:-}" ]]; then

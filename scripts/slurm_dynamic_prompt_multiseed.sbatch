@@ -6,11 +6,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=08:00:00
 #SBATCH --array=0-5%1
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_dynamic_prompt/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_dynamic_prompt/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_dynamic_prompt/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?dynamic prompt multiseed must use scripts/task_tracker.py}"
 : "${MATRIX_GROUP:?submit with MATRIX_GROUP=A or B}"

@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
-REGRESSION_ROOT=${REGRESSION_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1}
+REGRESSION_ROOT=${REGRESSION_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${REGRESSION_ROOT}/soft_cluster_v1}
-PANEL=${PANEL:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet}
+PANEL=${PANEL:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet}
 FOLD_MANIFEST=${FOLD_MANIFEST:-${OUTPUT_ROOT}/fold_manifest.tsv}
 CONFIG_MANIFEST=${CONFIG_MANIFEST:-${OUTPUT_ROOT}/config_manifest.tsv}
 CONCURRENCY=${CONCURRENCY:-54}

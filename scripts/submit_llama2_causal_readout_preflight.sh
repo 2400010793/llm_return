@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
-PREFLIGHT_ROOT=${PREFLIGHT_ROOT:-/mnt/lustre3/home/gaozh/llm_return/data/interim/llama2_causal_readout_preflight_v2}
+PREFLIGHT_ROOT=${PREFLIGHT_ROOT:-/data/alpha_team2/shares/llm_return/data/interim/llama2_causal_readout_preflight_v2}
 # Leave the node unconstrained by default so Slurm can place the probe on any
 # available compatible GPU node.  Set GPU_NODE only when a node-specific probe
 # is intentional.
@@ -18,9 +18,9 @@ if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name llama2-causal-readout-preflight-v2 \
     --purpose "Validate article-then-readout Llama-2 embeddings, mask pairing, shapes, and contextual variation before full submission" \
-    --input /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/inputs \
+    --input /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/inputs \
     --input data/processed/cleaned/cninfo_prompt_bundle_existing_2018_2026_clean_v1/prompt_v3_fixed_parts \
-    --input /mnt/lustre3/home/gaozh/models/Llama-2-13b-hf \
+    --input /mnt/lustre3/home/team/models/Llama-2-13b-hf \
     --output "${PREFLIGHT_ROOT}" \
     --related-file scripts/run_llama2_prompt_embeddings.py \
     --related-file scripts/audit_llama2_prompt_embeddings.py \

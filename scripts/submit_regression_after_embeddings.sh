@@ -1,7 +1,7 @@
 #!/bin/bash
 # Attach triple-concat Ridge regressions to existing embedding parent arrays.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name pooled-embedding-regression \
@@ -21,7 +21,7 @@ PANEL=${PANEL:-data/processed/cninfo_full_classification_panel.parquet}
 [[ -s "${PANEL}" ]] || { echo "missing panel: ${PANEL}" >&2; exit 2; }
 mkdir -p logs/slurm_pooled_regression logs/slurm_pooled_regression_launcher configs/generated
 
-/home/gaozh/llm_return/.venv/bin/python -m py_compile \
+/home/team/llm_return/.venv/bin/python -m py_compile \
   scripts/run_pooled_embedding_regression.py scripts/build_pooled_regression_manifest.py
 bash -n scripts/slurm_pooled_embedding_regression.sbatch scripts/slurm_launch_completed_embedding_regression.sbatch
 

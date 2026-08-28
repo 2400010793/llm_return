@@ -8,17 +8,17 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-29%6
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_embed_time_ext/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_embed_time_ext/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_embed_time_ext/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_embed_time_ext/%A_%a.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p reports/classification/time_aligned_embedding_extended logs/slurm_embed_time_ext
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 embeddings=(roberta bge_m3 qwen)
 files=(

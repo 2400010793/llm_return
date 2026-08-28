@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
-ROOT=${ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1}
-PANEL=${PANEL:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet}
+ROOT=${ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/qwen3_prompt_return_regression_v1}
+PANEL=${PANEL:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/classification/sina_single_stock_classification_panel.parquet}
 OUTPUT_ROOT=${OUTPUT_ROOT:-${ROOT}/pca_ablation_v1}
 MANIFEST=${MANIFEST:-${OUTPUT_ROOT}/manifest.tsv}
 CONCURRENCY=${CONCURRENCY:-15}

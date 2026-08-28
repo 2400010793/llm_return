@@ -5,11 +5,11 @@
 #SBATCH --mem=24G
 #SBATCH --time=04:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_cninfo_strict/%j.summary.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_cninfo_strict/%j.summary.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/qwen_cninfo_strict/%j.summary.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/qwen_cninfo_strict/%j.summary.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${TASK_RECORD_ID:?submit through task_tracker.py}"
 : "${REGRESSION_ROOT:?export REGRESSION_ROOT}"
 : "${GEOMETRY_ROOT:?export GEOMETRY_ROOT}"

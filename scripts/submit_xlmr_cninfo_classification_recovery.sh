@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 manifest=configs/generated/pooled_xlm_roberta_large_plain_paper_hk.tsv
 panel=data/processed/cninfo_full_classification_panel.parquet

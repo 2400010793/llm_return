@@ -27,7 +27,7 @@ uv run python reports/comprehensive_research_report/build_report.py
 
 ```bash
 python scripts/audit_prompt_cluster_portfolios.py \
-  --root /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
+  --root /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
 ```
 
 输出为仓库根目录的 `中国市场PromptToken新闻收益预测研究报告.pdf`。构建过程不访问

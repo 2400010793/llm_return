@@ -197,7 +197,7 @@ def main() -> None:
         "--embedding-root",
         type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/"
             "cninfo_method_v1/embeddings"
         ),
     )
@@ -205,7 +205,7 @@ def main() -> None:
         "--output-root",
         type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/"
             "cninfo_method_v1"
         ),
     )
@@ -213,7 +213,7 @@ def main() -> None:
         "--panel",
         type=Path,
         default=Path(
-            "/home/gaozh/news_content_quality_20260812/"
+            "/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/"
             "classification/sina_single_stock_classification_panel.parquet"
         ),
     )

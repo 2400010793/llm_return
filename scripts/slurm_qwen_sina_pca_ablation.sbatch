@@ -5,11 +5,11 @@
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_sina_pca/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_sina_pca/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/qwen_sina_pca/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/qwen_sina_pca/%A_%a.err
 
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 : "${TASK_RECORD_ID:?submit through task_tracker.py}"
 : "${MANIFEST:?export MANIFEST}"
 line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 2))p" "${MANIFEST}")

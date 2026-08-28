@@ -7,11 +7,11 @@
 #SBATCH --mem=32G
 #SBATCH --time=08:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_cninfo_prompt_clean/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_cninfo_prompt_clean/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_cninfo_prompt_clean/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_cninfo_prompt_clean/%j.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?clean prompt construction must use scripts/task_tracker.py}"
 : "${INPUT:?INPUT is required}"

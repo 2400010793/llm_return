@@ -4,12 +4,12 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=04:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/minimal_prompt_knn/%j_summary.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/minimal_prompt_knn/%j_summary.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/minimal_prompt_knn/%j_summary.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/minimal_prompt_knn/%j_summary.err
 
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 STUDY_ROOT=${STUDY_ROOT:-${SINA_ROOT}/prompt_minimal_v2/analysis_v1}
 EXPECTED_FOLDS=${EXPECTED_FOLDS:-144}
 SUBMIT_SIMPLE_STATES=${SUBMIT_SIMPLE_STATES:-0}

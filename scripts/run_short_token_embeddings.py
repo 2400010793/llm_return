@@ -13,8 +13,8 @@ from pathlib import Path
 import numpy as np
 
 MODEL_PATHS = {
-    "roberta": "/home/gaozh/llm_return/models/chinese-roberta-wwm-ext",
-    "bge_m3": "/home/gaozh/llm_return/models/bge-m3",
+    "roberta": "/home/team/llm_return/models/chinese-roberta-wwm-ext",
+    "bge_m3": "/home/team/llm_return/models/bge-m3",
 }
 DEFAULT_MAX_LENGTH = {"roberta": 512, "bge_m3": 1000}
 

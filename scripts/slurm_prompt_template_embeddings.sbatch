@@ -7,11 +7,11 @@
 #SBATCH --mem=32G
 #SBATCH --time=24:00:00
 #SBATCH --requeue
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_embeddings/%A_%a.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_embeddings/%A_%a.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/positive_prompt_embeddings/%A_%a.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/positive_prompt_embeddings/%A_%a.err
 set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?array task required}"
-REPO_ROOT=${REPO_ROOT:-/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/home/team/llm_return}
 DATASET=${DATASET:?DATASET must be sina or cninfo}
 MODEL=${MODEL:?MODEL must be roberta or bge_m3}
 SHARDS=${SHARDS:?SHARDS required}
@@ -28,7 +28,7 @@ fi
 destination="${OUTPUT_ROOT}/${MODEL}/shard-${shard}"
 if [[ -s "${destination}/COMPLETED" ]]; then exit 0; fi
 [[ -e "${destination}" ]] && { echo "refusing incomplete destination: ${destination}" >&2; exit 1; }
-mkdir -p "$(dirname "${destination}")" /mnt/lustre3/home/gaozh/llm_return/logs/positive_prompt_embeddings
+mkdir -p "$(dirname "${destination}")" /data/alpha_team2/shares/llm_return/logs/positive_prompt_embeddings
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1

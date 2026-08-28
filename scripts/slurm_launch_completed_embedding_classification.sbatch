@@ -8,11 +8,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2G
 #SBATCH --time=00:20:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_pooled_cls_launcher/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_pooled_cls_launcher/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_pooled_cls_launcher/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_pooled_cls_launcher/%j.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${MODEL:?export MODEL}"
 : "${VARIANT_GROUP:?export VARIANT_GROUP=short, long, or paper_hk}"
 : "${TASK_RECORD_ID:?launcher must be submitted through scripts/task_tracker.py}"
@@ -30,7 +30,7 @@ INCLUDE_PROMPT_TOKENS=${INCLUDE_PROMPT_TOKENS:-0}
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel.parquet}
 CLASSIFICATION_CONCURRENCY=${CLASSIFICATION_CONCURRENCY:-4}
 mkdir -p configs/generated logs/slurm_pooled_cls logs/slurm_pooled_cls_launcher
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 if [[ ! -s "${PANEL}" ]]; then
   echo "Classification panel is missing: ${PANEL}" >&2

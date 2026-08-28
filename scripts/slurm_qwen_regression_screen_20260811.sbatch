@@ -5,11 +5,11 @@
 #SBATCH --mem=256G
 #SBATCH --time=24:00:00
 #SBATCH --requeue
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_qwen_overnight_20260811/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_qwen_overnight_20260811/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_qwen_overnight_20260811/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_qwen_overnight_20260811/%A_%a.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?submit through scripts/task_tracker.py}"
 : "${MANIFEST:?export the regression manifest}"

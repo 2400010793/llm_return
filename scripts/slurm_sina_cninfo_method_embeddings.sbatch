@@ -7,18 +7,18 @@
 #SBATCH --time=12:00:00
 #SBATCH --requeue
 #SBATCH --array=0-15%4
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_cninfo_method/%A_%a_embed.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_cninfo_method/%A_%a_embed.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_cninfo_method/%A_%a_embed.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_cninfo_method/%A_%a_embed.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${SLURM_ARRAY_TASK_ID:?run as array 0..15}"
 
 models=(roberta bge_m3 ckip_bert xlm_roberta_large)
 model=${models[$((SLURM_ARRAY_TASK_ID / 4))]}
 shard=$((SLURM_ARRAY_TASK_ID % 4))
-input=/home/gaozh/news_content_quality_20260812/cninfo_method_v1/inputs/shard-${shard}
-root=/home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings
+input=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/inputs/shard-${shard}
+root=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/embeddings
 destination=${root}/shard-${shard}/${model}
 stage=/tmp/sina-cninfo-method-${SLURM_JOB_ID}-${SLURM_ARRAY_TASK_ID}
 
@@ -27,7 +27,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 complete=1
 for variant in plain short masked_short long masked_long; do

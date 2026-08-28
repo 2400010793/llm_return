@@ -2,7 +2,7 @@
 # Attach follow-up classification jobs to the existing embedding arrays without
 # changing, cancelling, or resubmitting those arrays.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
@@ -27,7 +27,7 @@ PANEL_JOB=${PANEL_JOB:-}
 mkdir -p logs/slurm_full_panel logs/slurm_pooled_cls_launcher logs/slurm_pooled_cls configs/generated
 
 # Cheap checks before any submission.
-/home/gaozh/llm_return/.venv/bin/python -m py_compile \
+/home/team/llm_return/.venv/bin/python -m py_compile \
   scripts/build_cninfo_full_classification_panel.py \
   scripts/build_pooled_classification_manifest.py \
   scripts/run_pooled_embedding_classification.py

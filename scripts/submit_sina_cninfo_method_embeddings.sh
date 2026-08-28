@@ -1,15 +1,15 @@
 #!/bin/bash
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name sina-cninfo-method-embeddings-v1 \
     --purpose "Generate CNINFO-style segment pools and every contextual Prompt token for Sina" \
-    --input /home/gaozh/news_content_quality_20260812/cleaned/sina_single_stock_clean.parquet \
-    --input /home/gaozh/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet \
-    --output /home/gaozh/news_content_quality_20260812/cninfo_method_v1/inputs \
-    --output /home/gaozh/news_content_quality_20260812/cninfo_method_v1/embeddings \
+    --input /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cleaned/sina_single_stock_clean.parquet \
+    --input /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/classification/sina_single_stock_classification_panel.parquet \
+    --output /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/inputs \
+    --output /data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/embeddings \
     --output reports/sina_cninfo_method_embedding_audit_v1.json \
     --related-file scripts/build_sina_cninfo_method_inputs.py \
     --related-file scripts/run_sina_cninfo_method_embeddings.py \

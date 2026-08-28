@@ -29,7 +29,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-DEFAULT_DATA_ROOT = Path("/home/gaozh/news_content_quality_20260812")
+DEFAULT_DATA_ROOT = Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812")
 DEFAULT_MIN_STOCKS = (5, 10, 20)
 DEFAULT_COST_BPS = (0.0, 10.0, 25.0, 50.0)
 DEFAULT_RANK_IC_THRESHOLDS = (1, 3)

@@ -5,21 +5,21 @@
 #SBATCH --cpus-per-task=12
 #SBATCH --mem=64G
 #SBATCH --time=00:30:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_ollama_candidates_1000_probe/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_ollama_candidates_1000_probe/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_ollama_candidates_1000_probe/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_ollama_candidates_1000_probe/%j.err
 
 set -euo pipefail
-REPO_ROOT=/home/gaozh/llm_return
+REPO_ROOT=/home/team/llm_return
 cd "${REPO_ROOT}"
 mkdir -p logs/slurm_ollama_candidates_1000_probe data/interim/qwen_candidates_1000_probe
 
 export CUDA_VISIBLE_DEVICES=5
 export OLLAMA_HOST=127.0.0.1:11440
-export OLLAMA_MODELS=/home/gaozh/.ollama/models
+export OLLAMA_MODELS=/home/team/.ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=30m
-OLLAMA=/home/gaozh/ollama-new/bin/ollama
+OLLAMA=/home/team/ollama-new/bin/ollama
 cleanup(){ [[ -n "${OLLAMA_PID:-}" ]] && kill "${OLLAMA_PID}" 2>/dev/null || true; }
 trap cleanup EXIT
 "${OLLAMA}" serve >"logs/slurm_ollama_candidates_1000_probe/${SLURM_JOB_ID}.ollama.log" 2>&1 &

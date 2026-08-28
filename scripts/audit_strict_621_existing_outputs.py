@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 
-BASE = Path("/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/aligned_masked_short_v1")
+BASE = Path("/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/aligned_masked_short_v1")
 OUT = Path("reports/intraday_token_correspondence")
 PANEL = Path("data/processed/prompt_factor_labels/prompt_factor_label_panel_v2.parquet")
 

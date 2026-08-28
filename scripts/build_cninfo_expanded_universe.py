@@ -22,7 +22,7 @@ def exchange_for(code: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--returns", type=Path, default=Path("/mnt/lustre3/home/gaozh/ret.parquet"))
+    parser.add_argument("--returns", type=Path, default=Path("/mnt/lustre3/home/team/ret.parquet"))
     parser.add_argument("--output", type=Path, default=Path("data/stock_universe_cninfo_current_with_returns.csv"))
     parser.add_argument("--source-snapshot", type=Path, default=Path("data/source_stock_lists/a_share_code_name_20260818.csv"))
     parser.add_argument("--report", type=Path, default=Path("reports/cninfo_expanded_universe_20260818.json"))

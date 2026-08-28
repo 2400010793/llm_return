@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_new_cluster/%j.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/qwen_new_cluster/%j.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/qwen_new_cluster/%j.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/qwen_new_cluster/%j.err
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
-ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1
+cd /data/alpha_team2/shares/llm_return
+ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1
 EMBED=${ROOT}/qwen3_gguf_prompt_mean
 PANEL=${ROOT}/classification/sina_single_stock_classification_panel.parquet
 OUT=${ROOT}/qwen3_new_hdbscan_v1

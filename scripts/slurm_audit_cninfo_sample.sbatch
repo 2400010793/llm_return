@@ -4,10 +4,10 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_audit_cninfo/%j.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_audit_cninfo/%j.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_audit_cninfo/%j.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_audit_cninfo/%j.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_audit_cninfo reports/data_quality
 /usr/bin/python3 scripts/audit_cninfo_random_sample.py \
   --input data/processed/cleaned/cninfo_announcements_deduplicated.jsonl \

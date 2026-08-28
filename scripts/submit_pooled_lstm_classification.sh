@@ -2,7 +2,7 @@
 # Run the bounded paper-style one-step LSTM baseline on existing embeddings.
 # This entrypoint never generates embeddings.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel.parquet}
 EMBEDDING_ROOT=${EMBEDDING_ROOT:-$PWD}

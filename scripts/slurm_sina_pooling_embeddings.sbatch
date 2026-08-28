@@ -8,17 +8,17 @@
 #SBATCH --time=08:00:00
 #SBATCH --requeue
 #SBATCH --array=0-3%2
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_pooling/%A_%a_embed.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_pooling/%A_%a_embed.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_pooling/%A_%a_embed.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_pooling/%A_%a_embed.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${SLURM_ARRAY_TASK_ID:?run as an array over 0..3}"
 
 models=(chinese_bert chinese_roberta bge_m3 xlm_roberta_large)
 model=${models[$SLURM_ARRAY_TASK_ID]}
-input=/home/gaozh/news_content_quality_20260812/prompts/sina_single_stock_prompt_variants.parquet
-root=/home/gaozh/news_content_quality_20260812/embeddings/single_stock/pooling_ablation_v1
+input=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/prompts/sina_single_stock_prompt_variants.parquet
+root=/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/embeddings/single_stock/pooling_ablation_v1
 destination=${root}/${model}
 stage=/tmp/sina-pooling-${SLURM_JOB_ID}-${SLURM_ARRAY_TASK_ID}
 
@@ -27,7 +27,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export TOKENIZERS_PARALLELISM=false
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 if [[ -s "${destination}/summary.json" && -s "${destination}/mean.npy" && \
       -s "${destination}/cls.npy" && -s "${destination}/max.npy" && \

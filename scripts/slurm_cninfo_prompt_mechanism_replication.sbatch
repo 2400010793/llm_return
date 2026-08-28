@@ -5,11 +5,11 @@
 #SBATCH --mem=32G
 #SBATCH --time=2-00:00:00
 #SBATCH --array=0-1%2
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/prompt_mechanism/%A_%a_cninfo.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/prompt_mechanism/%A_%a_cninfo.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/prompt_mechanism/%A_%a_cninfo.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/prompt_mechanism/%A_%a_cninfo.err
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-STUDY_ROOT=${STUDY_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_mechanism_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+STUDY_ROOT=${STUDY_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_mechanism_v1}
 cd "${REPO_ROOT}"
 models=(roberta bge_m3)
 model=${models[${SLURM_ARRAY_TASK_ID}]}

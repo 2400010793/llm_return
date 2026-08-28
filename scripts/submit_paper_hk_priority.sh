@@ -2,7 +2,7 @@
 # Submit the active paper-faithful China (HK) encoder, then its classification
 # and O2O regression matrices. CKIP-BERT was retired after its 2026 OOS audit.
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \

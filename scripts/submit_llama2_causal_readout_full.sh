@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 # Leave the node unconstrained by default.  The 10-GPU nodes are shared and
 # pinning to c019 can strand the job when its dependency chain is dead or the
@@ -10,9 +10,9 @@ GPU_NODE=${GPU_NODE:-}
 GPU_IDS=${GPU_IDS:-0,1,2,3,4,5,6,7,8,9}
 BATCH_SIZE=${BATCH_SIZE:-2}
 EXCLUSIVE_USER=${EXCLUSIVE_USER:-1}
-SINA_OUTPUT=${SINA_OUTPUT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_minimal_v2/llama2_embeddings}
-CNINFO_OUTPUT=${CNINFO_OUTPUT:-/mnt/lustre3/home/gaozh/llm_return/data/processed/cninfo_minimal_prompt_v2/llama2_embeddings}
-AUDIT_ROOT=${AUDIT_ROOT:-/mnt/lustre3/home/gaozh/llm_return/reports/llama2_causal_readout_v2}
+SINA_OUTPUT=${SINA_OUTPUT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_minimal_v2/llama2_embeddings}
+CNINFO_OUTPUT=${CNINFO_OUTPUT:-/data/alpha_team2/shares/llm_return/data/processed/cninfo_minimal_prompt_v2/llama2_embeddings}
+AUDIT_ROOT=${AUDIT_ROOT:-/data/alpha_team2/shares/llm_return/reports/llama2_causal_readout_v2}
 SNAPSHOT_FROM_TASK=${SNAPSHOT_FROM_TASK:-}
 
 if [[ -z "${TASK_RECORD_ID:-}" ]]; then
@@ -21,10 +21,10 @@ if [[ -z "${TASK_RECORD_ID:-}" ]]; then
   exec .venv/bin/python scripts/task_tracker.py run \
     --name llama2-causal-readout-full-v2 \
     --purpose "Generate audited Llama-2 article-then-readout embeddings for Sina and CNINFO with one serial worker per physical GPU" \
-    --input /mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/inputs \
+    --input /data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/inputs \
     --input data/processed/cleaned/cninfo_prompt_bundle_existing_2018_2026_clean_v1/prompt_v3_fixed_parts \
     --input data/processed/cleaned/cninfo_prompt_bundle_increment_2010_2017_clean_v1/prompt_v3_fixed_parts \
-    --input /mnt/lustre3/home/gaozh/models/Llama-2-13b-hf \
+    --input /mnt/lustre3/home/team/models/Llama-2-13b-hf \
     --output "${SINA_OUTPUT}" \
     --output "${CNINFO_OUTPUT}" \
     --output "${AUDIT_ROOT}" \

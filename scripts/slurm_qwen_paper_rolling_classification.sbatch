@@ -6,17 +6,17 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-2%3
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_qwen_time_classification/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_qwen_time_classification/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_qwen_time_classification/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_qwen_time_classification/%A_%a.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p reports/classification/qwen3_embedding_8b_time_aligned logs/slurm_qwen_time_classification
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 classifiers=(logistic random_forest mlp)
 classifier=${classifiers[$SLURM_ARRAY_TASK_ID]}

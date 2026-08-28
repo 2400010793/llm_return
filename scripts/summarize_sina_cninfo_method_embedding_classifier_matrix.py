@@ -433,8 +433,8 @@ def main() -> None:
     )
     args = parser.parse_args()
     roots = args.results_root or [
-        Path("/home/gaozh/news_content_quality_20260812/cninfo_method_v1/classification"),
-        Path("/home/gaozh/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification/classification"),
+        Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/classification"),
+        Path("/data/alpha_team2/shares/llm_return/datasets/news_content_quality_20260812/cninfo_method_v1/prompt_embedding_classification/classification"),
     ]
     summary = build_summary(roots)
     args.output.parent.mkdir(parents=True, exist_ok=True)

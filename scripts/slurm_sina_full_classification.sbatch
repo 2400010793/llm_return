@@ -6,11 +6,11 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-2%3
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_sina_full_classification/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_sina_full_classification/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_sina_full_classification/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_sina_full_classification/%A_%a.err
 
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 : "${TASK_RECORD_ID:?classification must be submitted through scripts/task_tracker.py}"
 : "${PANEL:?export PANEL}"
 : "${EMBEDDING_ROOT:?export EMBEDDING_ROOT}"
@@ -29,7 +29,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 .venv/bin/python scripts/run_precomputed_embedding_classification.py \
   "${PANEL}" --matrix "${matrix}" --metadata "${meta}" \

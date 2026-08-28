@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-cd /mnt/lustre3/home/gaozh/llm_return
+cd /data/alpha_team2/shares/llm_return
 
 MANIFEST=${MANIFEST:-configs/generated/o2o_paper_replication_final_2026.tsv}
 GAMMAS=${GAMMAS:-1.0,0.7,0.5,0.4,0.3,0.2,0.1}

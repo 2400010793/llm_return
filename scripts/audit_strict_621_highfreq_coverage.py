@@ -7,7 +7,7 @@ import pyarrow.parquet as pq
 
 
 SHARE = Path("/data/alpha_team2/shares/260825")
-OUT = Path("/mnt/lustre3/home/gaozh/llm_return/reports/intraday_token_correspondence")
+OUT = Path("/data/alpha_team2/shares/llm_return/reports/intraday_token_correspondence")
 
 
 def years(path: Path) -> dict:

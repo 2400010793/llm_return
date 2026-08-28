@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
 cd "${REPO_ROOT}"
 
 PANEL=${PANEL:-data/processed/cninfo_full_classification_panel_2010_2026.parquet}

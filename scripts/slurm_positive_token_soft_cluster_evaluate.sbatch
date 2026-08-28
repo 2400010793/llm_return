@@ -4,13 +4,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=08:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/positive_token_soft_cluster/%A_%a_eval.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/positive_token_soft_cluster/%A_%a_eval.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/positive_token_soft_cluster/%A_%a_eval.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/positive_token_soft_cluster/%A_%a_eval.err
 
 set -euo pipefail
 : "${OUTPUT_ROOT:?OUTPUT_ROOT required}"
 : "${SLURM_ARRAY_TASK_ID:?array task required}"
-REPO=/mnt/lustre3/home/gaozh/llm_return
+REPO=/data/alpha_team2/shares/llm_return
 index=${SLURM_ARRAY_TASK_ID}
 representation=
 if [[ -n "${CONFIG_MANIFEST:-}" ]]; then

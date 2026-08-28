@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 
 PYTHON=${PYTHON:-${REPO_ROOT}/.venv/bin/python}

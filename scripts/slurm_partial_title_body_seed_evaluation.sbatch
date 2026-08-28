@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=01:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_title_body_seeds/%j_eval.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/slurm_title_body_seeds/%j_eval.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/slurm_title_body_seeds/%j_eval.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/slurm_title_body_seeds/%j_eval.err
 
 set -euo pipefail
-REPO_ROOT=/mnt/lustre3/home/gaozh/llm_return
+REPO_ROOT=/data/alpha_team2/shares/llm_return
 cd "${REPO_ROOT}"
 : "${TASK_RECORD_ID:?evaluation must be submitted through scripts/task_tracker.py}"
 

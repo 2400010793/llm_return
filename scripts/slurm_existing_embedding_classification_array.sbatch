@@ -6,13 +6,13 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --requeue
 #SBATCH --array=0-35%36
-#SBATCH --output=/home/gaozh/llm_return/logs/slurm_existing_embed_cls/%A_%a.out
-#SBATCH --error=/home/gaozh/llm_return/logs/slurm_existing_embed_cls/%A_%a.err
+#SBATCH --output=/home/team/llm_return/logs/slurm_existing_embed_cls/%A_%a.out
+#SBATCH --error=/home/team/llm_return/logs/slurm_existing_embed_cls/%A_%a.err
 set -euo pipefail
-cd /home/gaozh/llm_return
+cd /home/team/llm_return
 mkdir -p logs/slurm_existing_embed_cls reports/classification/existing_embeddings
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK} MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK} OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK} NUMEXPR_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export PYTHONPATH=/home/gaozh/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+export PYTHONPATH=/home/team/llm_return/.venv/lib/python3.9/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 models=(chinese_roberta bge_m3 word2vec)
 inputs=(text_plain text_input_2_short text_input_3_long text_input_5_masked_short text_input_6_masked_long)
 model=${models[$((SLURM_ARRAY_TASK_ID / 15))]}

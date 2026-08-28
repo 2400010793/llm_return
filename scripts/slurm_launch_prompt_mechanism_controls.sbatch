@@ -4,11 +4,11 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
 #SBATCH --time=01:00:00
-#SBATCH --output=/mnt/lustre3/home/gaozh/llm_return/logs/prompt_mechanism/%j_control_launch.out
-#SBATCH --error=/mnt/lustre3/home/gaozh/llm_return/logs/prompt_mechanism/%j_control_launch.err
+#SBATCH --output=/data/alpha_team2/shares/llm_return/logs/prompt_mechanism/%j_control_launch.out
+#SBATCH --error=/data/alpha_team2/shares/llm_return/logs/prompt_mechanism/%j_control_launch.err
 set -euo pipefail
-REPO_ROOT=${REPO_ROOT:-/mnt/lustre3/home/gaozh/llm_return}
-SINA_ROOT=${SINA_ROOT:-/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1}
+REPO_ROOT=${REPO_ROOT:-/data/alpha_team2/shares/llm_return}
+SINA_ROOT=${SINA_ROOT:-/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1}
 STUDY_ROOT=${STUDY_ROOT:-${SINA_ROOT}/prompt_mechanism_v1}
 cd "${REPO_ROOT}"
 mkdir -p "${STUDY_ROOT}/controls" logs/prompt_mechanism

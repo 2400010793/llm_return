@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-ROOT=/mnt/lustre3/home/gaozh/sina_all_news_records_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
-REPO=/mnt/lustre3/home/gaozh/llm_return
+ROOT=/data/alpha_team2/shares/llm_return/datasets/sina_cninfo_full_2010_2026/single_stock_cninfo_v1/prompt_positive_v1
+REPO=/data/alpha_team2/shares/llm_return
 DATASET=${DATASET:-sina}
 SHARDS=${SHARDS:-64}
 MANIFEST=${MANIFEST:-$ROOT/matrix_manifest_${DATASET}.tsv}
